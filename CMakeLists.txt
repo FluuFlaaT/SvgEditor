@@ -11,6 +11,9 @@ include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
-add_subdirectory(src/SvgEditor_Core Core) 
-add_subdirectory(src/SvgEditor_UI UI)     
-add_subdirectory(src/SvgEditor_App App)   
+add_subdirectory(src/CommandManager CommandManager)
+add_subdirectory(src/ConfigManager ConfigManager)
+add_subdirectory(src/CoreSvgEngine CoreSvgEngine)
+add_subdirectory(src/DrawingTools DrawingTools)
+add_subdirectory(src/FileIO FileIO)
+add_subdirectory(src/QtUiLayer QtUiLayer)
