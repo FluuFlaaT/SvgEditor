@@ -9,7 +9,7 @@ set(CMAKE_AUTOUIC ON)
 
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
-find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets Svg REQUIRED)
 
 add_subdirectory(src/CommandManager CommandManager)
 add_subdirectory(src/ConfigManager ConfigManager)
