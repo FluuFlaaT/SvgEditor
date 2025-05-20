@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "../../src/FileIOManager/FileIOManager.h"
 #include "../../src/CoreSvgEngine/CoreSvgEngine.h"
+#include "../../src/CoreSvgEngine/SvgShapes.h"
 #include <string>
 #include <QFile>
 #include <QDir>
@@ -165,4 +166,77 @@ TEST_F(FileIOManagerTest, LastErrorTest) {
     if (doc) {
         delete doc;
     }
+}
+
+// 测试保存和加载后SVG元素的顺序是否保持不变
+TEST_F(FileIOManagerTest, PreserveElementOrderWhenSaveAndLoad) {
+    // 创建一个有多个元素的文档，顺序为：矩形、圆形、线条
+    SvgDocument* originalDoc = new SvgDocument(600, 400);
+    
+    // 添加矩形
+    SvgRectangle* rect = new SvgRectangle({50, 50}, 100, 80);
+    rect->setFillColor({255, 0, 0, 255});  // 红色
+    rect->setID("rect1");
+    originalDoc->addElement(rect);
+    
+    // 添加圆形
+    SvgCircle* circle = new SvgCircle({200, 150}, 60);
+    circle->setFillColor({0, 255, 0, 255});  // 绿色
+    circle->setID("circle1");
+    originalDoc->addElement(circle);
+    
+    // 添加线条
+    SvgLine* line = new SvgLine({100, 200}, {300, 300});
+    line->setStrokeColor({0, 0, 255, 255});  // 蓝色
+    line->setStrokeWidth(3.0);
+    line->setID("line1");
+    originalDoc->addElement(line);
+    
+    // 保存文档到文件
+    QString orderTestPath = testDirPath + "/element_order_test.svg";
+    bool saveResult = fileManager->saveSvgFile(orderTestPath, originalDoc);
+    ASSERT_TRUE(saveResult) << "Failed to save SVG document";
+    
+    // 重新加载文档
+    SvgDocument* loadedDoc = nullptr;
+    bool loadResult = fileManager->openSvgFile(orderTestPath, loadedDoc);
+    ASSERT_TRUE(loadResult) << "Failed to load SVG document";
+    ASSERT_NE(nullptr, loadedDoc) << "Loaded document is null";
+    
+    // 验证元素数量
+    ASSERT_EQ(originalDoc->getElements().size(), loadedDoc->getElements().size()) 
+        << "Element count mismatch after loading";
+    
+    // 验证元素顺序与类型
+    auto originalElems = originalDoc->getElements();
+    auto loadedElems = loadedDoc->getElements();
+    
+    for (size_t i = 0; i < originalElems.size(); i++) {
+        EXPECT_EQ(originalElems[i]->getType(), loadedElems[i]->getType())
+            << "Element type at position " << i << " doesn't match";
+        EXPECT_EQ(originalElems[i]->getID(), loadedElems[i]->getID())
+            << "Element ID at position " << i << " doesn't match";
+    }
+    
+    // 验证具体元素属性（可选，但更彻底）
+    if (loadedElems.size() >= 3) {
+        // 检查矩形
+        SvgRectangle* loadedRect = dynamic_cast<SvgRectangle*>(loadedElems[0]);
+        ASSERT_NE(nullptr, loadedRect) << "First element is not a rectangle";
+        EXPECT_EQ("rect1", loadedRect->getID());
+        
+        // 检查圆形
+        SvgCircle* loadedCircle = dynamic_cast<SvgCircle*>(loadedElems[1]);
+        ASSERT_NE(nullptr, loadedCircle) << "Second element is not a circle";
+        EXPECT_EQ("circle1", loadedCircle->getID());
+        
+        // 检查线条
+        SvgLine* loadedLine = dynamic_cast<SvgLine*>(loadedElems[2]);
+        ASSERT_NE(nullptr, loadedLine) << "Third element is not a line";
+        EXPECT_EQ("line1", loadedLine->getID());
+    }
+    
+    // 清理
+    delete originalDoc;
+    delete loadedDoc;
 }
