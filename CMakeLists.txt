@@ -19,6 +19,10 @@ add_subdirectory(src/FileIOManager FileIOManager)
 add_subdirectory(src/LoggingService LoggingService)
 add_subdirectory(src/QtUiLayer QtUiLayer)
 
+# 启用测试
+enable_testing()
+add_subdirectory(tests)
+
 # 解决 MSVC C4819 报 warning 的问题
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
