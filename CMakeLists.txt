@@ -16,6 +16,7 @@ add_subdirectory(src/ConfigManager ConfigManager)
 add_subdirectory(src/CoreSvgEngine CoreSvgEngine)
 add_subdirectory(src/DrawingTools DrawingTools)
 add_subdirectory(src/FileIOManager FileIOManager)
+add_subdirectory(src/LoggingService LoggingService)
 add_subdirectory(src/QtUiLayer QtUiLayer)
 
 # 解决 MSVC C4819 报 warning 的问题
