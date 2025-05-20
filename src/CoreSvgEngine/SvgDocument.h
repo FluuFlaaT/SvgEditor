@@ -3,12 +3,28 @@
 #include <string>
 #include "SvgElement.h"
 
+// 前向声明
+namespace tinyxml2 {
+    class XMLElement;
+}
+
 class SvgDocument {
 private:
     std::vector<SvgElement*> m_elements;
     double m_width;
     double m_height;
     Color m_backgroundColor;
+
+    // SVG解析帮助方法
+    void parseChildElements(tinyxml2::XMLElement* parentElement);
+    void parseSvgLine(tinyxml2::XMLElement* element);
+    void parseSvgRectangle(tinyxml2::XMLElement* element);
+    void parseSvgCircle(tinyxml2::XMLElement* element);
+    void parseSvgEllipse(tinyxml2::XMLElement* element);
+    void parseSvgPolygon(tinyxml2::XMLElement* element);
+    void parseSvgPolyline(tinyxml2::XMLElement* element);
+    void parseSvgText(tinyxml2::XMLElement* element);
+    void parseCommonAttributes(tinyxml2::XMLElement* element, SvgElement* svgElement);
 
 public:
     SvgDocument(double w = 600, double h = 400, Color bg = {255,255,255,255}) // 默认白色背景

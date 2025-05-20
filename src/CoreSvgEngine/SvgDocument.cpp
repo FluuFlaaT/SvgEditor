@@ -1,7 +1,11 @@
 #include "SvgDocument.h"
+#include "SvgElement.h"
+#include "SvgShapes.h"
+#include "SvgText.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <tinyxml2.h>
 #include "../LoggingService/LoggingService.h"
 
 // 析构函数
@@ -95,15 +99,107 @@ std::string SvgDocument::generateSvgContent() const {
 // 解析SVG内容
 bool SvgDocument::parseSvgContent(const std::string& content) {
     LoggingService::getInstance().info("Parsing SVG content, content length: " + std::to_string(content.length()));
-    // 实际的SVG解析器会在这里解析 `content` 字符串,
-    // 识别不同的SVG标签 (line, rect, circle, etc.) 和它们的属性,
-    // 然后创建相应的 SvgElement 对象并添加到 m_elements 中。
-    // 例如，它会查找 <svg> 标签获取 width 和 height。
-    // 这里仅为占位符。
-    std::cout << "SvgDocument::parseSvgContent - Placeholder for actual SVG parsing of: " 
-              << content.substr(0, 100) << "...\n";
-    // 假设解析总是成功的
-    LoggingService::getInstance().info("SVG content parsed successfully");
+    
+    // 清除当前所有元素，准备重新加载
+    clearElements();
+    
+    // 创建XML文档
+    tinyxml2::XMLDocument doc;
+    tinyxml2::XMLError xmlResult = doc.Parse(content.c_str(), content.size());
+    if (xmlResult != tinyxml2::XML_SUCCESS) {
+        LoggingService::getInstance().error("Failed to parse SVG content: " + std::string(doc.ErrorStr()));
+        return false;
+    }
+    
+    // 查找root <svg> 元素
+    tinyxml2::XMLElement* svgElement = doc.FirstChildElement("svg");
+    if (!svgElement) {
+        LoggingService::getInstance().error("Failed to find <svg> root element");
+        return false;
+    }
+    
+    // 获取SVG的宽度和高度
+    const char* widthStr = svgElement->Attribute("width");
+    const char* heightStr = svgElement->Attribute("height");
+    
+    if (widthStr) {
+        // 处理可能的单位（如px，mm等）
+        std::string width(widthStr);
+        if (width.find("px") != std::string::npos) {
+            width = width.substr(0, width.find("px"));
+        }
+        try {
+            double w = std::stod(width);
+            setWidth(w);
+        } catch (std::exception& e) {
+            LoggingService::getInstance().warn("Failed to parse SVG width: " + std::string(e.what()));
+        }
+    }
+    
+    if (heightStr) {
+        std::string height(heightStr);
+        if (height.find("px") != std::string::npos) {
+            height = height.substr(0, height.find("px"));
+        }
+        try {
+            double h = std::stod(height);
+            setHeight(h);
+        } catch (std::exception& e) {
+            LoggingService::getInstance().warn("Failed to parse SVG height: " + std::string(e.what()));
+        }
+    }
+    
+    // 查找是否有背景色定义（通常是第一个矩形元素，且覆盖整个SVG）
+    tinyxml2::XMLElement* rectElement = svgElement->FirstChildElement("rect");
+    if (rectElement) {
+        const char* widthAttr = rectElement->Attribute("width");
+        const char* heightAttr = rectElement->Attribute("height");
+        const char* fillAttr = rectElement->Attribute("fill");
+        
+        // 检查是否是全尺寸背景矩形
+        if (widthAttr && heightAttr && fillAttr) {
+            std::string widthVal(widthAttr);
+            std::string heightVal(heightAttr);
+            
+            bool isFullWidth = false;
+            bool isFullHeight = false;
+            
+            if (widthVal == "100%") {
+                isFullWidth = true;
+            } else {
+                try {
+                    double w = std::stod(widthVal);
+                    isFullWidth = (w >= m_width);
+                } catch (std::exception&) {
+                    // 解析失败，忽略
+                }
+            }
+            
+            if (heightVal == "100%") {
+                isFullHeight = true;
+            } else {
+                try {
+                    double h = std::stod(heightVal);
+                    isFullHeight = (h >= m_height);
+                } catch (std::exception&) {
+                    // 解析失败，忽略
+                }
+            }
+            
+            if (isFullWidth && isFullHeight) {
+                // 这很可能是背景矩形
+                setBackgroundColor(Color::fromString(fillAttr));
+                // 跳过添加此元素，继续处理下一个
+                rectElement = rectElement->NextSiblingElement();
+            }
+        }
+    }
+    
+    // 解析所有子元素
+    parseChildElements(svgElement);
+    
+    LoggingService::getInstance().info("SVG content parsed successfully with " + 
+                                      std::to_string(m_elements.size()) + " elements");
     return true;
 }
 
@@ -120,4 +216,270 @@ void SvgDocument::setHeight(double h) {
 void SvgDocument::setBackgroundColor(const Color& color) { 
     LoggingService::getInstance().info("Setting document background color: " + m_backgroundColor.toString() + " to " + color.toString());
     m_backgroundColor = color; 
+}
+
+// 解析SVG子元素
+void SvgDocument::parseChildElements(tinyxml2::XMLElement* parentElement) {
+    // 遍历所有子元素
+    tinyxml2::XMLElement* element = parentElement->FirstChildElement();
+    while (element) {
+        std::string elementName = element->Name();
+        
+        if (elementName == "line") {
+            parseSvgLine(element);
+        } else if (elementName == "rect") {
+            parseSvgRectangle(element);
+        } else if (elementName == "circle") {
+            parseSvgCircle(element);
+        } else if (elementName == "ellipse") {
+            parseSvgEllipse(element);
+        } else if (elementName == "polygon") {
+            parseSvgPolygon(element);
+        } else if (elementName == "polyline") {
+            parseSvgPolyline(element);
+        } else if (elementName == "text") {
+            parseSvgText(element);
+        } else if (elementName == "g") {
+            // 解析组元素，递归处理
+            parseChildElements(element);
+        }
+        // 可以根据需要添加更多元素类型的解析
+        
+        // 移动到下一个元素
+        element = element->NextSiblingElement();
+    }
+}
+
+// 解析SVG线条元素
+void SvgDocument::parseSvgLine(tinyxml2::XMLElement* element) {
+    double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+    
+    element->QueryDoubleAttribute("x1", &x1);
+    element->QueryDoubleAttribute("y1", &y1);
+    element->QueryDoubleAttribute("x2", &x2);
+    element->QueryDoubleAttribute("y2", &y2);
+    
+    SvgLine* line = new SvgLine({x1, y1}, {x2, y2});
+    parseCommonAttributes(element, line);
+    
+    addElement(line);
+}
+
+// 解析SVG矩形元素
+void SvgDocument::parseSvgRectangle(tinyxml2::XMLElement* element) {
+    double x = 0, y = 0, width = 0, height = 0, rx = 0, ry = 0;
+    
+    element->QueryDoubleAttribute("x", &x);
+    element->QueryDoubleAttribute("y", &y);
+    element->QueryDoubleAttribute("width", &width);
+    element->QueryDoubleAttribute("height", &height);
+    element->QueryDoubleAttribute("rx", &rx);
+    element->QueryDoubleAttribute("ry", &ry);
+    
+    SvgRectangle* rect = new SvgRectangle({x, y}, width, height, rx, ry);
+    parseCommonAttributes(element, rect);
+    
+    addElement(rect);
+}
+
+// 解析SVG圆形元素
+void SvgDocument::parseSvgCircle(tinyxml2::XMLElement* element) {
+    double cx = 0, cy = 0, r = 0;
+    
+    element->QueryDoubleAttribute("cx", &cx);
+    element->QueryDoubleAttribute("cy", &cy);
+    element->QueryDoubleAttribute("r", &r);
+    
+    SvgCircle* circle = new SvgCircle({cx, cy}, r);
+    parseCommonAttributes(element, circle);
+    
+    addElement(circle);
+}
+
+// 解析SVG椭圆元素
+void SvgDocument::parseSvgEllipse(tinyxml2::XMLElement* element) {
+    double cx = 0, cy = 0, rx = 0, ry = 0;
+    
+    element->QueryDoubleAttribute("cx", &cx);
+    element->QueryDoubleAttribute("cy", &cy);
+    element->QueryDoubleAttribute("rx", &rx);
+    element->QueryDoubleAttribute("ry", &ry);
+    
+    SvgEllipse* ellipse = new SvgEllipse({cx, cy}, rx, ry);
+    parseCommonAttributes(element, ellipse);
+    
+    addElement(ellipse);
+}
+
+// 解析SVG多边形元素
+void SvgDocument::parseSvgPolygon(tinyxml2::XMLElement* element) {
+    const char* pointsStr = element->Attribute("points");
+    if (!pointsStr) {
+        LoggingService::getInstance().warn("Polygon element missing 'points' attribute");
+        return;
+    }
+    
+    std::vector<Point> points;
+    std::istringstream pointStream(pointsStr);
+    std::string pointPair;
+    
+    // 分割成点对
+    while (std::getline(pointStream, pointPair, ' ')) {
+        if (pointPair.empty()) continue;
+        
+        size_t commaPos = pointPair.find(',');
+        if (commaPos != std::string::npos) {
+            try {
+                double x = std::stod(pointPair.substr(0, commaPos));
+                double y = std::stod(pointPair.substr(commaPos + 1));
+                points.push_back({x, y});
+            } catch (std::exception& e) {
+                LoggingService::getInstance().warn("Failed to parse polygon point: " + std::string(e.what()));
+            }
+        }
+    }
+    
+    if (points.size() < 3) {
+        LoggingService::getInstance().warn("Polygon has fewer than 3 points, skipping");
+        return;
+    }
+    
+    SvgPolygon* polygon = new SvgPolygon(points);
+    parseCommonAttributes(element, polygon);
+    
+    addElement(polygon);
+}
+
+// 解析SVG折线元素
+void SvgDocument::parseSvgPolyline(tinyxml2::XMLElement* element) {
+    const char* pointsStr = element->Attribute("points");
+    if (!pointsStr) {
+        LoggingService::getInstance().warn("Polyline element missing 'points' attribute");
+        return;
+    }
+    
+    std::vector<Point> points;
+    std::istringstream pointStream(pointsStr);
+    std::string pointPair;
+    
+    // 分割成点对
+    while (std::getline(pointStream, pointPair, ' ')) {
+        if (pointPair.empty()) continue;
+        
+        size_t commaPos = pointPair.find(',');
+        if (commaPos != std::string::npos) {
+            try {
+                double x = std::stod(pointPair.substr(0, commaPos));
+                double y = std::stod(pointPair.substr(commaPos + 1));
+                points.push_back({x, y});
+            } catch (std::exception& e) {
+                LoggingService::getInstance().warn("Failed to parse polyline point: " + std::string(e.what()));
+            }
+        }
+    }
+    
+    if (points.size() < 2) {
+        LoggingService::getInstance().warn("Polyline has fewer than 2 points, skipping");
+        return;
+    }
+    
+    SvgPolyline* polyline = new SvgPolyline(points);
+    parseCommonAttributes(element, polyline);
+    
+    addElement(polyline);
+}
+
+// 解析SVG文本元素
+void SvgDocument::parseSvgText(tinyxml2::XMLElement* element) {
+    double x = 0, y = 0;
+    element->QueryDoubleAttribute("x", &x);
+    element->QueryDoubleAttribute("y", &y);
+    
+    const char* textContent = element->GetText();
+    std::string text = textContent ? textContent : "";
+    
+    SvgText* textElement = new SvgText({x, y}, text);
+    
+    // 解析字体相关属性
+    const char* fontFamily = element->Attribute("font-family");
+    if (fontFamily) {
+        textElement->setFontFamily(fontFamily);
+    }
+    
+    double fontSize = 12.0; // 默认字体大小
+    if (element->QueryDoubleAttribute("font-size", &fontSize) == tinyxml2::XML_SUCCESS) {
+        textElement->setFontSize(fontSize);
+    }
+    
+    parseCommonAttributes(element, textElement);
+    
+    addElement(textElement);
+}
+
+// 解析SVG元素通用属性
+void SvgDocument::parseCommonAttributes(tinyxml2::XMLElement* element, SvgElement* svgElement) {
+    // ID属性
+    const char* id = element->Attribute("id");
+    if (id) {
+        svgElement->setID(id);
+    }
+    
+    // 填充颜色
+    const char* fill = element->Attribute("fill");
+    if (fill) {
+        svgElement->setFillColor(Color::fromString(fill));
+    }
+    
+    // 描边颜色
+    const char* stroke = element->Attribute("stroke");
+    if (stroke) {
+        svgElement->setStrokeColor(Color::fromString(stroke));
+    }
+    
+    // 描边宽度
+    double strokeWidth = 1.0;
+    if (element->QueryDoubleAttribute("stroke-width", &strokeWidth) == tinyxml2::XML_SUCCESS) {
+        svgElement->setStrokeWidth(strokeWidth);
+    }
+    
+    // 透明度
+    double opacity = 1.0;
+    if (element->QueryDoubleAttribute("opacity", &opacity) == tinyxml2::XML_SUCCESS) {
+        svgElement->setOpacity(opacity);
+    }
+    
+    // 变换
+    const char* transform = element->Attribute("transform");
+    if (transform) {
+        Transform t;
+        t.transform_str = transform;
+        svgElement->setTransform(t);
+    }
+    
+    // 处理其他自定义属性 (style, class等)
+    const tinyxml2::XMLAttribute* attr = element->FirstAttribute();
+    while (attr) {
+        std::string name = attr->Name();
+        std::string value = attr->Value();
+        
+        // 跳过已经处理过的属性
+        if (name != "id" && name != "fill" && name != "stroke" && 
+            name != "stroke-width" && name != "opacity" && name != "transform" &&
+            name != "x" && name != "y" && name != "width" && name != "height" &&
+            name != "x1" && name != "y1" && name != "x2" && name != "y2" &&
+            name != "cx" && name != "cy" && name != "r" && name != "rx" && name != "ry" &&
+            name != "points" && name != "font-family" && name != "font-size") {
+            
+            // 尝试将值解析为数字
+            try {
+                double numValue = std::stod(value);
+                svgElement->setAttribute(name, numValue);
+            } catch (std::exception&) {
+                // 如果不是数字就存为字符串
+                svgElement->setAttribute(name, value);
+            }
+        }
+        
+        attr = attr->Next();
+    }
 }
