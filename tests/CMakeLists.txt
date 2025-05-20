@@ -5,3 +5,4 @@ find_package(GTest CONFIG REQUIRED)
 
 # 添加Core SVG引擎测试
 add_subdirectory(CoreSvgEngine)
+add_subdirectory(FileIOManager)
