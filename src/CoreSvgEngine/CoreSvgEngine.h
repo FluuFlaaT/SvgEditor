@@ -6,7 +6,7 @@ private:
     SvgDocument* m_document; // 当前操作的SVG文档
 
 public:
-    CoreSvgEngine() : m_document(new SvgDocument()) {}
+    CoreSvgEngine();
     ~CoreSvgEngine();
 
     CoreSvgEngine(const CoreSvgEngine&) = delete;

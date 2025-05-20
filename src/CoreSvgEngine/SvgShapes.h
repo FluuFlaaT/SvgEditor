@@ -10,7 +10,7 @@ private:
     Point m_p2;
 
 public: 
-    SvgLine(Point start = {0,0}, Point end = {0,0}) : m_p1(start), m_p2(end) {}
+    SvgLine(Point start = {0,0}, Point end = {0,0}); 
     
     SvgElementType getType() const override { return SvgElementType::Line; }
     std::string toSvgString() const override;
@@ -18,9 +18,10 @@ public:
     // ---------- Getter & Setter ----------
 
     Point getP1() const { return m_p1; } 
-    void setP1(const Point& p) { m_p1 = p; }
+    void setP1(const Point& p);
+    
     Point getP2() const { return m_p2; } 
-    void setP2(const Point& p) { m_p2 = p; }
+    void setP2(const Point& p);
 };
 
 class SvgRectangle : public SvgElement {
@@ -32,9 +33,7 @@ private:
     double m_ry; // 圆角半径
 
 public: 
-    SvgRectangle(Point tl = {0,0}, double w = 0, double h = 0, double rx_ = 0.0, double ry_ = 0.0)
-        : m_topLeft(tl), m_width(w > 0 ? w : 0), m_height(h > 0 ? h : 0), 
-          m_rx(rx_ > 0 ? rx_ : 0), m_ry(ry_ > 0 ? ry_ : 0) {}
+    SvgRectangle(Point tl = {0,0}, double w = 0, double h = 0, double rx_ = 0.0, double ry_ = 0.0);
     
     SvgElementType getType() const override { return SvgElementType::Rectangle; }
     std::string toSvgString() const override;
@@ -42,19 +41,19 @@ public:
     // ---------- Getter & Setter ----------
 
     Point getTopLeft() const { return m_topLeft; } 
-    void setTopLeft(const Point& p) { m_topLeft = p; }
+    void setTopLeft(const Point& p);
     
     double getWidth() const { return m_width; } 
-    void setWidth(double w) { m_width = (w > 0 ? w : 0); }
+    void setWidth(double w);
     
     double getHeight() const { return m_height; } 
-    void setHeight(double h) { m_height = (h > 0 ? h : 0); }
+    void setHeight(double h);
     
     double getRx() const { return m_rx; } 
-    void setRx(double rx_val) { m_rx = (rx_val > 0 ? rx_val : 0); }
+    void setRx(double rx_val);
     
     double getRy() const { return m_ry; } 
-    void setRy(double ry_val) { m_ry = (ry_val > 0 ? ry_val : 0); }
+    void setRy(double ry_val);
 };
 
 class SvgCircle : public SvgElement {
@@ -63,7 +62,7 @@ private:
     double m_radius;
 
 public: 
-    SvgCircle(Point c = {0,0}, double r = 0) : m_center(c), m_radius(r > 0 ? r : 0) {}
+    SvgCircle(Point c = {0,0}, double r = 0);
     
     SvgElementType getType() const override { return SvgElementType::Circle; }
     std::string toSvgString() const override;
@@ -71,10 +70,10 @@ public:
     // ---------- Getter & Setter ----------
 
     Point getCenter() const { return m_center; } 
-    void setCenter(const Point& c) { m_center = c; }
+    void setCenter(const Point& c);
     
     double getRadius() const { return m_radius; } 
-    void setRadius(double r) { m_radius = (r > 0 ? r : 0); }
+    void setRadius(double r);
 };
 
 class SvgEllipse : public SvgElement {
@@ -84,8 +83,7 @@ private:
     double m_ry;
 
 public: 
-    SvgEllipse(Point c = {0,0}, double r_x = 0, double r_y = 0) 
-        : m_center(c), m_rx(r_x > 0 ? r_x : 0), m_ry(r_y > 0 ? r_y : 0) {}
+    SvgEllipse(Point c = {0,0}, double r_x = 0, double r_y = 0);
     
     SvgElementType getType() const override { return SvgElementType::Ellipse; }
     std::string toSvgString() const override;
@@ -93,13 +91,13 @@ public:
     // ---------- Getter & Setter ----------
 
     Point getCenter() const { return m_center; } 
-    void setCenter(const Point& c) { m_center = c; }
+    void setCenter(const Point& c);
     
     double getRx() const { return m_rx; } 
-    void setRx(double r_x) { m_rx = (r_x > 0 ? r_x : 0); }
+    void setRx(double r_x);
     
     double getRy() const { return m_ry; } 
-    void setRy(double r_y) { m_ry = (r_y > 0 ? r_y : 0); }
+    void setRy(double r_y);
 };
 
 class SvgPolygon : public SvgElement {
@@ -107,7 +105,7 @@ protected: // 改为 protected 以便派生类可以访问
     std::vector<Point> m_points;
 
 public:
-    SvgPolygon(const std::vector<Point>& pts = {}) : m_points(pts) {}
+    SvgPolygon(const std::vector<Point>& pts = {});
     
     SvgElementType getType() const override { return SvgElementType::Polygon; }
     std::string toSvgString() const override;
@@ -115,9 +113,9 @@ public:
     // ---------- Getter & Setter ----------
 
     const std::vector<Point>& getPoints() const { return m_points; }
-    void setPoints(const std::vector<Point>& pts) { m_points = pts; }
+    void setPoints(const std::vector<Point>& pts);
     
-    void addPoint(const Point& p) { m_points.push_back(p); }
+    void addPoint(const Point& p);
 };
 
 
@@ -126,7 +124,7 @@ private:
     std::vector<Point> m_points;
 
 public: 
-    SvgPolyline(const std::vector<Point>& pts = {}) : m_points(pts) {}
+    SvgPolyline(const std::vector<Point>& pts = {});
     
     SvgElementType getType() const override { return SvgElementType::Polyline; }
     std::string toSvgString() const override;
@@ -134,9 +132,9 @@ public:
     // ---------- Getter & Setter ----------
 
     const std::vector<Point>& getPoints() const { return m_points; } 
-    void setPoints(const std::vector<Point>& pts) { m_points = pts; }
+    void setPoints(const std::vector<Point>& pts);
     
-    void addPoint(const Point& p) { m_points.push_back(p); }
+    void addPoint(const Point& p);
 };
 
 // 五边形

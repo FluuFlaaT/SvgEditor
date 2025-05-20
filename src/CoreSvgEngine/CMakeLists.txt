@@ -10,7 +10,10 @@ add_library(${TARGET_NAME} STATIC
 
 target_include_directories(${TARGET_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/src/LoggingService # 添加 LoggingService 头文件目录
 )
+
+target_link_libraries(${TARGET_NAME} PRIVATE LoggingService) # 链接 LoggingService
 
 set_target_properties(${TARGET_NAME} PROPERTIES
     CXX_STANDARD 20

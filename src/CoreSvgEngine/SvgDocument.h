@@ -34,10 +34,11 @@ public:
     std::vector<SvgElement*>& getElements() { return m_elements; } // 非const版本，用于修改
     
     double getWidth() const { return m_width; }
-    void setWidth(double w) { m_width = (w > 0 ? w : 1); }
+    void setWidth(double w); 
     
     double getHeight() const { return m_height; }
-    void setHeight(double h) { m_height = (h > 0 ? h : 1); }
-      Color getBackgroundColor() const { return m_backgroundColor; }
-    void setBackgroundColor(const Color& color) { m_backgroundColor = color; }
+    void setHeight(double h);
+    
+    Color getBackgroundColor() const { return m_backgroundColor; }
+    void setBackgroundColor(const Color& color);
 };

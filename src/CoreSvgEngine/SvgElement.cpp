@@ -1,6 +1,7 @@
 #include <string>
 #include <sstream>
 #include "SvgElement.h"
+#include "../LoggingService/LoggingService.h"
 
 std::string SvgElement::getCommonAttributesString() const {
     std::stringstream ss;
@@ -36,6 +37,7 @@ std::string SvgElement::getID() const {
 }
 
 void SvgElement::setID(const std::string& id) {
+    LoggingService::getInstance().info("Setting element ID: '" + m_id + "' to '" + id + "'");
     m_id = id;
 }
 
@@ -44,6 +46,7 @@ Color SvgElement::getStrokeColor() const {
 }
 
 void SvgElement::setStrokeColor(const Color& color) {
+    LoggingService::getInstance().info("Setting element stroke color: " + m_strokeColor.toString() + " to " + color.toString());
     m_strokeColor = color;
 }
 
@@ -52,6 +55,7 @@ double SvgElement::getStrokeWidth() const {
 }
 
 void SvgElement::setStrokeWidth(double width) {
+    LoggingService::getInstance().info("Setting element stroke width: " + std::to_string(m_strokeWidth) + " to " + std::to_string((width < 0) ? 0 : width));
     m_strokeWidth = (width < 0) ? 0 : width;
 }
 
@@ -60,6 +64,7 @@ Color SvgElement::getFillColor() const {
 }
 
 void SvgElement::setFillColor(const Color& color) {
+    LoggingService::getInstance().info("Setting element fill color: " + m_fillColor.toString() + " to " + color.toString());
     m_fillColor = color;
 }
 
@@ -68,6 +73,10 @@ Transform SvgElement::getTransform() const {
 }
 
 void SvgElement::setTransform(const Transform& transform) {
+    LoggingService::getInstance().info("Setting element transform: " + 
+        (m_transform.transform_str.empty() ? "none" : m_transform.transform_str) + 
+        " to " + 
+        (transform.transform_str.empty() ? "none" : transform.transform_str));
     m_transform = transform;
 }
 
@@ -76,5 +85,7 @@ double SvgElement::getOpacity() const {
 }
 
 void SvgElement::setOpacity(double opacity) {
-    m_opacity = (opacity < 0.0) ? 0.0 : (opacity > 1.0 ? 1.0 : opacity);
+    double newOpacity = (opacity < 0.0) ? 0.0 : (opacity > 1.0 ? 1.0 : opacity);
+    LoggingService::getInstance().info("Setting element opacity: " + std::to_string(m_opacity) + " to " + std::to_string(newOpacity));
+    m_opacity = newOpacity;
 }

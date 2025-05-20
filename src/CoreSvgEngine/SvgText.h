@@ -18,14 +18,14 @@ public:
     // ---------- Getter & Setter ----------
 
     Point getPosition() const { return m_position; } 
-    void setPosition(const Point& p) { m_position = p; }
+    void setPosition(const Point& p);
     
     std::string getTextContent() const { return m_textContent; } 
-    void setTextContent(const std::string& text) { m_textContent = text; }
+    void setTextContent(const std::string& text);
     
     std::string getFontFamily() const { return m_fontFamily; } 
-    void setFontFamily(const std::string& family) { m_fontFamily = family; }
+    void setFontFamily(const std::string& family);
     
     double getFontSize() const { return m_fontSize; } 
-    void setFontSize(double size) { m_fontSize = (size > 0 ? size : 1.0); }
+    void setFontSize(double size);
 };

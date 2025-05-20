@@ -2,9 +2,11 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include "../LoggingService/LoggingService.h"
 
 // 析构函数
 SvgDocument::~SvgDocument() {
+    LoggingService::getInstance().info("Destroying SVG document with " + std::to_string(m_elements.size()) + " elements");
     for (SvgElement* elem : m_elements) {
         delete elem;
     }
@@ -14,37 +16,56 @@ SvgDocument::~SvgDocument() {
 // 添加元素
 void SvgDocument::addElement(SvgElement* element) {
     if (element) {
+        LoggingService::getInstance().info("Adding new element to document, type: " + 
+            std::to_string(static_cast<int>(element->getType())) + 
+            (element->getID().empty() ? "" : ", ID: " + element->getID()));
         m_elements.push_back(element);
     }
 }
 
 // 根据ID移除元素
 bool SvgDocument::removeElementById(const std::string& id) {
+    LoggingService::getInstance().info("Removing element by ID: " + id);
     auto it = std::remove_if(m_elements.begin(), m_elements.end(),
                              [&id](SvgElement* elem){ return elem && elem->getID() == id; });
     if (it != m_elements.end()) {
         for (auto del_it = it; del_it != m_elements.end(); ++del_it) {
             delete *del_it; // 删除找到的元素
         }
+        int removedCount = std::distance(it, m_elements.end());
         m_elements.erase(it, m_elements.end());
+        LoggingService::getInstance().info("Successfully removed " + std::to_string(removedCount) + " element(s) with ID: " + id);
         return true;
     }
+    LoggingService::getInstance().info("No element found with ID: " + id);
     return false;
 }
 
 // 根据指针移除元素
 bool SvgDocument::removeElement(SvgElement* element) {
+    if (element) {
+        LoggingService::getInstance().info("Removing element by pointer, type: " + 
+            std::to_string(static_cast<int>(element->getType())) + 
+            (element->getID().empty() ? "" : ", ID: " + element->getID()));
+    } else {
+        LoggingService::getInstance().warn("Attempt to remove null element pointer");
+        return false;
+    }
+    
     auto it = std::find(m_elements.begin(), m_elements.end(), element);
     if (it != m_elements.end()) {
         m_elements.erase(it);
         delete element; // 删除元素
+        LoggingService::getInstance().info("Element successfully removed");
         return true;
     }
+    LoggingService::getInstance().warn("Element not found in document");
     return false;
 }
 
 // 清除所有元素
 void SvgDocument::clearElements() {
+    LoggingService::getInstance().info("Clearing all elements from document, count: " + std::to_string(m_elements.size()));
     for (SvgElement* elem : m_elements) {
         delete elem;
     }
@@ -53,6 +74,7 @@ void SvgDocument::clearElements() {
 
 // 生成SVG内容
 std::string SvgDocument::generateSvgContent() const {
+    LoggingService::getInstance().info("Generating SVG content for document with " + std::to_string(m_elements.size()) + " elements");
     std::stringstream ss;
     ss << "<svg width=\"" << m_width << "\" height=\"" << m_height << "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
     // 如果背景色不是完全透明的白色，则添加背景矩形
@@ -72,6 +94,7 @@ std::string SvgDocument::generateSvgContent() const {
 
 // 解析SVG内容
 bool SvgDocument::parseSvgContent(const std::string& content) {
+    LoggingService::getInstance().info("Parsing SVG content, content length: " + std::to_string(content.length()));
     // 实际的SVG解析器会在这里解析 `content` 字符串,
     // 识别不同的SVG标签 (line, rect, circle, etc.) 和它们的属性,
     // 然后创建相应的 SvgElement 对象并添加到 m_elements 中。
@@ -80,5 +103,21 @@ bool SvgDocument::parseSvgContent(const std::string& content) {
     std::cout << "SvgDocument::parseSvgContent - Placeholder for actual SVG parsing of: " 
               << content.substr(0, 100) << "...\n";
     // 假设解析总是成功的
+    LoggingService::getInstance().info("SVG content parsed successfully");
     return true;
+}
+
+void SvgDocument::setWidth(double w) { 
+    LoggingService::getInstance().info("Setting document width: " + std::to_string(m_width) + " to " + std::to_string(w > 0 ? w : 1));
+    m_width = (w > 0 ? w : 1); 
+}
+
+void SvgDocument::setHeight(double h) { 
+    LoggingService::getInstance().info("Setting document height: " + std::to_string(m_height) + " to " + std::to_string(h > 0 ? h : 1));
+    m_height = (h > 0 ? h : 1); 
+}
+
+void SvgDocument::setBackgroundColor(const Color& color) { 
+    LoggingService::getInstance().info("Setting document background color: " + m_backgroundColor.toString() + " to " + color.toString());
+    m_backgroundColor = color; 
 }
