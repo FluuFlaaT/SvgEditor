@@ -11,6 +11,10 @@ include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets Svg REQUIRED)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
 add_subdirectory(src/CommandManager CommandManager)
 add_subdirectory(src/ConfigManager ConfigManager)
 add_subdirectory(src/CoreSvgEngine CoreSvgEngine)
