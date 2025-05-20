@@ -1,5 +1,5 @@
 #pragma once
-#define _USE_MATH_DEFINES // 配合cmath引入圆周率
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <vector>
 #include "SvgElement.h"
@@ -14,8 +14,6 @@ public:
     
     SvgElementType getType() const override { return SvgElementType::Line; }
     std::string toSvgString() const override;
-    
-    // ---------- Getter & Setter ----------
 
     Point getP1() const { return m_p1; } 
     void setP1(const Point& p);
@@ -37,8 +35,6 @@ public:
     
     SvgElementType getType() const override { return SvgElementType::Rectangle; }
     std::string toSvgString() const override;
-    
-    // ---------- Getter & Setter ----------
 
     Point getTopLeft() const { return m_topLeft; } 
     void setTopLeft(const Point& p);
@@ -66,8 +62,6 @@ public:
     
     SvgElementType getType() const override { return SvgElementType::Circle; }
     std::string toSvgString() const override;
-    
-    // ---------- Getter & Setter ----------
 
     Point getCenter() const { return m_center; } 
     void setCenter(const Point& c);
@@ -87,8 +81,6 @@ public:
     
     SvgElementType getType() const override { return SvgElementType::Ellipse; }
     std::string toSvgString() const override;
-    
-    // ---------- Getter & Setter ----------
 
     Point getCenter() const { return m_center; } 
     void setCenter(const Point& c);
@@ -109,8 +101,6 @@ public:
     
     SvgElementType getType() const override { return SvgElementType::Polygon; }
     std::string toSvgString() const override;
-    
-    // ---------- Getter & Setter ----------
 
     const std::vector<Point>& getPoints() const { return m_points; }
     void setPoints(const std::vector<Point>& pts);
@@ -128,8 +118,6 @@ public:
     
     SvgElementType getType() const override { return SvgElementType::Polyline; }
     std::string toSvgString() const override;
-    
-    // ---------- Getter & Setter ----------
 
     const std::vector<Point>& getPoints() const { return m_points; } 
     void setPoints(const std::vector<Point>& pts);

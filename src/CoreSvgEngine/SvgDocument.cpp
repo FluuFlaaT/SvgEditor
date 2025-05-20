@@ -8,7 +8,6 @@
 #include <tinyxml2.h>
 #include "../LoggingService/LoggingService.h"
 
-// 析构函数
 SvgDocument::~SvgDocument() {
     LoggingService::getInstance().info("Destroying SVG document with " + std::to_string(m_elements.size()) + " elements");
     for (SvgElement* elem : m_elements) {
@@ -17,7 +16,6 @@ SvgDocument::~SvgDocument() {
     m_elements.clear();
 }
 
-// 添加元素
 void SvgDocument::addElement(SvgElement* element) {
     if (element) {
         LoggingService::getInstance().info("Adding new element to document, type: " + 
@@ -27,7 +25,6 @@ void SvgDocument::addElement(SvgElement* element) {
     }
 }
 
-// 根据ID移除元素
 bool SvgDocument::removeElementById(const std::string& id) {
     LoggingService::getInstance().info("Removing element by ID: " + id);
     auto it = std::remove_if(m_elements.begin(), m_elements.end(),
@@ -45,7 +42,6 @@ bool SvgDocument::removeElementById(const std::string& id) {
     return false;
 }
 
-// 根据指针移除元素
 bool SvgDocument::removeElement(SvgElement* element) {
     if (element) {
         LoggingService::getInstance().info("Removing element by pointer, type: " + 
@@ -67,7 +63,6 @@ bool SvgDocument::removeElement(SvgElement* element) {
     return false;
 }
 
-// 清除所有元素
 void SvgDocument::clearElements() {
     LoggingService::getInstance().info("Clearing all elements from document, count: " + std::to_string(m_elements.size()));
     for (SvgElement* elem : m_elements) {
@@ -76,7 +71,6 @@ void SvgDocument::clearElements() {
     m_elements.clear();
 }
 
-// 生成SVG内容
 std::string SvgDocument::generateSvgContent() const {
     LoggingService::getInstance().info("Generating SVG content for document with " + std::to_string(m_elements.size()) + " elements");
     std::stringstream ss;
@@ -96,7 +90,6 @@ std::string SvgDocument::generateSvgContent() const {
     return ss.str();
 }
 
-// 解析SVG内容
 bool SvgDocument::parseSvgContent(const std::string& content) {
     LoggingService::getInstance().info("Parsing SVG content, content length: " + std::to_string(content.length()));
     
@@ -218,7 +211,6 @@ void SvgDocument::setBackgroundColor(const Color& color) {
     m_backgroundColor = color; 
 }
 
-// 解析SVG子元素
 void SvgDocument::parseChildElements(tinyxml2::XMLElement* parentElement) {
     // 遍历所有子元素
     tinyxml2::XMLElement* element = parentElement->FirstChildElement();
@@ -250,7 +242,6 @@ void SvgDocument::parseChildElements(tinyxml2::XMLElement* parentElement) {
     }
 }
 
-// 解析SVG线条元素
 void SvgDocument::parseSvgLine(tinyxml2::XMLElement* element) {
     double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
     
@@ -265,7 +256,6 @@ void SvgDocument::parseSvgLine(tinyxml2::XMLElement* element) {
     addElement(line);
 }
 
-// 解析SVG矩形元素
 void SvgDocument::parseSvgRectangle(tinyxml2::XMLElement* element) {
     double x = 0, y = 0, width = 0, height = 0, rx = 0, ry = 0;
     
@@ -282,7 +272,6 @@ void SvgDocument::parseSvgRectangle(tinyxml2::XMLElement* element) {
     addElement(rect);
 }
 
-// 解析SVG圆形元素
 void SvgDocument::parseSvgCircle(tinyxml2::XMLElement* element) {
     double cx = 0, cy = 0, r = 0;
     
@@ -296,7 +285,6 @@ void SvgDocument::parseSvgCircle(tinyxml2::XMLElement* element) {
     addElement(circle);
 }
 
-// 解析SVG椭圆元素
 void SvgDocument::parseSvgEllipse(tinyxml2::XMLElement* element) {
     double cx = 0, cy = 0, rx = 0, ry = 0;
     
@@ -311,7 +299,6 @@ void SvgDocument::parseSvgEllipse(tinyxml2::XMLElement* element) {
     addElement(ellipse);
 }
 
-// 解析SVG多边形元素
 void SvgDocument::parseSvgPolygon(tinyxml2::XMLElement* element) {
     const char* pointsStr = element->Attribute("points");
     if (!pointsStr) {
@@ -350,7 +337,6 @@ void SvgDocument::parseSvgPolygon(tinyxml2::XMLElement* element) {
     addElement(polygon);
 }
 
-// 解析SVG折线元素
 void SvgDocument::parseSvgPolyline(tinyxml2::XMLElement* element) {
     const char* pointsStr = element->Attribute("points");
     if (!pointsStr) {
