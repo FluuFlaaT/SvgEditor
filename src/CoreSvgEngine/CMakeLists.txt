@@ -8,12 +8,17 @@ add_library(${TARGET_NAME} STATIC
     ${HEADERS}
 )
 
+find_package(tinyxml2 CONFIG REQUIRED)
+
 target_include_directories(${TARGET_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/src/LoggingService # 添加 LoggingService 头文件目录
+    ${CMAKE_SOURCE_DIR}/src/LoggingService 
 )
 
-target_link_libraries(${TARGET_NAME} PRIVATE LoggingService) # 链接 LoggingService
+target_link_libraries(${TARGET_NAME} PRIVATE 
+    LoggingService 
+    tinyxml2::tinyxml2
+)
 
 set_target_properties(${TARGET_NAME} PROPERTIES
     CXX_STANDARD 20
