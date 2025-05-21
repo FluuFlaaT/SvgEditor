@@ -6,25 +6,24 @@
 
 CoreSvgEngine::CoreSvgEngine() : m_document(new SvgDocument()) {
     LoggingService::getInstance().info("Creating CoreSvgEngine instance with default document");
+    createNewDocument(600, 800);
 }
 
 CoreSvgEngine::~CoreSvgEngine() {
     LoggingService::getInstance().info("Destroying CoreSvgEngine instance");
-    delete m_document;
-    m_document = nullptr;
+    // 换成智能指针后不需要 delete 
 }
 
 void CoreSvgEngine::createNewDocument(double width, double height, Color bgColor) {
     LoggingService::getInstance().info("Creating new document: width=" + std::to_string(width) + ", height=" + std::to_string(height));
-    delete m_document;
-    m_document = new SvgDocument(width, height, bgColor);
+    m_document = std::make_unique<SvgDocument>(width, height, bgColor);
 }
 
 bool CoreSvgEngine::loadSvgFile(const std::string& filePath) {
     LoggingService::getInstance().info("Loading SVG file: " + filePath);
     if (!m_document) {
         LoggingService::getInstance().info("No document instance, creating new document");
-        m_document = new SvgDocument(); // 如果没有文档则创建一个
+        m_document = std::make_unique<SvgDocument>(); // 如果没有文档则创建一个
     } else {
         LoggingService::getInstance().info("Clearing elements from existing document");
         m_document->clearElements(); // 清空现有元素
