@@ -1,19 +1,17 @@
 #pragma once
 #include <QString>
-#include "CoreSvgEngine.h"
+#include <memory> // Add for std::unique_ptr
 
-class DrawingView; // TODO: 先写在这里，后面完善Qt了之后在替换一下
+class SvgDocument; // Forward declaration
+class DrawingView; // TODO: 先写在这里，后面完善Qt了之后再替换一下
 
 class FileIOManager {
 public:
-    FileIOManager(CoreSvgEngine* engine);
-    bool openSvgFile(const QString& filePath, SvgDocument*& outDocument);
-    bool saveSvgFile(const QString& filePath, SvgDocument* doc);
+    FileIOManager();
+    bool openSvgFile(const QString& filePath, std::unique_ptr<SvgDocument>& outDocument); // Changed to unique_ptr
+    bool saveSvgFile(const QString& filePath, const SvgDocument* doc); // Changed to const SvgDocument*
     bool exportToPng(const QString& filePath, DrawingView* view);
     QString lastError() const;
-    // deprecated: 
-    // bool importSvgFragment(const QString& filePath, SvgDocument* currentDoc);
 private:
-    CoreSvgEngine* m_engine;
     QString m_lastError;
 };

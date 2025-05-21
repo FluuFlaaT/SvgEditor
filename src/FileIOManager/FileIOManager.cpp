@@ -5,12 +5,14 @@
 #include <QImage>
 #include <QPainter>
 #include "../LoggingService/LoggingService.h"
+#include "../CoreSvgEngine/SvgDocument.h" // Ensure SvgDocument is included
+#include <memory> // Add for std::unique_ptr
 
-FileIOManager::FileIOManager(CoreSvgEngine* engine) : m_engine(engine), m_lastError("") {
+FileIOManager::FileIOManager() : m_lastError("") { // Removed m_engine initialization
     LoggingService::getInstance().info("Creating FileIOManager instance");
 }
 
-bool FileIOManager::openSvgFile(const QString& filePath, SvgDocument*& outDocument) {
+bool FileIOManager::openSvgFile(const QString& filePath, std::unique_ptr<SvgDocument>& outDocument) { // Changed to unique_ptr
     LoggingService::getInstance().info("Opening SVG file: " + filePath.toStdString());
     m_lastError.clear();
 
@@ -24,22 +26,23 @@ bool FileIOManager::openSvgFile(const QString& filePath, SvgDocument*& outDocume
     QByteArray fileData = file.readAll();
     file.close();
 
-    SvgDocument* newDoc = new SvgDocument();
+    std::unique_ptr<SvgDocument> newDoc = std::make_unique<SvgDocument>(); // Use std::make_unique
     
     bool parseSuccess = newDoc->parseSvgContent(fileData.toStdString());
     if (!parseSuccess) {
-        delete newDoc;
+        // newDoc is automatically deleted when it goes out of scope
         m_lastError = "Cannot parse SVG file content";
         LoggingService::getInstance().error(m_lastError.toStdString());
         return false;
     }
 
-    outDocument = newDoc;
+    outDocument = std::move(newDoc); // Transfer ownership
     LoggingService::getInstance().info("Successfully opened and parsed SVG file");
     return true;
 }
 
-bool FileIOManager::saveSvgFile(const QString& filePath, SvgDocument* doc) {
+// Make sure signature matches .h file: const SvgDocument* doc
+bool FileIOManager::saveSvgFile(const QString& filePath, const SvgDocument* doc) { 
     LoggingService::getInstance().info("Saving SVG file: " + filePath.toStdString());
     m_lastError.clear();
 
