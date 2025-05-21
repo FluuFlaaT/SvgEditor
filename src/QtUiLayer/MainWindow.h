@@ -41,8 +41,11 @@ private:
     RightAttrBar* m_rightAttrBar;
 
     QMenu* m_languageMenu;
+    QDir* m_translationsDir;
     QTranslator m_translator;  
     QString m_currentLanguage; 
+    QString m_translationsPath;
+    QStringList m_languages;
     
     void setupMenus();
     void setupToolBar();

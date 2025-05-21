@@ -18,13 +18,16 @@ MainWindow::MainWindow(QWidget *parent)
 {
     LoggingService::getInstance().debug("MainWindow constructor called.");
     
-    QString translationsPath = QApplication::applicationDirPath() + "/translations/";
-    QDir translationDir(translationsPath);
-    if (!translationDir.exists()) {
-        translationsPath = QDir::currentPath() + "/translations/";
+    /*
+    m_translationsPath = QApplication::applicationDirPath() + "/translations/";
+    m_translationsDir = new QDir(m_translationsPath);
+    if (!m_translationsDir->exists()) {
+        m_translationsPath = QDir::currentPath() + "/translations/";
     }
     
     QString locale = QLocale::system().name();
+
+
     if (!m_translator.load(locale, translationsPath)) {
         m_translator.load("en_US", translationsPath);
         m_currentLanguage = "en_US";
@@ -32,7 +35,8 @@ MainWindow::MainWindow(QWidget *parent)
         m_currentLanguage = locale;
     }
     qApp->installTranslator(&m_translator);
-    
+    */
+
     // Create UI components
     m_drawingLayer = new DrawingLayer(this);
     m_leftSideBar = new LeftSideBar(this);
@@ -332,20 +336,17 @@ QStringList MainWindow::getAvailableLanguages() const
     filters << "*.qm";
     QStringList files = dir.entryList(filters, QDir::Files);
     
-    // 支持的语言映射
     QMap<QString, QString> supportedLanguages;
     supportedLanguages["en_US"] = tr("English");
     supportedLanguages["zh_CN"] = tr("简体中文");
     
     for (const QString& file : files) {
-        // 从文件名中提取语言代码
         QString langCode = QFileInfo(file).baseName();
         if (supportedLanguages.contains(langCode)) {
             languages << langCode;
         }
     }
     
-    // 如果没有翻译文件，至少返回英语
     if (languages.isEmpty()) {
         languages << "en_US";
     }
