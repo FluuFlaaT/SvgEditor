@@ -2,6 +2,23 @@
 #include <sstream>
 #include "../LoggingService/LoggingService.h"
 
+// 转义XML特殊字符
+std::string escapeXmlChars(const std::string& input) {
+    std::string result;
+    result.reserve(input.size());
+    for (char c : input) {
+        switch (c) {
+            case '<': result += "&lt;"; break;
+            case '>': result += "&gt;"; break;
+            case '&': result += "&amp;"; break;
+            case '"': result += "&quot;"; break;
+            case '\'': result += "&apos;"; break;
+            default: result += c; break;
+        }
+    }
+    return result;
+}
+
 SvgText::SvgText(Point pos, const std::string& text) : 
     m_position(pos), m_textContent(text), m_fontFamily("Arial"), m_fontSize(12.0) {
     LoggingService::getInstance().info("Creating Text element: position=(" + 
@@ -19,7 +36,8 @@ std::string SvgText::toSvgString() const {
     ss << " font-family=\"" << m_fontFamily << "\"";
     ss << " font-size=\"" << m_fontSize << "\"";
     ss << getCommonAttributesString();
-    ss << ">" << m_textContent << "</text>";
+    // 转义文本内容中的特殊字符
+    ss << ">" << escapeXmlChars(m_textContent) << "</text>";
     return ss.str();
 }
 

@@ -21,8 +21,8 @@ public:
     virtual SvgElementType getType() const = 0;
     virtual void draw() const;
     virtual std::string toSvgString() const = 0;
-    virtual void parseFromSvgAttributes(const std::map<std::string, std::string>& attributes) {};
-
+    virtual void parseFromSvgAttributes(const std::map<std::string, std::string>& attributes) {};    
+    
     std::variant<std::string, double, int> getAttribute(const std::string& name) const {
         auto it = m_attributes.find(name);
         if (it != m_attributes.end()) {
