@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.30)
 project(SvgEditor LANGUAGES CXX)
 
-option(BUILD_TESTS "Build gTest related exec" OFF)
+option(BUILD_TESTS "Build gTest related exec" ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

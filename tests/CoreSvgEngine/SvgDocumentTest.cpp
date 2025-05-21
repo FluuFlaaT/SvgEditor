@@ -1,23 +1,4 @@
-#include <gtest/gtest.h>
-#include "../../src/CoreSvgEngine/SvgDocument.h"
-#include "../../src/CoreSvgEngine/SvgShapes.h"
-#include "../../src/CoreSvgEngine/SvgText.h"
-#include <iostream>
-#include <sstream>
-#include <string>
-
-class SvgDocumentTest : public ::testing::Test {
-protected:
-    void SetUp() override {
-        doc = new SvgDocument(800, 600);
-    }
-
-    void TearDown() override {
-        delete doc;
-    }
-
-    SvgDocument* doc;
-};
+#include "SvgDocumentTest.h"
 
 // 基本SVG解析测试
 TEST_F(SvgDocumentTest, BasicSvgParsing) {
@@ -324,9 +305,4 @@ TEST_F(SvgDocumentTest, MissingAttributesHandling) {
     EXPECT_EQ(0.0, circle->getCenter().x); // 期望使用默认值0
     EXPECT_EQ(0.0, circle->getCenter().y);
     EXPECT_EQ(50.0, circle->getRadius());
-}
-
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }
