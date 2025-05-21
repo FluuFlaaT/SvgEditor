@@ -1,7 +1,7 @@
-add_executable(file_io_manager_tests FileIOManagerTest.cpp)
+add_executable(FileIOManagerTest FileIOManagerTest.cpp)
 
 # 链接测试与依赖库
-target_link_libraries(file_io_manager_tests PRIVATE 
+target_link_libraries(FileIOManagerTest PRIVATE 
     FileIOManager
     CoreSvgEngine
     GTest::gtest 
@@ -12,4 +12,4 @@ target_link_libraries(file_io_manager_tests PRIVATE
 
 # 添加到测试
 include(GoogleTest)
-gtest_discover_tests(file_io_manager_tests)
+gtest_discover_tests(FileIOManagerTest)
