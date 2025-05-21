@@ -1,15 +1,5 @@
 #include "LeftSideBar.h"
-
-// 定义工具ID常量
-enum ToolId {
-    TOOL_SELECT = 1,
-    TOOL_LINE,
-    TOOL_RECTANGLE,
-    TOOL_CIRCLE,
-    TOOL_ELLIPSE,
-    TOOL_POLYLINE,
-    TOOL_PATH
-};
+#include "ToolId.h" // 包含新的头文件
 
 LeftSideBar::LeftSideBar(QWidget *parent)
     : QWidget(parent)
@@ -32,13 +22,13 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     m_toolButtons = new QButtonGroup(this);
     m_toolButtons->setExclusive(true); // 只允许选择一个工具
     
-    m_mainLayout->addWidget(createToolButton(tr("Select"), "select", TOOL_SELECT));
-    m_mainLayout->addWidget(createToolButton(tr("Line"), "line", TOOL_LINE));
-    m_mainLayout->addWidget(createToolButton(tr("Rectangle"), "rectangle", TOOL_RECTANGLE));
-    m_mainLayout->addWidget(createToolButton(tr("Circle"), "circle", TOOL_CIRCLE));
-    m_mainLayout->addWidget(createToolButton(tr("Ellipse"), "ellipse", TOOL_ELLIPSE));
-    m_mainLayout->addWidget(createToolButton(tr("Polyline"), "polyline", TOOL_POLYLINE));
-    m_mainLayout->addWidget(createToolButton(tr("Path"), "path", TOOL_PATH));
+    m_mainLayout->addWidget(createToolButton(tr("Select"), "select", static_cast<int>(ToolId::TOOL_SELECT)));
+    m_mainLayout->addWidget(createToolButton(tr("Line"), "line", static_cast<int>(ToolId::TOOL_LINE)));
+    m_mainLayout->addWidget(createToolButton(tr("Rectangle"), "rectangle", static_cast<int>(ToolId::TOOL_RECTANGLE)));
+    m_mainLayout->addWidget(createToolButton(tr("Circle"), "circle", static_cast<int>(ToolId::TOOL_CIRCLE)));
+    m_mainLayout->addWidget(createToolButton(tr("Ellipse"), "ellipse", static_cast<int>(ToolId::TOOL_ELLIPSE)));
+    m_mainLayout->addWidget(createToolButton(tr("Polyline"), "polyline", static_cast<int>(ToolId::TOOL_POLYLINE)));
+    m_mainLayout->addWidget(createToolButton(tr("Path"), "path", static_cast<int>(ToolId::TOOL_PATH)));
     
     m_mainLayout->addStretch(); // 底部缓冲
     
@@ -83,32 +73,32 @@ void LeftSideBar::changeEvent(QEvent* event)
         for (int i = 0; i < buttons.size(); i++) {
             QToolButton* button = qobject_cast<QToolButton*>(buttons[i]);
             if (button) {
-                switch (m_toolButtons->id(button)) {
-                    case TOOL_SELECT:
+                switch (static_cast<ToolId>(m_toolButtons->id(button))) { // 使用强类型枚举
+                    case ToolId::TOOL_SELECT:
                         button->setText(tr("Select"));
                         button->setToolTip(tr("Select"));
                         break;
-                    case TOOL_LINE:
+                    case ToolId::TOOL_LINE:
                         button->setText(tr("Line"));
                         button->setToolTip(tr("Line"));
                         break;
-                    case TOOL_RECTANGLE:
+                    case ToolId::TOOL_RECTANGLE:
                         button->setText(tr("Rectangle"));
                         button->setToolTip(tr("Rectangle"));
                         break;
-                    case TOOL_CIRCLE:
+                    case ToolId::TOOL_CIRCLE:
                         button->setText(tr("Circle"));
                         button->setToolTip(tr("Circle"));
                         break;
-                    case TOOL_ELLIPSE:
+                    case ToolId::TOOL_ELLIPSE:
                         button->setText(tr("Ellipse"));
                         button->setToolTip(tr("Ellipse"));
                         break;
-                    case TOOL_POLYLINE:
+                    case ToolId::TOOL_POLYLINE:
                         button->setText(tr("Polyline"));
                         button->setToolTip(tr("Polyline"));
                         break;
-                    case TOOL_PATH:
+                    case ToolId::TOOL_PATH:
                         button->setText(tr("Path"));
                         button->setToolTip(tr("Path"));
                         break;
