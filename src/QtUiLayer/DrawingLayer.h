@@ -93,7 +93,7 @@ protected:
 
     void drawBackground(QPainter *painter, const QRectF &rect) override; // To draw canvas background color
 
-    void changeEvent(QEvent* event) override; // For language changes, etc.
+    // void changeEvent(QEvent* event) override; // For language changes, etc.
 
 private:
     // Core Pointers & Scene
@@ -172,6 +172,4 @@ private:
     QColor toQColor(const Color& coreColor) const;
     Color toCoreColor(const QColor& qColor) const;
 
-    QGraphicsScene* m_scene;
-    
 };
