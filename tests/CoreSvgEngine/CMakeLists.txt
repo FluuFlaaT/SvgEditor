@@ -1,4 +1,4 @@
-add_executable(CoreSvgEngineTest main.cpp SvgDocumentTest.cpp)
+add_executable(CoreSvgEngineTest main.cpp SvgDocumentTest.cpp SvgParserTest.cpp)
 
 # 链接测试与依赖库
 target_link_libraries(CoreSvgEngineTest PRIVATE 

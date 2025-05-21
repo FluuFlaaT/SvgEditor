@@ -31,11 +31,11 @@ TEST_F(SvgDocumentTest, LineParsing) {
     EXPECT_EQ(1, doc->getElements().size());
     
     // 获取解析的元素
-    SvgElement* elem = doc->getElements()[0];
+    const auto& elem = doc->getElements()[0]; // Use .get() to access raw pointer from unique_ptr
     EXPECT_EQ(SvgElementType::Line, elem->getType());
     
     // 转换为具体类型
-    SvgLine* line = dynamic_cast<SvgLine*>(elem);
+    SvgLine* line = dynamic_cast<SvgLine*>(elem.get());
     ASSERT_NE(nullptr, line);
     
     // 验证属性
@@ -62,10 +62,10 @@ TEST_F(SvgDocumentTest, RectangleParsing) {
     EXPECT_TRUE(doc->parseSvgContent(svgContent));
     
     ASSERT_EQ(1, doc->getElements().size());
-    SvgElement* elem = doc->getElements()[0];
+    const auto& elem = doc->getElements()[0];
     EXPECT_EQ(SvgElementType::Rectangle, elem->getType());
     
-    SvgRectangle* rect = dynamic_cast<SvgRectangle*>(elem);
+    SvgRectangle* rect = dynamic_cast<SvgRectangle*>(elem.get());
     ASSERT_NE(nullptr, rect);
     
     EXPECT_EQ("test-rect", rect->getID());
@@ -91,10 +91,10 @@ TEST_F(SvgDocumentTest, CircleParsing) {
     EXPECT_TRUE(doc->parseSvgContent(svgContent));
     
     ASSERT_EQ(1, doc->getElements().size());
-    SvgElement* elem = doc->getElements()[0];
+    const auto& elem = doc->getElements()[0];
     EXPECT_EQ(SvgElementType::Circle, elem->getType());
     
-    SvgCircle* circle = dynamic_cast<SvgCircle*>(elem);
+    SvgCircle* circle = dynamic_cast<SvgCircle*>(elem.get());
     ASSERT_NE(nullptr, circle);
     
     EXPECT_EQ("test-circle", circle->getID());
@@ -121,10 +121,10 @@ TEST_F(SvgDocumentTest, EllipseParsing) {
     EXPECT_TRUE(doc->parseSvgContent(svgContent));
     
     ASSERT_EQ(1, doc->getElements().size());
-    SvgElement* elem = doc->getElements()[0];
+    const auto& elem = doc->getElements()[0];
     EXPECT_EQ(SvgElementType::Ellipse, elem->getType());
     
-    SvgEllipse* ellipse = dynamic_cast<SvgEllipse*>(elem);
+    SvgEllipse* ellipse = dynamic_cast<SvgEllipse*>(elem.get());
     ASSERT_NE(nullptr, ellipse);
       EXPECT_EQ("test-ellipse", ellipse->getID());
     EXPECT_EQ(200.0, ellipse->getCenter().x);
@@ -147,10 +147,10 @@ TEST_F(SvgDocumentTest, PolygonParsing) {
     EXPECT_TRUE(doc->parseSvgContent(svgContent));
     
     ASSERT_EQ(1, doc->getElements().size());
-    SvgElement* elem = doc->getElements()[0];
+    const auto& elem = doc->getElements()[0];
     EXPECT_EQ(SvgElementType::Polygon, elem->getType());
     
-    SvgPolygon* polygon = dynamic_cast<SvgPolygon*>(elem);
+    SvgPolygon* polygon = dynamic_cast<SvgPolygon*>(elem.get());
     ASSERT_NE(nullptr, polygon);
     
     EXPECT_EQ("test-polygon", polygon->getID());
@@ -184,10 +184,10 @@ TEST_F(SvgDocumentTest, PolylineParsing) {
     EXPECT_TRUE(doc->parseSvgContent(svgContent));
     
     ASSERT_EQ(1, doc->getElements().size());
-    SvgElement* elem = doc->getElements()[0];
+    const auto& elem = doc->getElements()[0];
     EXPECT_EQ(SvgElementType::Polyline, elem->getType());
     
-    SvgPolyline* polyline = dynamic_cast<SvgPolyline*>(elem);
+    SvgPolyline* polyline = dynamic_cast<SvgPolyline*>(elem.get());
     ASSERT_NE(nullptr, polyline);
     
     EXPECT_EQ("test-polyline", polyline->getID());
@@ -220,10 +220,10 @@ TEST_F(SvgDocumentTest, TextParsing) {
     EXPECT_TRUE(doc->parseSvgContent(svgContent));
     
     ASSERT_EQ(1, doc->getElements().size());
-    SvgElement* elem = doc->getElements()[0];
+    const auto& elem = doc->getElements()[0];
     EXPECT_EQ(SvgElementType::Text, elem->getType());
     
-    SvgText* text = dynamic_cast<SvgText*>(elem);
+    SvgText* text = dynamic_cast<SvgText*>(elem.get());
     ASSERT_NE(nullptr, text);
     
     EXPECT_EQ("test-text", text->getID());
@@ -248,7 +248,7 @@ TEST_F(SvgDocumentTest, CustomAttributesParsing) {
     EXPECT_TRUE(doc->parseSvgContent(svgContent));
     
     ASSERT_EQ(1, doc->getElements().size());
-    SvgElement* elem = doc->getElements()[0];
+    const auto& elem = doc->getElements()[0];
     
     // 检查自定义字符串属性
     auto customStrAttr = elem->getAttribute("data-custom-str");
@@ -293,14 +293,14 @@ TEST_F(SvgDocumentTest, MissingAttributesHandling) {
     
     // 期望两个元素都被解析，只是使用了默认值
     EXPECT_EQ(2, doc->getElements().size());
-      auto rect = dynamic_cast<SvgRectangle*>(doc->getElements()[0]);
+    auto rect = dynamic_cast<SvgRectangle*>(doc->getElements()[0].get());
     ASSERT_NE(nullptr, rect);
     EXPECT_EQ(0.0, rect->getTopLeft().x); // 期望使用默认值0
     EXPECT_EQ(0.0, rect->getTopLeft().y);
     EXPECT_EQ(100.0, rect->getWidth());
     EXPECT_EQ(50.0, rect->getHeight());
     
-    auto circle = dynamic_cast<SvgCircle*>(doc->getElements()[1]);
+    auto circle = dynamic_cast<SvgCircle*>(doc->getElements()[1].get());
     ASSERT_NE(nullptr, circle);
     EXPECT_EQ(0.0, circle->getCenter().x); // 期望使用默认值0
     EXPECT_EQ(0.0, circle->getCenter().y);

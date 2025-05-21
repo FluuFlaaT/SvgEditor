@@ -6,16 +6,13 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <memory> // Required for std::unique_ptr
 
 class SvgDocumentTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        doc = new SvgDocument(800, 600);
+        doc = std::make_unique<SvgDocument>(800, 600);
     }
 
-    void TearDown() override {
-        delete doc;
-    }
-
-    SvgDocument* doc;
+    std::unique_ptr<SvgDocument> doc;
 };
