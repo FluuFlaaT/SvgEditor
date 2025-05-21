@@ -4,11 +4,17 @@ set(SOURCES
     main.cpp
     MainWindow.cpp
     SvgDisplayWidget.cpp
+    DrawingLayer.cpp
+    LeftSideBar.cpp
+    RightAttrBar.cpp
 )
 
 set(HEADERS
     MainWindow.h
     SvgDisplayWidget.h
+    DrawingLayer.h
+    LeftSideBar.h
+    RightAttrBar.h
 )
 
 file(GLOB UI_FILES *.ui)

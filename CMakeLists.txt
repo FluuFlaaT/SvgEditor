@@ -9,9 +9,15 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON) 
 set(CMAKE_AUTOUIC ON)
 
+# 添加自定义CMAKE模块路径
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+# 包含翻译模块
+include(Translation)
+
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
-find_package(Qt5 COMPONENTS Core Gui Widgets Svg REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets Svg LinguistTools REQUIRED)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -39,7 +45,11 @@ if(BUILD_TESTS OR CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_subdirectory(tests)
 endif()
 
+# 生成翻译文件
+add_translation_targets(QM_FILES)
+
 # 解决 MSVC C4819 报 warning 的问题
 # 没解决掉，除非所有文件用UTF-8BOM保存；但是用BOM会覆盖所有git历史
-add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    add_compile_options(/source-charset:utf-8 /execution-charset:gb2312)
+endif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
