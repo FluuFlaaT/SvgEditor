@@ -53,7 +53,7 @@ void DrawingLayer::setSvgContent(const QString &svgContent)
 
 void DrawingLayer::updateView()
 {
-    // 重置视图并适应内容
+
     resetTransform();
     setSceneRect(m_scene->itemsBoundingRect());
     fitInView(m_scene->itemsBoundingRect(), Qt::KeepAspectRatio);

@@ -16,7 +16,6 @@ public:
     void showAttributesForTool(int toolId);
     void showAttributesForElement(int elementType);
     
-    // 添加changeEvent方法
     void changeEvent(QEvent* event) override;
 
 private:
@@ -24,7 +23,6 @@ private:
     QLabel* m_titleLabel;
     QStackedWidget* m_stackedWidget;
     
-    // 为不同元素类型创建属性面板
     QWidget* createCommonAttributesWidget();
     QWidget* createCircleAttributesWidget();
     QWidget* createRectangleAttributesWidget();

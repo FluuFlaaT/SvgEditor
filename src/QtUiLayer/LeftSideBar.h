@@ -13,7 +13,7 @@ public:
     explicit LeftSideBar(QWidget *parent = nullptr);
     ~LeftSideBar();
     
-    // 添加changeEvent方法
+    // 语言更换时调用
     void changeEvent(QEvent* event) override;
 
 signals:
@@ -22,7 +22,6 @@ signals:
 private:
     QVBoxLayout* m_mainLayout;
     QButtonGroup* m_toolButtons;
-    
-    // 绘图工具
+
     QToolButton* createToolButton(const QString& text, const QString& iconName, int toolId);
 };

@@ -33,7 +33,7 @@ private slots:
     void exportToPNG();
     
     void handleToolSelected(int toolId);
-    void createCircle();
+    void createCircle(); // SVG测试用例
 
 private:
     DrawingLayer* m_drawingLayer;

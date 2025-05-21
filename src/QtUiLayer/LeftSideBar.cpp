@@ -23,21 +23,21 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     setMinimumWidth(100);
     setMaximumWidth(150);
     
-    // 创建主布局
     m_mainLayout = new QVBoxLayout(this);
     m_mainLayout->setContentsMargins(5, 10, 5, 10);
     m_mainLayout->setSpacing(5);
-    // 创建标题
+
+    /* 原来有个标题放在上面，现在没必要了
     QLabel* titleLabel = new QLabel(tr(""), this);
     titleLabel->setAlignment(Qt::AlignCenter);
     titleLabel->setStyleSheet("font-weight: bold;");
     m_mainLayout->addWidget(titleLabel);
+    */
     
     // 创建按钮组
     m_toolButtons = new QButtonGroup(this);
     m_toolButtons->setExclusive(true); // 只允许选择一个工具
     
-    // 添加各种工具按钮
     m_mainLayout->addWidget(createToolButton(tr("Select"), "select", TOOL_SELECT));
     m_mainLayout->addWidget(createToolButton(tr("Line"), "line", TOOL_LINE));
     m_mainLayout->addWidget(createToolButton(tr("Rectangle"), "rectangle", TOOL_RECTANGLE));
@@ -46,10 +46,8 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     m_mainLayout->addWidget(createToolButton(tr("Polyline"), "polyline", TOOL_POLYLINE));
     m_mainLayout->addWidget(createToolButton(tr("Path"), "path", TOOL_PATH));
     
-    // 添加底部弹簧
-    m_mainLayout->addStretch();
+    m_mainLayout->addStretch(); // 底部缓冲
     
-    // 连接信号
     connect(m_toolButtons, QOverload<int>::of(&QButtonGroup::buttonClicked), 
         [this](int id) {
             LoggingService::getInstance().debug("Tool selected: " + std::to_string(id));
@@ -87,12 +85,10 @@ QToolButton* LeftSideBar::createToolButton(const QString& text, const QString& i
 void LeftSideBar::changeEvent(QEvent* event)
 {
     if (event->type() == QEvent::LanguageChange) {
-        // 重新翻译所有文本
         QList<QAbstractButton*> buttons = m_toolButtons->buttons();
         for (int i = 0; i < buttons.size(); i++) {
             QToolButton* button = qobject_cast<QToolButton*>(buttons[i]);
             if (button) {
-                // 根据ID重设文本
                 switch (m_toolButtons->id(button)) {
                     case TOOL_SELECT:
                         button->setText(tr("Select"));
@@ -125,13 +121,7 @@ void LeftSideBar::changeEvent(QEvent* event)
                 }
             }
         }
-        
-        // 更新标题标签
-        QLabel* titleLabel = findChild<QLabel*>();
-        if (titleLabel) {
-            titleLabel->setText(tr("Drawing Tools"));
-        }
-        
+
         LoggingService::getInstance().debug("LeftSideBar language changed");
     }
     
