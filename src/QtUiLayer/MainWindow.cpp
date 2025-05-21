@@ -329,11 +329,11 @@ void MainWindow::createCircle()
     if (doc) {
         LoggingService::getInstance().debug("Creating a new SvgCircle element.");
         
-        SvgCircle* circle = new SvgCircle({200, 150}, 50);
+        auto circle = std::make_unique<SvgCircle>(Point{200, 150}, 50);
         circle->setFillColor({255, 0, 0, 255});
         circle->setStrokeColor({0, 0, 0, 255});
         circle->setStrokeWidth(2.0);
-        doc->addElement(circle);
+        doc->addElement(std::move(circle));
 
         QString updatedSvgContent = QString::fromStdString(doc->generateSvgContent());
         m_drawingLayer->setSvgContent(updatedSvgContent);
