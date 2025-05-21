@@ -3,7 +3,6 @@
 #include <string>
 #include "SvgElement.h"
 
-// 前向声明
 namespace tinyxml2 {
     class XMLElement;
 }

@@ -21,14 +21,11 @@ bool FileIOManager::openSvgFile(const QString& filePath, SvgDocument*& outDocume
         return false;
     }
 
-    // 读取文件内容
     QByteArray fileData = file.readAll();
     file.close();
 
-    // 创建新的SvgDocument
     SvgDocument* newDoc = new SvgDocument();
     
-    // 解析SVG内容
     bool parseSuccess = newDoc->parseSvgContent(fileData.toStdString());
     if (!parseSuccess) {
         delete newDoc;
@@ -37,7 +34,6 @@ bool FileIOManager::openSvgFile(const QString& filePath, SvgDocument*& outDocume
         return false;
     }
 
-    // 设置输出文档
     outDocument = newDoc;
     LoggingService::getInstance().info("Successfully opened and parsed SVG file");
     return true;
@@ -60,7 +56,6 @@ bool FileIOManager::saveSvgFile(const QString& filePath, SvgDocument* doc) {
         return false;
     }
 
-    // 获取SVG内容并写入文件
     std::string svgContent = doc->generateSvgContent();
     QByteArray data(svgContent.c_str(), svgContent.length());
     
@@ -78,7 +73,7 @@ bool FileIOManager::saveSvgFile(const QString& filePath, SvgDocument* doc) {
 }
 
 bool FileIOManager::exportToPng(const QString& filePath, DrawingView* view) {
-    // 注意：这是一个简单的实现，具体实现可能需要根据DrawingView的实际接口调整
+    // TODO: 初步实现，占位中。
     LoggingService::getInstance().info("Exporting to PNG: " + filePath.toStdString());
     m_lastError.clear();
 
@@ -88,13 +83,12 @@ bool FileIOManager::exportToPng(const QString& filePath, DrawingView* view) {
         return false;
     }
 
-    // 此处需要根据DrawingView的具体实现来完成
-    // 以下为占位实现，需要在Qt层完成后更新
+    // TODO: 需要根据DrawingView的具体实现来完成
     m_lastError = "Export to PNG not implemented";
     LoggingService::getInstance().log(LogLevel::Warning, m_lastError.toStdString());
     return false;
 
-    /* 完整实现可能类似以下代码：
+    /* 
     QImage image(view->width(), view->height(), QImage::Format_ARGB32);
     image.fill(Qt::transparent);
 
