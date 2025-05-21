@@ -14,6 +14,15 @@
 #include "DrawingLayer.h"
 #include "LeftSideBar.h"
 #include "RightAttrBar.h"
+#include "SvgShapes.h"
+#include <QApplication>
+#include <QSplitter>
+#include <QIcon>
+#include <QFileInfo>
+#include <QDir>
+#include <QEvent>
+#include <QActionGroup>
+#include <QLocale>
 
 class MainWindow : public QMainWindow
 {

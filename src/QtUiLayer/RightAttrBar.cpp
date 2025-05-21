@@ -1,13 +1,4 @@
 ﻿#include "RightAttrBar.h"
-#include <QFormLayout>
-#include <QLineEdit>
-#include <QColorDialog>
-#include <QPushButton>
-#include <QDoubleSpinBox>
-#include <QComboBox>
-#include <QGroupBox>
-#include <QEvent>
-#include "LoggingService.h"
 
 RightAttrBar::RightAttrBar(QWidget *parent)
     : QWidget(parent)

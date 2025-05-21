@@ -5,6 +5,15 @@
 #include <QLabel>
 #include <QScrollArea>
 #include <QStackedWidget>
+#include <QFormLayout>
+#include <QLineEdit>
+#include <QColorDialog>
+#include <QPushButton>
+#include <QDoubleSpinBox>
+#include <QComboBox>
+#include <QGroupBox>
+#include <QEvent>
+#include "LoggingService.h"
 
 class RightAttrBar : public QWidget {
     Q_OBJECT

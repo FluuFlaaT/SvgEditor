@@ -1,9 +1,4 @@
 #include "DrawingLayer.h"
-#include <QSvgRenderer>
-#include <QGraphicsSvgItem>
-#include <QResizeEvent>
-#include <QEvent>
-#include "LoggingService.h"
 
 DrawingLayer::DrawingLayer(QWidget *parent)
     : QGraphicsView(parent)

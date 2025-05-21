@@ -1,10 +1,4 @@
 #include "LeftSideBar.h"
-#include <QIcon>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QSpacerItem>
-#include <QEvent>
-#include "LoggingService.h"
 
 // 定义工具ID常量
 enum ToolId {

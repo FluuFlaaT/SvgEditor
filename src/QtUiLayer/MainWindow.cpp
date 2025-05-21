@@ -1,17 +1,4 @@
 ﻿#include "MainWindow.h"
-#include "SvgShapes.h"
-#include <QApplication>
-#include <QHBoxLayout>
-#include <QSplitter>
-#include <QIcon>
-#include <QFileInfo>
-#include <QDir>
-#include <QEvent>
-#include <QActionGroup>
-#include <QMessageBox>
-#include <QTranslator>
-#include <QLocale>
-#include "LoggingService.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_currentFilePath(""), m_currentLanguage("en_US")
@@ -219,14 +206,11 @@ void MainWindow::updateTitle()
 
 void MainWindow::setupLanguageMenu()
 {
-    // 获取可用的语言列表
     QStringList languages = getAvailableLanguages();
     
-    // 创建语言选择的动作组（仅允许选择一种语言）
     QActionGroup* langGroup = new QActionGroup(this);
     langGroup->setExclusive(true);
     
-    // 为每种语言创建一个选择项
     QMap<QString, QString> displayNames;
     displayNames["en_US"] = tr("English");
     displayNames["zh_CN"] = tr("简体中文");
@@ -237,12 +221,10 @@ void MainWindow::setupLanguageMenu()
         langAction->setCheckable(true);
         langAction->setData(langCode);
         
-        // 设置当前语言为选中状态
         if (langCode == m_currentLanguage) {
             langAction->setChecked(true);
         }
         
-        // 连接信号槽，点击时切换语言
         connect(langAction, &QAction::triggered, this, [this, langCode]() {
             switchLanguage(langCode);
             LoggingService::getInstance().info("Language menu action triggered: " + langCode.toStdString());
@@ -272,20 +254,17 @@ void MainWindow::switchLanguage(const QString& locale)
         return;
     }
     
-    // 移除旧的翻译器
     qApp->removeTranslator(&m_translator);
     
-    // 加载新的翻译文件
     QString translationsPath = QApplication::applicationDirPath() + "/translations/";
     QDir translationDir(translationsPath);
     if (!translationDir.exists()) {
-        // 如果不存在，尝试查找项目目录中的translations
         translationsPath = QDir::currentPath() + "/translations/";
     }
     
     bool loaded = m_translator.load(locale, translationsPath);
     if (loaded) {
-        // 安装新的翻译器
+        // 安装新的Translator
         qApp->installTranslator(&m_translator);
         m_currentLanguage = locale;
         LoggingService::getInstance().info("Switched language to: " + locale.toStdString());

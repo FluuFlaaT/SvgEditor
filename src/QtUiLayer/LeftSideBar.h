@@ -5,6 +5,11 @@
 #include <QButtonGroup>
 #include <QPushButton>
 #include <QToolButton>
+#include <QIcon>
+#include <QLabel>
+#include <QSpacerItem>
+#include <QEvent>
+#include "LoggingService.h"
 
 class LeftSideBar : public QWidget {
     Q_OBJECT
