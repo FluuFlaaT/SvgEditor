@@ -3,7 +3,7 @@
 ## 0. 怎么让它跑起来
 
 - 依赖需求
-    - vcpkg —— 需要安装并配置$VCPKG_ROOT
+    - vcpkg —— 需要安装并配置`$VCPKG_ROOT`
     - `qt5-base` `gTest` `tinyxml2` `qt5-Svg` —— 均可透过 vcpkg 安装 
     - CMake，Visual Studio（需支持C++20标准，故推荐v143版及更高版本的构建工具）
     - 未对 macOS 和 Linux 做适配，本项目只保证 Windows 下的可运行性
