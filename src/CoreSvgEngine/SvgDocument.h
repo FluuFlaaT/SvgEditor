@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <memory>
 #include "SvgElement.h"
 
 namespace tinyxml2 {
@@ -9,7 +10,7 @@ namespace tinyxml2 {
 
 class SvgDocument {
 private:
-    std::vector<SvgElement*> m_elements;
+    std::vector<std::unique_ptr<SvgElement>> m_elements;
     double m_width;
     double m_height;
     Color m_backgroundColor;
@@ -37,16 +38,16 @@ public:
     SvgDocument(SvgDocument&&) = default;
     SvgDocument& operator=(SvgDocument&&) = default;
 
-    void addElement(SvgElement* element);
+    void addElement(std::unique_ptr<SvgElement> element);
     bool removeElementById(const std::string& id);
-    bool removeElement(SvgElement* element);
+    bool removeElement(const SvgElement* element_ptr);
     void clearElements();
     std::string generateSvgContent() const;
     bool parseSvgContent(const std::string& content);
     
     // ---------- Getter & Setter ----------
-    const std::vector<SvgElement*>& getElements() const { return m_elements; }
-    std::vector<SvgElement*>& getElements() { return m_elements; } // 非const版本，用于修改
+    const std::vector<std::unique_ptr<SvgElement>>& getElements() const { return m_elements; }
+    std::vector<std::unique_ptr<SvgElement>>& getElements() { return m_elements; } // 非const版本，用于修改
     
     double getWidth() const { return m_width; }
     void setWidth(double w); 

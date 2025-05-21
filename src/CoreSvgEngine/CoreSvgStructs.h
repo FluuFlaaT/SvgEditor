@@ -2,6 +2,8 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <algorithm> // Required for std::transform
+#include <map> // Required for color name mapping
 
 enum class SvgElementType {
     Line,
@@ -37,16 +39,80 @@ struct Color {
         return ss.str();
     }
 
-    static Color fromString(const std::string& s) {
+    static Color fromString(const std::string& s_in) {
         Color c;
+        std::string s = s_in;
+        // Convert to lowercase for case-insensitive comparison
+        std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+
+        static const std::map<std::string, Color> colorNameToHex = {
+            {"black", {0, 0, 0, 255}}, {"silver", {192, 192, 192, 255}},
+            {"gray", {128, 128, 128, 255}}, {"white", {255, 255, 255, 255}},
+            {"maroon", {128, 0, 0, 255}}, {"red", {255, 0, 0, 255}},
+            {"purple", {128, 0, 128, 255}}, {"fuchsia", {255, 0, 255, 255}},
+            {"green", {0, 128, 0, 255}}, {"lime", {0, 255, 0, 255}},
+            {"olive", {128, 128, 0, 255}}, {"yellow", {255, 255, 0, 255}},
+            {"navy", {0, 0, 128, 255}}, {"blue", {0, 0, 255, 255}},
+            {"teal", {0, 128, 128, 255}}, {"aqua", {0, 255, 255, 255}},
+            {"transparent", {0, 0, 0, 0}}
+            // Add more common SVG color names as needed
+        };
+
+        if (s.empty() || s == "none") {
+            c.alpha = 0; // Transparent
+            return c;
+        }
+
+        auto it = colorNameToHex.find(s);
+        if (it != colorNameToHex.end()) {
+            return it->second;
+        }
+
         if (s.rfind("rgba", 0) == 0) {
-            sscanf(s.c_str(), "rgba(%d,%d,%d,%lf)", &c.r, &c.g, &c.b, &reinterpret_cast<double&>(c.alpha));
-            c.alpha = static_cast<int>(c.alpha * 255.0);
+            double alpha_double;
+            // Ensure format is rgba(r,g,b,a)
+            if (sscanf(s.c_str(), "rgba(%d,%d,%d,%lf)", &c.r, &c.g, &c.b, &alpha_double) == 4) {
+                c.alpha = static_cast<int>(alpha_double * 255.0);
+            } else {
+                // Invalid rgba format, treat as transparent or a default color
+                c.alpha = 0; 
+            }
         } else if (s.rfind("rgb", 0) == 0) {
-            sscanf(s.c_str(), "rgb(%d,%d,%d)", &c.r, &c.g, &c.b);
-            c.alpha = 255;
-        } else if (s == "none" || s.empty()) {
-            c.alpha = 0;
+             // Ensure format is rgb(r,g,b)
+            if (sscanf(s.c_str(), "rgb(%d,%d,%d)", &c.r, &c.g, &c.b) == 3) {
+                c.alpha = 255;
+            } else {
+                // Invalid rgb format
+                c.alpha = 0;
+            }
+        } else if (s[0] == '#') {
+            if (s.length() == 7) { // #RRGGBB
+                sscanf(s.c_str(), "#%02x%02x%02x", &c.r, &c.g, &c.b);
+                c.alpha = 255;
+            } else if (s.length() == 9) { // #RRGGBBAA
+                 sscanf(s.c_str(), "#%02x%02x%02x%02x", &c.r, &c.g, &c.b, &c.alpha);
+            } else if (s.length() == 4) { // #RGB
+                int r_short, g_short, b_short;
+                sscanf(s.c_str(), "#%1x%1x%1x", &r_short, &g_short, &b_short);
+                c.r = r_short * 16 + r_short;
+                c.g = g_short * 16 + g_short;
+                c.b = b_short * 16 + b_short;
+                c.alpha = 255;
+            } else if (s.length() == 5) { // #RGBA
+                int r_short, g_short, b_short, a_short;
+                sscanf(s.c_str(), "#%1x%1x%1x%1x", &r_short, &g_short, &b_short, &a_short);
+                c.r = r_short * 16 + r_short;
+                c.g = g_short * 16 + g_short;
+                c.b = b_short * 16 + b_short;
+                c.alpha = a_short * 16 + a_short;
+            }
+             else {
+                // Invalid hex format
+                c.alpha = 0;
+            }
+        } else {
+            // Unknown format, default to transparent or black
+            c.r = 0; c.g = 0; c.b = 0; c.alpha = 0; // Default to transparent black
         }
         return c;
     }
