@@ -3,6 +3,11 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include "CoreSvgEngine.h"
+#include <QSvgRenderer>
+#include <QGraphicsSvgItem>
+#include <QResizeEvent>
+#include <QEvent>
+#include "LoggingService.h"
 
 class DrawingLayer : public QGraphicsView {
     Q_OBJECT
