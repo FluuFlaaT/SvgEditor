@@ -106,7 +106,7 @@ private:
     ToolId m_currentToolType;
     QPointF m_lastMouseScenePos;
     QPointF m_dragStartScenePos;
-    QPointer<QGraphicsItem> m_previewItem;       // For visual feedback during drawing (e.g., rubber band rect)
+    QGraphicsItem* m_previewItem;          // Corrected: QGraphicsItem is not a QObject derivative
     bool m_isDragging;                           // Flag to indicate if a drag operation is in progress
 
     // Item Mapping
