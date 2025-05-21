@@ -10,4 +10,5 @@
 - 编译
     - `cmake -B build .; cd build; cmake ..; cmake --build --config debug`
         - 两个编译产物：主程序和gtest测试程序
-    - `cmake -B build .; cd build; cmake ..; cmake --build --config debug --target svg_document_tests`
+    - `cmake -B build .; cd build; cmake ..; cmake --build --config release`
+        - 一个编译产物：主程序
