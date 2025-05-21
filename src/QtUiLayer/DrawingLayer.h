@@ -99,7 +99,7 @@ private:
     // Core Pointers & Scene
     QGraphicsScene* m_scene;                     //
     CoreSvgEngine* m_svgEngine;                 // Non-owning pointer to the shared engine
-    QPointer<SvgDocument> m_currentDocument;     // Non-owning QPointer to the current SvgDocument
+    SvgDocument* m_currentDocument;              // Non-owning pointer to the current SvgDocument
     CommandManager* m_commandManager;            // Non-owning pointer for undo/redo
 
     // Tool & Interaction State
