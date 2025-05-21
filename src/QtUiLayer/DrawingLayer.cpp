@@ -2,6 +2,7 @@
 #include <QSvgRenderer>
 #include <QGraphicsSvgItem>
 #include <QResizeEvent>
+#include <QEvent>
 #include "LoggingService.h"
 
 DrawingLayer::DrawingLayer(QWidget *parent)
@@ -58,4 +59,13 @@ void DrawingLayer::updateView()
     fitInView(m_scene->itemsBoundingRect(), Qt::KeepAspectRatio);
     
     viewport()->update();
+}
+
+void DrawingLayer::changeEvent(QEvent* event)
+{
+    if (event->type() == QEvent::LanguageChange) {
+        LoggingService::getInstance().debug("DrawingLayer language changed");
+    }
+    
+    QGraphicsView::changeEvent(event);
 }

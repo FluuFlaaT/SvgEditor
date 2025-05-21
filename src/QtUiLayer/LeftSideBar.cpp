@@ -3,6 +3,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QSpacerItem>
+#include <QEvent>
 #include "LoggingService.h"
 
 // 定义工具ID常量
@@ -81,4 +82,58 @@ QToolButton* LeftSideBar::createToolButton(const QString& text, const QString& i
     m_toolButtons->addButton(button, toolId);
     
     return button;
+}
+
+void LeftSideBar::changeEvent(QEvent* event)
+{
+    if (event->type() == QEvent::LanguageChange) {
+        // 重新翻译所有文本
+        QList<QAbstractButton*> buttons = m_toolButtons->buttons();
+        for (int i = 0; i < buttons.size(); i++) {
+            QToolButton* button = qobject_cast<QToolButton*>(buttons[i]);
+            if (button) {
+                // 根据ID重设文本
+                switch (m_toolButtons->id(button)) {
+                    case TOOL_SELECT:
+                        button->setText(tr("Select"));
+                        button->setToolTip(tr("Select"));
+                        break;
+                    case TOOL_LINE:
+                        button->setText(tr("Line"));
+                        button->setToolTip(tr("Line"));
+                        break;
+                    case TOOL_RECTANGLE:
+                        button->setText(tr("Rectangle"));
+                        button->setToolTip(tr("Rectangle"));
+                        break;
+                    case TOOL_CIRCLE:
+                        button->setText(tr("Circle"));
+                        button->setToolTip(tr("Circle"));
+                        break;
+                    case TOOL_ELLIPSE:
+                        button->setText(tr("Ellipse"));
+                        button->setToolTip(tr("Ellipse"));
+                        break;
+                    case TOOL_POLYLINE:
+                        button->setText(tr("Polyline"));
+                        button->setToolTip(tr("Polyline"));
+                        break;
+                    case TOOL_PATH:
+                        button->setText(tr("Path"));
+                        button->setToolTip(tr("Path"));
+                        break;
+                }
+            }
+        }
+        
+        // 更新标题标签
+        QLabel* titleLabel = findChild<QLabel*>();
+        if (titleLabel) {
+            titleLabel->setText(tr("Drawing Tools"));
+        }
+        
+        LoggingService::getInstance().debug("LeftSideBar language changed");
+    }
+    
+    QWidget::changeEvent(event);
 }

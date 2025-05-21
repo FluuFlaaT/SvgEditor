@@ -12,6 +12,9 @@ class LeftSideBar : public QWidget {
 public:
     explicit LeftSideBar(QWidget *parent = nullptr);
     ~LeftSideBar();
+    
+    // 添加changeEvent方法
+    void changeEvent(QEvent* event) override;
 
 signals:
     void toolSelected(int toolId);

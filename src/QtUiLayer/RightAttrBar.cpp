@@ -6,6 +6,7 @@
 #include <QDoubleSpinBox>
 #include <QComboBox>
 #include <QGroupBox>
+#include <QEvent>
 #include "LoggingService.h"
 
 RightAttrBar::RightAttrBar(QWidget *parent)
@@ -267,4 +268,68 @@ QWidget* RightAttrBar::createLineAttributesWidget()
     layout->addStretch();
     
     return widget;
+}
+
+void RightAttrBar::changeEvent(QEvent* event)
+{
+    if (event->type() == QEvent::LanguageChange) {
+        // 更新标题
+        m_titleLabel->setText(tr("Properties Panel"));
+        
+        // 根据当前面板更新标题
+        int currentIndex = m_stackedWidget->currentIndex();
+        switch (currentIndex) {
+            case 1: // 圆形属性面板
+                m_titleLabel->setText(tr("Circle Properties"));
+                break;
+            case 2: // 矩形属性面板
+                m_titleLabel->setText(tr("Rectangle Properties"));
+                break;
+            case 3: // 线条属性面板
+                m_titleLabel->setText(tr("Line Properties"));
+                break;
+            default:
+                m_titleLabel->setText(tr("Common Properties"));
+                break;
+        }
+        
+        // 更新属性面板中的所有文本
+        // 查找并更新所有组框标题
+        QList<QGroupBox*> groupBoxes = findChildren<QGroupBox*>();
+        for (QGroupBox* groupBox : groupBoxes) {
+            if (groupBox->title() == "Common Properties") {
+                groupBox->setTitle(tr("Common Properties"));
+            }
+        }
+        
+        // 更新所有标签文本
+        QList<QLabel*> labels = findChildren<QLabel*>();
+        for (QLabel* label : labels) {
+            if (label->text().endsWith(':')) {
+                if (label->text() == "Fill Color:") {
+                    label->setText(tr("Fill Color:"));
+                    label->setToolTip(tr("Fill Color"));
+                } else if (label->text() == "Stroke Color:") {
+                    label->setText(tr("Stroke Color:"));
+                    label->setToolTip(tr("Stroke Color"));
+                } else if (label->text() == "Stroke Width:") {
+                    label->setText(tr("Stroke Width:"));
+                } else if (label->text() == "Opacity:") {
+                    label->setText(tr("Opacity:"));
+                }
+            }
+        }
+        
+        // 更新所有按钮文本
+        QList<QPushButton*> buttons = findChildren<QPushButton*>();
+        for (QPushButton* button : buttons) {
+            if (button->text() == "Select") {
+                button->setText(tr("Select"));
+            }
+        }
+        
+        LoggingService::getInstance().debug("RightAttrBar language changed");
+    }
+    
+    QWidget::changeEvent(event);
 }

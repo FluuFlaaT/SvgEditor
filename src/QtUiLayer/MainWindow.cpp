@@ -18,61 +18,33 @@ MainWindow::MainWindow(QWidget *parent)
 {
     LoggingService::getInstance().debug("MainWindow constructor called.");
     
-    /*
-    m_translationsPath = QApplication::applicationDirPath() + "/translations/";
-    m_translationsDir = new QDir(m_translationsPath);
-    if (!m_translationsDir->exists()) {
-        m_translationsPath = QDir::currentPath() + "/translations/";
-    }
-    
-    QString locale = QLocale::system().name();
-
-
-    if (!m_translator.load(locale, translationsPath)) {
-        m_translator.load("en_US", translationsPath);
-        m_currentLanguage = "en_US";
-    } else {
-        m_currentLanguage = locale;
-    }
-    qApp->installTranslator(&m_translator);
-    */
-
-    // Create UI components
     m_drawingLayer = new DrawingLayer(this);
     m_leftSideBar = new LeftSideBar(this);
     m_rightAttrBar = new RightAttrBar(this);
     
-    // Create horizontal splitter
     QSplitter* splitter = new QSplitter(Qt::Horizontal, this);
     splitter->addWidget(m_leftSideBar);
     splitter->addWidget(m_drawingLayer);
     splitter->addWidget(m_rightAttrBar);
     
-    // Set splitter proportions
     splitter->setStretchFactor(0, 2);  // Left sidebar
     splitter->setStretchFactor(1, 8); // Drawing area
     splitter->setStretchFactor(2, 3);  // Right sidebar
     
-    // 设置分割器初始大小
     QList<int> sizes;
     sizes << 150 << 800 << 300;
     splitter->setSizes(sizes);
-      // Set as central widget
     setCentralWidget(splitter);
     
-    // Setup menus and toolbars
     setupMenus();
     setupToolBar();
     setupStatusBar();
     
-    // Window size
     resize(1280, 800);
     setWindowTitle(tr("SVG Editor"));
     
-    // Connect signals and slots
     connect(m_leftSideBar, &LeftSideBar::toolSelected, this, &MainWindow::handleToolSelected);
     
-    // Create initial empty document
     newFile();
     
     LoggingService::getInstance().debug("MainWindow setup complete.");
@@ -331,6 +303,8 @@ QStringList MainWindow::getAvailableLanguages() const
         translationsPath = QDir::currentPath() + "/translations/";
         dir.setPath(translationsPath);
     }
+
+    LoggingService::getInstance().debug(translationsPath.toStdString());
     
     QStringList filters;
     filters << "*.qm";

@@ -3,7 +3,6 @@ set(TARGET_NAME QtUiLayer)
 set(SOURCES
     main.cpp
     MainWindow.cpp
-    SvgDisplayWidget.cpp
     DrawingLayer.cpp
     LeftSideBar.cpp
     RightAttrBar.cpp
@@ -11,7 +10,6 @@ set(SOURCES
 
 set(HEADERS
     MainWindow.h
-    SvgDisplayWidget.h
     DrawingLayer.h
     LeftSideBar.h
     RightAttrBar.h

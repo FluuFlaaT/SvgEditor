@@ -13,6 +13,7 @@ public:
 
     void setSvgContent(const QString& svgContent);
     void updateView();
+    void changeEvent(QEvent* event) override;
 
 private:
     QGraphicsScene* m_scene;

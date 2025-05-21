@@ -15,6 +15,9 @@ public:
 
     void showAttributesForTool(int toolId);
     void showAttributesForElement(int elementType);
+    
+    // 添加changeEvent方法
+    void changeEvent(QEvent* event) override;
 
 private:
     QVBoxLayout* m_mainLayout;
