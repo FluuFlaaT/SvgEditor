@@ -36,7 +36,9 @@ MainWindow::MainWindow(QWidget *parent)
     splitter->setSizes(sizes);
     setCentralWidget(splitter);
     
+    
     setupMenus();
+    setupLanguageMenu();
     setupToolBar();
     setupStatusBar();
     
@@ -97,7 +99,6 @@ void MainWindow::setupMenus()
     QMenu* settingsMenu = menuBar()->addMenu(tr("Settings"));
     
     m_languageMenu = settingsMenu->addMenu(tr("Language"));
-    setupLanguageMenu();
     
     // TODO: Add Edit menu and other menus
     

@@ -265,26 +265,6 @@ QWidget* RightAttrBar::createLineAttributesWidget()
 void RightAttrBar::changeEvent(QEvent* event)
 {
     if (event->type() == QEvent::LanguageChange) {
-        // 更新标题
-        m_titleLabel->setText(tr("Properties Panel"));
-        
-        // 根据当前面板更新标题
-        int currentIndex = m_stackedWidget->currentIndex();
-        switch (currentIndex) {
-            case 1: // 圆形属性面板
-                m_titleLabel->setText(tr("Circle Properties"));
-                break;
-            case 2: // 矩形属性面板
-                m_titleLabel->setText(tr("Rectangle Properties"));
-                break;
-            case 3: // 线条属性面板
-                m_titleLabel->setText(tr("Line Properties"));
-                break;
-            default:
-                m_titleLabel->setText(tr("Common Properties"));
-                break;
-        }
-        
         // 更新属性面板中的所有文本
         // 查找并更新所有组框标题
         QList<QGroupBox*> groupBoxes = findChildren<QGroupBox*>();
