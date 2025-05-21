@@ -28,7 +28,7 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     m_mainLayout->setContentsMargins(5, 10, 5, 10);
     m_mainLayout->setSpacing(5);
     // 创建标题
-    QLabel* titleLabel = new QLabel(tr("Drawing Tools"), this);
+    QLabel* titleLabel = new QLabel(tr(""), this);
     titleLabel->setAlignment(Qt::AlignCenter);
     titleLabel->setStyleSheet("font-weight: bold;");
     m_mainLayout->addWidget(titleLabel);
