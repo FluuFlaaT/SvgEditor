@@ -3,6 +3,8 @@
 #include <cmath>
 #include "CanvasArea.h"
 #include "../CoreSvgEngine/CoreSvgEngine.h"
+#include "../CoreSvgEngine/SvgDocument.h"
+#include "../CoreSvgEngine/SvgShapes.h"
 
 Q_LOGGING_CATEGORY(canvasAreaLog, "CanvasArea")
 
