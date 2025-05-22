@@ -2,6 +2,9 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QLabel>
+#include <QToolButton>
+#include <QMenu>
+#include <QAction>
 
 LeftSideBar::LeftSideBar(QWidget *parent)
     : QWidget(parent)
@@ -41,20 +44,28 @@ LeftSideBar::LeftSideBar(QWidget *parent)
 
     mainLayout->addSpacing(20);
 
-    // Create zoom section with only Zoom In button
+    // Create zoom section with menu
     QLabel* zoomLabel = new QLabel("Zoom", this);
     zoomLabel->setAlignment(Qt::AlignCenter);
     zoomLabel->setStyleSheet("font-weight: bold;");
     mainLayout->addWidget(zoomLabel);
 
-    zoomInBtn = new QPushButton("Zoom In", this);
-    zoomInBtn->setToolTip(tr("Increase zoom level (Ctrl++)"));
+    zoomMenuBtn = new QToolButton(this);
+    zoomMenuBtn->setText(tr("Zoom Menu"));
+    zoomMenuBtn->setPopupMode(QToolButton::InstantPopup);
+    zoomMenu = new QMenu(this);
+    zoomInAction = zoomMenu->addAction(tr("Zoom In"));
+    zoomOutAction = zoomMenu->addAction(tr("Zoom Out"));
+    resetZoomAction = zoomMenu->addAction(tr("Reset Zoom"));
+    fitToWindowAction = zoomMenu->addAction(tr("Fit to Window"));
+    zoomMenuBtn->setMenu(zoomMenu);
+    mainLayout->addWidget(zoomMenuBtn);
 
-    // Add zoom button to layout
-    mainLayout->addWidget(zoomInBtn);
-
-    // Connect zoom button signal
-    connect(zoomInBtn, &QPushButton::clicked, this, &LeftSideBar::zoomInRequested);
+    // Connect zoom actions to signals
+    connect(zoomInAction, &QAction::triggered, this, &LeftSideBar::zoomInRequested);
+    connect(zoomOutAction, &QAction::triggered, this, &LeftSideBar::zoomOutRequested);
+    connect(resetZoomAction, &QAction::triggered, this, &LeftSideBar::resetZoomRequested);
+    connect(fitToWindowAction, &QAction::triggered, this, &LeftSideBar::fitToWindowRequested);
 
     mainLayout->addStretch();
 

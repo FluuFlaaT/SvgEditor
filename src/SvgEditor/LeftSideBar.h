@@ -4,6 +4,9 @@
 #include <vector>
 #include <QVector>
 #include <QPushButton>
+#include <QToolButton>
+#include <QMenu>
+#include <QAction>
 
 class LeftSideBar : public QWidget
 {
@@ -24,12 +27,23 @@ public:
     // Zoom buttons - simplified to only keep zoomInBtn
     QPushButton *zoomInBtn;
 
+    QToolButton *zoomMenuBtn;
+    QMenu *zoomMenu;
+    QAction *zoomInAction;
+    QAction *zoomOutAction;
+    QAction *resetZoomAction;
+    QAction *fitToWindowAction;
+
 signals:
     // Only keep the zoomInRequested signal
     void zoomInRequested();
 
     // Add a signal for the drag tool
     void dragToolRequested();
+
+    void zoomOutRequested();
+    void resetZoomRequested();
+    void fitToWindowRequested();
 
 private:
 

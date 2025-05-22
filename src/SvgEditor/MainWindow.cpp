@@ -118,6 +118,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Connect left sidebar zoom button (only zoomIn remains)
     connect(m_leftSideBar, &LeftSideBar::zoomInRequested, m_canvasArea, &CanvasArea::zoomIn);
+    connect(m_leftSideBar, &LeftSideBar::zoomOutRequested, m_canvasArea, &CanvasArea::zoomOut);
+    connect(m_leftSideBar, &LeftSideBar::resetZoomRequested, m_canvasArea, &CanvasArea::resetZoom);
+    connect(m_leftSideBar, &LeftSideBar::fitToWindowRequested, m_canvasArea, &CanvasArea::fitToView);
 
     // Connect drag tool signal
     connect(m_leftSideBar, &LeftSideBar::dragToolRequested, this, [this]() { handleToolSelected(4); });
