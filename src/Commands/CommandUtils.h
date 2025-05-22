@@ -2,11 +2,6 @@
 #include <QString>
 #include "SvgEditor/ShapeToolBar.h"
 
-/**
- * @brief Get a human-readable name for a shape type
- * @param type The shape type
- * @return A human-readable name for the shape type
- */
 inline QString getShapeTypeName(ShapeType type)
 {
     switch (type) {

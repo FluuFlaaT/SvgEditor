@@ -3,12 +3,17 @@ set(TARGET_NAME Commands)
 set(SOURCES
     Command.cpp
     CommandManager.cpp
+    AddShapeCommand.cpp
+    RemoveShapeCommand.cpp
 )
 
 set(HEADERS
     Command.h
     CommandManager.h
     CommandUtils.h
+    AddShapeCommand.h
+    RemoveShapeCommand.h
+    SvgEditorForwards.h
 )
 
 add_library(${TARGET_NAME} STATIC
@@ -24,6 +29,8 @@ target_include_directories(${TARGET_NAME} PUBLIC
 target_link_libraries(${TARGET_NAME} PUBLIC
     Qt5::Core
     Qt5::Gui
+    Qt5::Widgets
+    Qt5::Svg
 )
 
 set_target_properties(${TARGET_NAME} PROPERTIES

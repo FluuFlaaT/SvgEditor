@@ -9,6 +9,7 @@
 #include <QLoggingCategory>
 #include <QWheelEvent>
 #include <QMouseEvent>
+#include <QKeyEvent>
 #include <QGraphicsLineItem>
 #include <QGraphicsEllipseItem>
 #include <QGraphicsPolygonItem>
@@ -23,10 +24,12 @@
 #include <QCursor>
 #include <QApplication>
 #include <QInputDialog>
+#include <QMenu>
+#include <QContextMenuEvent>
 #include <cmath>
 #include "ShapeToolBar.h"
 #include "EditableTextItem.h"
-#include "Commands/CommandManager.h"
+#include "../Commands/CommandManager.h"
 
 // 前向声明CoreSvgEngine类
 class CoreSvgEngine;
@@ -53,7 +56,7 @@ public:
     qreal currentZoom() const { return m_zoomFactor; }
 
     // Tool methods
-    void setDragMode(bool enabled);  // Enable/disable drag mode
+    void setDragMode(QGraphicsView::DragMode mode);  // Set the drag mode
     void setShapeCreationMode(ShapeType type); // Set the shape creation mode
     void setSelectMode(); // Set selection mode
 
@@ -71,6 +74,9 @@ public:
     // Helper method to determine the type of an item
     ShapeType getItemType(QGraphicsItem* item) const;
 
+    // Delete the currently selected item
+    void deleteSelectedItem();
+
 signals:
     void zoomChanged(qreal zoomFactor);
     void shapeCreated(QGraphicsItem* item);
@@ -87,6 +93,12 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
+
+    // Key event handler for keyboard shortcuts (like Delete)
+    void keyPressEvent(QKeyEvent *event) override;
+
+    // Context menu event handler for right-click menu
+    void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
     QGraphicsScene* m_scene;

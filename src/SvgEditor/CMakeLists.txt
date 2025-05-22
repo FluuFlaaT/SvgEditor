@@ -12,8 +12,6 @@ set(SOURCES
     CanvasArea.cpp
     ShapeToolBar.cpp
     EditableTextItem.cpp
-    Commands/AddShapeCommand.cpp
-    Commands/RemoveShapeCommand.cpp
 )
 
 set(HEADERS
@@ -23,8 +21,6 @@ set(HEADERS
     CanvasArea.h
     ShapeToolBar.h
     EditableTextItem.h
-    Commands/AddShapeCommand.h
-    Commands/RemoveShapeCommand.h
 )
 
 file(GLOB UI_FILES *.ui)

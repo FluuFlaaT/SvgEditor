@@ -7,8 +7,8 @@
 #include "../CoreSvgEngine/SvgDocument.h"
 #include "../CoreSvgEngine/SvgShapes.h"
 #include "../CoreSvgEngine/SvgText.h"
-#include "Commands/AddShapeCommand.h"
-#include "Commands/RemoveShapeCommand.h"
+#include "../Commands/AddShapeCommand.h"
+#include "../Commands/RemoveShapeCommand.h"
 
 Q_LOGGING_CATEGORY(canvasAreaLog, "CanvasArea")
 
@@ -403,17 +403,20 @@ QGraphicsPolygonItem* CanvasArea::createStar(const QPointF& center, qreal outerR
     return starItem;
 }
 
-void CanvasArea::setDragMode(bool enabled)
+void CanvasArea::setDragMode(QGraphicsView::DragMode mode)
 {
-    if (enabled) {
-        QGraphicsView::setDragMode(QGraphicsView::ScrollHandDrag);
+    QGraphicsView::setDragMode(mode);
+
+    if (mode == QGraphicsView::ScrollHandDrag) {
         viewport()->setCursor(Qt::OpenHandCursor);
         m_currentShapeType = ShapeType::None;
-        qCDebug(canvasAreaLog) << "Drag mode enabled";
-    } else {
-        QGraphicsView::setDragMode(QGraphicsView::RubberBandDrag);
+        qCDebug(canvasAreaLog) << "Drag mode set to ScrollHandDrag";
+    } else if (mode == QGraphicsView::RubberBandDrag) {
         viewport()->setCursor(Qt::ArrowCursor);
-        qCDebug(canvasAreaLog) << "Drag mode disabled";
+        qCDebug(canvasAreaLog) << "Drag mode set to RubberBandDrag";
+    } else {
+        viewport()->setCursor(Qt::ArrowCursor);
+        qCDebug(canvasAreaLog) << "Drag mode set to NoDrag";
     }
 }
 
@@ -489,7 +492,7 @@ void CanvasArea::addShapeToDocument(QGraphicsItem* item)
 
         // Set style properties
         QPen pen = lineItem->pen();
-        svgLine->setStrokeColor(Color(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha()));
+        svgLine->setStrokeColor({pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha()});
         svgLine->setStrokeWidth(pen.width());
         svgLine->setOpacity(item->opacity());
 
@@ -511,8 +514,8 @@ void CanvasArea::addShapeToDocument(QGraphicsItem* item)
         // Set style properties
         QPen pen = rectItem->pen();
         QBrush brush = rectItem->brush();
-        svgRect->setStrokeColor(Color(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha()));
-        svgRect->setFillColor(Color(brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha()));
+        svgRect->setStrokeColor({pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha()});
+        svgRect->setFillColor({brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha()});
         svgRect->setStrokeWidth(pen.width());
         svgRect->setOpacity(item->opacity());
 
@@ -953,6 +956,74 @@ EditableTextItem* CanvasArea::createText(const QPointF& position, const QString&
     });
 
     return textItem;
+}
+
+void CanvasArea::keyPressEvent(QKeyEvent *event)
+{
+    // Check if Delete key was pressed
+    if (event->key() == Qt::Key_Delete) {
+        deleteSelectedItem();
+        event->accept();
+    } else {
+        // Pass the event to the parent class
+        QGraphicsView::keyPressEvent(event);
+    }
+}
+
+void CanvasArea::contextMenuEvent(QContextMenuEvent *event)
+{
+    // Get the item under the cursor
+    QPointF scenePos = mapToScene(event->pos());
+    QGraphicsItem* itemUnderCursor = scene()->itemAt(scenePos, transform());
+
+    // Create the context menu
+    QMenu contextMenu(this);
+
+    // If there's an item under the cursor, add a delete option
+    if (itemUnderCursor && itemUnderCursor != m_backgroundItem && itemUnderCursor != m_outlineItem) {
+        // Select the item under cursor if it's not already selected
+        if (!itemUnderCursor->isSelected()) {
+            scene()->clearSelection();
+            itemUnderCursor->setSelected(true);
+
+            // Emit the selection signal
+            ShapeType itemType = getItemType(itemUnderCursor);
+            emit itemSelected(itemUnderCursor, itemType);
+            qCDebug(canvasAreaLog) << "Item selected via context menu, type:" << static_cast<int>(itemType);
+        }
+
+        // Add delete action
+        QAction* deleteAction = contextMenu.addAction(tr("Delete"));
+        connect(deleteAction, &QAction::triggered, this, &CanvasArea::deleteSelectedItem);
+
+        // Show the context menu
+        contextMenu.exec(event->globalPos());
+        event->accept();
+    } else {
+        // If no item under cursor, pass the event to the parent class
+        QGraphicsView::contextMenuEvent(event);
+    }
+}
+
+void CanvasArea::deleteSelectedItem()
+{
+    // Get the currently selected item
+    QGraphicsItem* selectedItem = getSelectedItem();
+
+    if (selectedItem && selectedItem != m_backgroundItem && selectedItem != m_outlineItem) {
+        // Get the type of the selected item
+        ShapeType itemType = getItemType(selectedItem);
+
+        qCDebug(canvasAreaLog) << "Deleting selected item of type:" << static_cast<int>(itemType);
+
+        // Create and execute a RemoveShapeCommand
+        auto command = std::make_unique<RemoveShapeCommand>(this, selectedItem, itemType);
+        CommandManager::instance()->executeCommand(std::move(command));
+
+        qCDebug(canvasAreaLog) << "Item deleted via command";
+    } else {
+        qCDebug(canvasAreaLog) << "No item selected for deletion";
+    }
 }
 
 bool CanvasArea::openFileWithEngine(CoreSvgEngine* engine) {

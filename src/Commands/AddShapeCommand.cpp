@@ -2,6 +2,7 @@
 #include <QLoggingCategory>
 #include "CoreSvgEngine/SvgDocument.h"
 #include "CommandUtils.h"
+#include "SvgEditor/CanvasArea.h"
 
 Q_LOGGING_CATEGORY(addShapeCommandLog, "AddShapeCommand")
 

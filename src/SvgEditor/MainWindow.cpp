@@ -399,7 +399,7 @@ void MainWindow::handleToolSelected(int toolId)
     int attrWidgetType = RightAttrBar::CommonAttributes; // Default to common attributes
 
     // Reset drag mode by default
-    m_canvasArea->setDragMode(false);
+    m_canvasArea->setDragMode(QGraphicsView::RubberBandDrag);
 
     // Hide shape toolbar by default
     m_shapeToolBar->hide();
@@ -433,7 +433,7 @@ void MainWindow::handleToolSelected(int toolId)
             toolName = tr("Drag Tool");
             attrWidgetType = RightAttrBar::CommonAttributes;
             // Enable drag mode for the canvas
-            m_canvasArea->setDragMode(true);
+            m_canvasArea->setDragMode(QGraphicsView::ScrollHandDrag);
             break;
         case 5:
             toolName = tr("Zoom Tool");

@@ -22,7 +22,7 @@
 #include "CanvasArea.h"
 #include "ShapeToolBar.h"
 #include "../CoreSvgEngine/CoreSvgEngine.h"
-#include "Commands/CommandManager.h"
+#include "../Commands/CommandManager.h"
 
 Q_DECLARE_LOGGING_CATEGORY(mainWindowLog)
 
