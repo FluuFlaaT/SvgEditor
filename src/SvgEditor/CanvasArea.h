@@ -1,6 +1,7 @@
 #pragma once
 #include <QGraphicsView>
 #include <QGraphicsSvgItem>
+#include <QGraphicsRectItem>
 
 class CanvasArea : public QGraphicsView
 {
@@ -14,4 +15,7 @@ public:
 
 private:
     QGraphicsScene* m_scene;
+    QGraphicsRectItem* m_backgroundItem;
+    QGraphicsSvgItem* m_svgItem;
+    QGraphicsRectItem* m_outlineItem;
 };
