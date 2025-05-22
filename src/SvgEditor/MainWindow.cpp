@@ -140,6 +140,15 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_rightAttrBar, &RightAttrBar::borderWidthChanged, this, &MainWindow::updateSelectedItemBorderWidth);
     connect(m_rightAttrBar, &RightAttrBar::borderStyleChanged, this, &MainWindow::updateSelectedItemBorderStyle);
 
+    // Connect text property change signals
+    connect(m_rightAttrBar, &RightAttrBar::textContentChanged, this, &MainWindow::updateSelectedItemTextContent);
+    connect(m_rightAttrBar, &RightAttrBar::fontFamilyChanged, this, &MainWindow::updateSelectedItemFontFamily);
+    connect(m_rightAttrBar, &RightAttrBar::fontSizeChanged, this, &MainWindow::updateSelectedItemFontSize);
+    connect(m_rightAttrBar, &RightAttrBar::fontBoldChanged, this, &MainWindow::updateSelectedItemFontBold);
+    connect(m_rightAttrBar, &RightAttrBar::fontItalicChanged, this, &MainWindow::updateSelectedItemFontItalic);
+    connect(m_rightAttrBar, &RightAttrBar::textAlignmentChanged, this, &MainWindow::updateSelectedItemTextAlignment);
+    connect(m_rightAttrBar, &RightAttrBar::textColorChanged, this, &MainWindow::updateSelectedItemTextColor);
+
     // Set the current engine for the canvas area
     m_canvasArea->setCurrentEngine(m_svgEngine);
 
@@ -421,7 +430,8 @@ void MainWindow::handleToolSelected(int toolId)
             break;
         case 3:
             toolName = tr("Text Tool");
-            attrWidgetType = RightAttrBar::CommonAttributes;
+            attrWidgetType = RightAttrBar::TextAttributes;
+            m_canvasArea->setShapeCreationMode(ShapeType::Text);
             break;
         case 4:
             toolName = tr("Drag Tool");
@@ -916,6 +926,191 @@ void MainWindow::updateSelectedItemBorderStyle(Qt::PenStyle style)
     updateTitle();
 
     qCDebug(mainWindowLog) << "Updated selected item border style to:" << static_cast<int>(style);
+}
+
+void MainWindow::updateSelectedItemTextContent(const QString& text)
+{
+    QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
+    if (!selectedItem) {
+        qCWarning(mainWindowLog) << "No item selected for text content update";
+        return;
+    }
+
+    if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
+        // For our new EditableTextItem
+        textItem->setPlainText(text);
+        m_documentModified = true;
+        updateTitle();
+        qCDebug(mainWindowLog) << "Updated editable text content to:" << text;
+    }
+    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
+        // For backward compatibility
+        textItem->setText(text);
+        m_documentModified = true;
+        updateTitle();
+        qCDebug(mainWindowLog) << "Updated simple text content to:" << text;
+    }
+}
+
+void MainWindow::updateSelectedItemFontFamily(const QString& family)
+{
+    QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
+    if (!selectedItem) {
+        qCWarning(mainWindowLog) << "No item selected for font family update";
+        return;
+    }
+
+    if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
+        // For our new EditableTextItem
+        QFont font = textItem->font();
+        font.setFamily(family);
+        textItem->setFont(font);
+        m_documentModified = true;
+        updateTitle();
+        qCDebug(mainWindowLog) << "Updated editable text font family to:" << family;
+    }
+    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
+        // For backward compatibility
+        QFont font = textItem->font();
+        font.setFamily(family);
+        textItem->setFont(font);
+        m_documentModified = true;
+        updateTitle();
+        qCDebug(mainWindowLog) << "Updated simple text font family to:" << family;
+    }
+}
+
+void MainWindow::updateSelectedItemFontSize(int size)
+{
+    QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
+    if (!selectedItem) {
+        qCWarning(mainWindowLog) << "No item selected for font size update";
+        return;
+    }
+
+    if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
+        // For our new EditableTextItem
+        QFont font = textItem->font();
+        font.setPointSize(size);
+        textItem->setFont(font);
+        m_documentModified = true;
+        updateTitle();
+        qCDebug(mainWindowLog) << "Updated editable text font size to:" << size;
+    }
+    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
+        // For backward compatibility
+        QFont font = textItem->font();
+        font.setPointSize(size);
+        textItem->setFont(font);
+        m_documentModified = true;
+        updateTitle();
+        qCDebug(mainWindowLog) << "Updated simple text font size to:" << size;
+    }
+}
+
+void MainWindow::updateSelectedItemFontBold(bool bold)
+{
+    QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
+    if (!selectedItem) {
+        qCWarning(mainWindowLog) << "No item selected for font bold update";
+        return;
+    }
+
+    if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
+        // For our new EditableTextItem
+        textItem->setBold(bold);
+        m_documentModified = true;
+        updateTitle();
+        qCDebug(mainWindowLog) << "Updated editable text font bold to:" << (bold ? "true" : "false");
+    }
+    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
+        // For backward compatibility
+        QFont font = textItem->font();
+        font.setBold(bold);
+        textItem->setFont(font);
+        m_documentModified = true;
+        updateTitle();
+        qCDebug(mainWindowLog) << "Updated simple text font bold to:" << (bold ? "true" : "false");
+    }
+}
+
+void MainWindow::updateSelectedItemFontItalic(bool italic)
+{
+    QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
+    if (!selectedItem) {
+        qCWarning(mainWindowLog) << "No item selected for font italic update";
+        return;
+    }
+
+    if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
+        // For our new EditableTextItem
+        textItem->setItalic(italic);
+        m_documentModified = true;
+        updateTitle();
+        qCDebug(mainWindowLog) << "Updated editable text font italic to:" << (italic ? "true" : "false");
+    }
+    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
+        // For backward compatibility
+        QFont font = textItem->font();
+        font.setItalic(italic);
+        textItem->setFont(font);
+        m_documentModified = true;
+        updateTitle();
+        qCDebug(mainWindowLog) << "Updated simple text font italic to:" << (italic ? "true" : "false");
+    }
+}
+
+void MainWindow::updateSelectedItemTextAlignment(int alignment)
+{
+    QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
+    if (!selectedItem) {
+        qCWarning(mainWindowLog) << "No item selected for text alignment update";
+        return;
+    }
+
+    if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
+        // For our new EditableTextItem
+        Qt::Alignment textAlignment = Qt::AlignLeft;
+        switch (alignment) {
+            case 0: textAlignment = Qt::AlignLeft; break;
+            case 1: textAlignment = Qt::AlignCenter; break;
+            case 2: textAlignment = Qt::AlignRight; break;
+            default: textAlignment = Qt::AlignLeft; break;
+        }
+        textItem->setTextAlignment(textAlignment);
+        m_documentModified = true;
+        updateTitle();
+        qCDebug(mainWindowLog) << "Updated editable text alignment to:" << alignment;
+    }
+    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
+        // QGraphicsSimpleTextItem doesn't support alignment directly
+        // In a real implementation, we would need to handle this by adjusting the text position
+        qCDebug(mainWindowLog) << "Simple text item doesn't support alignment directly. Alignment index:" << alignment;
+    }
+}
+
+void MainWindow::updateSelectedItemTextColor(const QColor& color)
+{
+    QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
+    if (!selectedItem) {
+        qCWarning(mainWindowLog) << "No item selected for text color update";
+        return;
+    }
+
+    if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
+        // For our new EditableTextItem
+        textItem->setDefaultTextColor(color);
+        m_documentModified = true;
+        updateTitle();
+        qCDebug(mainWindowLog) << "Updated editable text color to:" << color.name();
+    }
+    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
+        // For backward compatibility
+        textItem->setBrush(QBrush(color));
+        m_documentModified = true;
+        updateTitle();
+        qCDebug(mainWindowLog) << "Updated simple text color to:" << color.name();
+    }
 }
 
 void MainWindow::updateRightAttrBarFromDocument()

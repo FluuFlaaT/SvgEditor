@@ -14,6 +14,10 @@
 #include <QVariant>
 #include <QPen>
 #include <QGraphicsItem>
+#include <QFontDatabase>
+#include <QCheckBox>
+#include <QGraphicsSimpleTextItem>
+#include "EditableTextItem.h"
 #include "ShapeToolBar.h" // 包含ShapeType定义
 
 Q_DECLARE_LOGGING_CATEGORY(rightAttrBarLog)
@@ -30,7 +34,8 @@ public:
         CommonAttributes = 0,
         CircleAttributes,
         RectangleAttributes,
-        LineAttributes
+        LineAttributes,
+        TextAttributes
     };
 
 public slots:
@@ -65,6 +70,15 @@ signals:
     void borderWidthChanged(int width);
     void borderStyleChanged(Qt::PenStyle style);
 
+    // Signals for text property changes
+    void fontFamilyChanged(const QString& family);
+    void fontSizeChanged(int size);
+    void fontBoldChanged(bool bold);
+    void fontItalicChanged(bool italic);
+    void textAlignmentChanged(int alignment);
+    void textContentChanged(const QString& text);
+    void textColorChanged(const QColor& color);
+
 private:
     QVBoxLayout* m_mainLayout;
     QStackedWidget* m_stackedWidget;
@@ -84,6 +98,16 @@ private:
     QColor m_borderColor;
     QColor m_fillColor;
 
+    // Text attributes controls
+    QComboBox* m_fontFamilyComboBox;
+    QSpinBox* m_fontSizeSpinBox;
+    QCheckBox* m_boldCheckBox;
+    QCheckBox* m_italicCheckBox;
+    QComboBox* m_textAlignComboBox;
+    QLineEdit* m_textContentEdit;
+    QPushButton* m_textColorButton;
+    QColor m_textColor;
+
     // Currently selected item
     QGraphicsItem* m_selectedItem;
     ShapeType m_selectedItemType;
@@ -92,4 +116,5 @@ private:
     QWidget* createCircleAttributesWidget();
     QWidget* createRectangleAttributesWidget();
     QWidget* createLineAttributesWidget();
+    QWidget* createTextAttributesWidget();
 };

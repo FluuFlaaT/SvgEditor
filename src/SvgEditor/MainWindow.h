@@ -54,6 +54,15 @@ private slots:
     void updateSelectedItemBorderWidth(int width);
     void updateSelectedItemBorderStyle(Qt::PenStyle style);
 
+    // Text property update slots
+    void updateSelectedItemTextContent(const QString& text);
+    void updateSelectedItemFontFamily(const QString& family);
+    void updateSelectedItemFontSize(int size);
+    void updateSelectedItemFontBold(bool bold);
+    void updateSelectedItemFontItalic(bool italic);
+    void updateSelectedItemTextAlignment(int alignment);
+    void updateSelectedItemTextColor(const QColor& color);
+
 private:
     LeftSideBar* m_leftSideBar;
     RightAttrBar* m_rightAttrBar;

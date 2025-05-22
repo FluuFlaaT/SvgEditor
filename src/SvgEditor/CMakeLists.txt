@@ -12,6 +12,7 @@ set(SOURCES
     CanvasArea.cpp
     XMLParser.cpp
     ShapeToolBar.cpp
+    EditableTextItem.cpp
 )
 
 set(HEADERS
@@ -21,6 +22,7 @@ set(HEADERS
     CanvasArea.h
     XMLParser.h
     ShapeToolBar.h
+    EditableTextItem.h
 )
 
 file(GLOB UI_FILES *.ui)

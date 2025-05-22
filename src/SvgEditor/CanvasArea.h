@@ -22,9 +22,11 @@
 #include <QBrush>
 #include <QCursor>
 #include <QApplication>
+#include <QInputDialog>
 #include <cmath>
 #include "XMLParser.h"
 #include "ShapeToolBar.h"
+#include "EditableTextItem.h"
 
 // 前向声明CoreSvgEngine类
 class CoreSvgEngine;
@@ -66,6 +68,9 @@ public:
     // Get the currently selected item
     QGraphicsItem* getSelectedItem() const;
     ShapeType getSelectedItemType() const;
+
+    // Helper method to determine the type of an item
+    ShapeType getItemType(QGraphicsItem* item) const;
 
 signals:
     void zoomChanged(qreal zoomFactor);
@@ -123,4 +128,5 @@ private:
     QGraphicsPolygonItem* createPolygon(const QPointF& center, qreal radius, int sides);
     QGraphicsPolygonItem* createStar(const QPointF& center, qreal outerRadius, qreal innerRadius);
     QGraphicsPolygonItem* createRegularPolygon(const QPointF& center, qreal radius, int sides);
+    EditableTextItem* createText(const QPointF& position, const QString& text = "");
 };

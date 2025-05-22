@@ -6,6 +6,7 @@
 #include "../CoreSvgEngine/CoreSvgEngine.h"
 #include "../CoreSvgEngine/SvgDocument.h"
 #include "../CoreSvgEngine/SvgShapes.h"
+#include "../CoreSvgEngine/SvgText.h"
 
 Q_LOGGING_CATEGORY(canvasAreaLog, "CanvasArea")
 
@@ -99,10 +100,18 @@ void CanvasArea::createShape(const QPointF& startPoint, const QPointF& endPoint)
     qCDebug(canvasAreaLog) << "Creating shape of type" << static_cast<int>(m_currentShapeType)
                           << "from" << startPoint << "to" << endPoint;
 
-    // Remove the current item if it exists
-    if (m_currentItem) {
-        m_scene->removeItem(m_currentItem);
-        delete m_currentItem;
+    // For text items, we don't want to remove the previous item
+    // as we want to support multiple text elements on the canvas
+    if (m_currentShapeType != ShapeType::Text) {
+        // Remove the current item if it exists
+        if (m_currentItem) {
+            m_scene->removeItem(m_currentItem);
+            delete m_currentItem;
+            m_currentItem = nullptr;
+        }
+    } else {
+        // For text items, just set the current item to nullptr
+        // without removing any existing items from the scene
         m_currentItem = nullptr;
     }
 
@@ -166,6 +175,11 @@ void CanvasArea::createShape(const QPointF& startPoint, const QPointF& endPoint)
             m_currentItem = createRegularPolygon(center, radius, 6);
             break;
         }
+        case ShapeType::Text: {
+            qCDebug(canvasAreaLog) << "Creating Text";
+            m_currentItem = createText(startPoint);
+            break;
+        }
         default:
             qCWarning(canvasAreaLog) << "Unknown shape type:" << static_cast<int>(m_currentShapeType);
             break;
@@ -188,6 +202,11 @@ void CanvasArea::updateShape(const QPointF& endPoint)
         return;
     }
 
+    // For text items, we don't update during mouse movement
+    if (m_currentShapeType == ShapeType::Text) {
+        return;
+    }
+
     qCDebug(canvasAreaLog) << "Updating shape from" << m_startPoint << "to" << endPoint;
 
     // Remove the current item
@@ -207,6 +226,9 @@ void CanvasArea::finalizeShape()
 
     qCDebug(canvasAreaLog) << "Finalizing shape of type" << static_cast<int>(m_currentShapeType);
 
+    // Store a reference to the current item before adding it to the document
+    QGraphicsItem* finalizedItem = m_currentItem;
+
     // Add the shape to the document
     addShapeToDocument(m_currentItem);
 
@@ -217,6 +239,17 @@ void CanvasArea::finalizeShape()
         // This will be done through the shapeCreated signal
     } else {
         qCWarning(canvasAreaLog) << "Cannot mark document as modified: engine or document is null";
+    }
+
+    // For text items, ensure they're selected so the properties panel updates
+    if (m_currentShapeType == ShapeType::Text) {
+        // Clear any existing selection
+        m_scene->clearSelection();
+        // Select the newly created text item
+        finalizedItem->setSelected(true);
+        // Emit the selection signal
+        emit itemSelected(finalizedItem, ShapeType::Text);
+        qCDebug(canvasAreaLog) << "Text item selected after creation";
     }
 
     // Reset the current item pointer (ownership transferred to the document)
@@ -421,6 +454,9 @@ void CanvasArea::setShapeCreationMode(ShapeType type)
             break;
         case ShapeType::Freehand:
             viewport()->setCursor(Qt::PointingHandCursor);
+            break;
+        case ShapeType::Text:
+            viewport()->setCursor(Qt::IBeamCursor);
             break;
         default:
             viewport()->setCursor(Qt::ArrowCursor);
@@ -663,6 +699,72 @@ void CanvasArea::addShapeToDocument(QGraphicsItem* item)
 
         qCDebug(canvasAreaLog) << "Added path to document";
     }
+    else if (EditableTextItem* textItem = dynamic_cast<EditableTextItem*>(item)) {
+        // Create an SvgText element
+        QPointF pos = textItem->pos();
+        QString text = textItem->toPlainString();
+
+        auto svgText = std::make_unique<SvgText>(Point{pos.x(), pos.y()}, text.toStdString());
+
+        // Set font properties
+        QFont font = textItem->font();
+        svgText->setFontFamily(font.family().toStdString());
+        svgText->setFontSize(font.pointSizeF());
+        svgText->setBold(textItem->isBold());
+        svgText->setItalic(textItem->isItalic());
+
+        // Set text alignment
+        Qt::Alignment alignment = textItem->textAlignment();
+        if (alignment & Qt::AlignCenter) {
+            svgText->setTextAnchor(TextAnchor::Middle);
+        } else if (alignment & Qt::AlignRight) {
+            svgText->setTextAnchor(TextAnchor::End);
+        } else {
+            svgText->setTextAnchor(TextAnchor::Start);
+        }
+
+        // Set color
+        QColor color = textItem->defaultTextColor();
+        svgText->setFillColor(Color(color.red(), color.green(), color.blue(), color.alpha()));
+        svgText->setOpacity(item->opacity());
+
+        // Add the element to the document
+        doc->addElement(std::move(svgText));
+
+        // Add the graphics item to the document's graphics items list
+        doc->m_graphicsItems.push_back(item);
+
+        qCDebug(canvasAreaLog) << "Added text to document";
+    }
+    // For backward compatibility, also handle QGraphicsSimpleTextItem
+    else if (QGraphicsSimpleTextItem* textItem = dynamic_cast<QGraphicsSimpleTextItem*>(item)) {
+        // Create an SvgText element
+        QPointF pos = textItem->pos();
+        QString text = textItem->text();
+
+        auto svgText = std::make_unique<SvgText>(Point{pos.x(), pos.y()}, text.toStdString());
+
+        // Set font properties
+        QFont font = textItem->font();
+        svgText->setFontFamily(font.family().toStdString());
+        svgText->setFontSize(font.pointSizeF());
+        svgText->setBold(font.bold());
+        svgText->setItalic(font.italic());
+
+        // Set color
+        QBrush brush = textItem->brush();
+        QColor color = brush.color();
+        svgText->setFillColor(Color(color.red(), color.green(), color.blue(), color.alpha()));
+        svgText->setOpacity(item->opacity());
+
+        // Add the element to the document
+        doc->addElement(std::move(svgText));
+
+        // Add the graphics item to the document's graphics items list
+        doc->m_graphicsItems.push_back(item);
+
+        qCDebug(canvasAreaLog) << "Added simple text to document";
+    }
 
     // Emit the shape created signal
     emit shapeCreated(item);
@@ -750,6 +852,20 @@ void CanvasArea::mousePressEvent(QMouseEvent *event)
     if (m_currentShapeType == ShapeType::None) {
         // If not in shape creation mode, use default behavior
         QGraphicsView::mousePressEvent(event);
+
+        // Check if an item was selected after the mouse press
+        if (event->button() == Qt::LeftButton) {
+            QList<QGraphicsItem*> selectedItems = m_scene->selectedItems();
+            if (!selectedItems.isEmpty()) {
+                QGraphicsItem* selectedItem = selectedItems.first();
+                ShapeType itemType = getItemType(selectedItem);
+
+                // Emit the selection signal
+                emit itemSelected(selectedItem, itemType);
+                qCDebug(canvasAreaLog) << "Item selected on mouse press, type:" << static_cast<int>(itemType);
+            }
+        }
+
         return;
     }
 
@@ -806,10 +922,11 @@ void CanvasArea::mouseMoveEvent(QMouseEvent *event)
 
             m_currentItem = createFreehandPath(m_freehandPoints);
             m_scene->addItem(m_currentItem);
-        } else {
-            // For other shapes, update the shape
+        } else if (m_currentShapeType != ShapeType::Text) {
+            // For other shapes (except Text), update the shape
             updateShape(m_endPoint);
         }
+        // For Text, we don't update during mouse movement to avoid dialog popup
 
         event->accept();
     } else {
@@ -839,36 +956,11 @@ void CanvasArea::mouseReleaseEvent(QMouseEvent *event)
             QList<QGraphicsItem*> selectedItems = m_scene->selectedItems();
             if (!selectedItems.isEmpty()) {
                 QGraphicsItem* selectedItem = selectedItems.first();
-                ShapeType itemType = ShapeType::None;
-
-                // Determine the type of the selected item
-                if (dynamic_cast<QGraphicsLineItem*>(selectedItem)) {
-                    itemType = ShapeType::Line;
-                } else if (dynamic_cast<QGraphicsRectItem*>(selectedItem) &&
-                           !dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
-                    itemType = ShapeType::Rectangle;
-                } else if (dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
-                    itemType = ShapeType::Ellipse;
-                } else if (dynamic_cast<QGraphicsPolygonItem*>(selectedItem)) {
-                    // For polygon items, we need to determine if it's a pentagon, hexagon, or star
-                    // This is a simplification - in a real app you might want to store this information
-                    // in the item's data or use a custom QGraphicsItem subclass
-                    QGraphicsPolygonItem* polygonItem = dynamic_cast<QGraphicsPolygonItem*>(selectedItem);
-                    int pointCount = polygonItem->polygon().size();
-                    if (pointCount == 5) {
-                        itemType = ShapeType::Pentagon;
-                    } else if (pointCount == 6) {
-                        itemType = ShapeType::Hexagon;
-                    } else if (pointCount == 10) {
-                        itemType = ShapeType::Star;
-                    }
-                } else if (dynamic_cast<QGraphicsPathItem*>(selectedItem)) {
-                    itemType = ShapeType::Freehand;
-                }
+                ShapeType itemType = getItemType(selectedItem);
 
                 // Emit the selection signal
                 emit itemSelected(selectedItem, itemType);
-                qCDebug(canvasAreaLog) << "Item selected, type:" << static_cast<int>(itemType);
+                qCDebug(canvasAreaLog) << "Item selected on mouse release, type:" << static_cast<int>(itemType);
             }
         }
     }
@@ -883,24 +975,23 @@ QGraphicsItem* CanvasArea::getSelectedItem() const
     return nullptr;
 }
 
-ShapeType CanvasArea::getSelectedItemType() const
+ShapeType CanvasArea::getItemType(QGraphicsItem* item) const
 {
-    QGraphicsItem* selectedItem = getSelectedItem();
-    if (!selectedItem) {
+    if (!item) {
         return ShapeType::None;
     }
 
-    // Determine the type of the selected item
-    if (dynamic_cast<QGraphicsLineItem*>(selectedItem)) {
+    // Determine the type of the item
+    if (dynamic_cast<QGraphicsLineItem*>(item)) {
         return ShapeType::Line;
-    } else if (dynamic_cast<QGraphicsRectItem*>(selectedItem) &&
-               !dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
+    } else if (dynamic_cast<QGraphicsRectItem*>(item) &&
+               !dynamic_cast<QGraphicsEllipseItem*>(item)) {
         return ShapeType::Rectangle;
-    } else if (dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
+    } else if (dynamic_cast<QGraphicsEllipseItem*>(item)) {
         return ShapeType::Ellipse;
-    } else if (dynamic_cast<QGraphicsPolygonItem*>(selectedItem)) {
+    } else if (dynamic_cast<QGraphicsPolygonItem*>(item)) {
         // For polygon items, we need to determine if it's a pentagon, hexagon, or star
-        QGraphicsPolygonItem* polygonItem = dynamic_cast<QGraphicsPolygonItem*>(selectedItem);
+        QGraphicsPolygonItem* polygonItem = dynamic_cast<QGraphicsPolygonItem*>(item);
         int pointCount = polygonItem->polygon().size();
         if (pointCount == 5) {
             return ShapeType::Pentagon;
@@ -909,11 +1000,50 @@ ShapeType CanvasArea::getSelectedItemType() const
         } else if (pointCount == 10) {
             return ShapeType::Star;
         }
-    } else if (dynamic_cast<QGraphicsPathItem*>(selectedItem)) {
+    } else if (dynamic_cast<QGraphicsPathItem*>(item)) {
         return ShapeType::Freehand;
+    } else if (dynamic_cast<EditableTextItem*>(item)) {
+        return ShapeType::Text;
+    } else if (dynamic_cast<QGraphicsSimpleTextItem*>(item)) {
+        return ShapeType::Text;
     }
 
     return ShapeType::None;
+}
+
+ShapeType CanvasArea::getSelectedItemType() const
+{
+    QGraphicsItem* selectedItem = getSelectedItem();
+    return getItemType(selectedItem);
+}
+
+EditableTextItem* CanvasArea::createText(const QPointF& position, const QString& text) {
+    // If text is empty, prompt the user for text input
+    QString textContent = text;
+    if (textContent.isEmpty()) {
+        bool ok;
+        textContent = QInputDialog::getText(this, tr("Enter Text"),
+                                         tr("Text content:"), QLineEdit::Normal,
+                                         tr("Text"), &ok);
+        if (!ok || textContent.isEmpty()) {
+            textContent = tr("Text"); // Default text if user cancels or enters empty text
+        }
+    }
+
+    // Create the editable text item
+    EditableTextItem* textItem = new EditableTextItem(textContent);
+    textItem->setPos(position);
+
+    // Connect signals
+    connect(textItem, &EditableTextItem::textChanged, this, [this, textItem](const QString& newText) {
+        // When text changes, update the document
+        if (m_currentEngine && m_currentEngine->getCurrentDocument()) {
+            // The document will be marked as modified when the text is finalized
+            qCDebug(canvasAreaLog) << "Text changed to:" << newText;
+        }
+    });
+
+    return textItem;
 }
 
 bool CanvasArea::openFileWithEngine(CoreSvgEngine* engine) {

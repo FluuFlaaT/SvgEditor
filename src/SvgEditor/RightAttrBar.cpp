@@ -25,6 +25,7 @@ RightAttrBar::RightAttrBar(QWidget *parent)
     // Uncomment when implemented
     // m_stackedWidget->addWidget(createRectangleAttributesWidget());
     // m_stackedWidget->addWidget(createLineAttributesWidget());
+    m_stackedWidget->addWidget(createTextAttributesWidget());
 
     // Set the common attributes widget as the default
     m_stackedWidget->setCurrentIndex(CommonAttributes);
@@ -128,6 +129,9 @@ void RightAttrBar::updateForSelectedItem(QGraphicsItem* item, ShapeType type)
         case ShapeType::Line:
             setCurrentWidget(LineAttributes);
             break;
+        case ShapeType::Text:
+            setCurrentWidget(TextAttributes);
+            break;
         case ShapeType::Pentagon:
         case ShapeType::Hexagon:
         case ShapeType::Star:
@@ -170,6 +174,126 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
     } else if (auto pathItem = dynamic_cast<QGraphicsPathItem*>(item)) {
         pen = pathItem->pen();
         brush = pathItem->brush();
+    } else if (auto textItem = dynamic_cast<EditableTextItem*>(item)) {
+        // Handle editable text item properties
+        if (type == ShapeType::Text && m_textContentEdit && m_fontFamilyComboBox &&
+            m_fontSizeSpinBox && m_boldCheckBox && m_italicCheckBox && m_textAlignComboBox) {
+
+            // Block signals to prevent triggering updates while setting values
+            m_textContentEdit->blockSignals(true);
+            m_fontFamilyComboBox->blockSignals(true);
+            m_fontSizeSpinBox->blockSignals(true);
+            m_boldCheckBox->blockSignals(true);
+            m_italicCheckBox->blockSignals(true);
+            m_textAlignComboBox->blockSignals(true);
+
+            // Set text content
+            m_textContentEdit->setText(textItem->toPlainString());
+
+            // Set font properties
+            QFont font = textItem->font();
+
+            // Set font family
+            int fontIndex = m_fontFamilyComboBox->findText(font.family());
+            if (fontIndex >= 0) {
+                m_fontFamilyComboBox->setCurrentIndex(fontIndex);
+            }
+
+            // Set font size
+            m_fontSizeSpinBox->setValue(font.pointSize());
+
+            // Set bold and italic
+            m_boldCheckBox->setChecked(textItem->isBold());
+            m_italicCheckBox->setChecked(textItem->isItalic());
+
+            // Set text alignment
+            int alignmentIndex = 0; // Default to left alignment
+            Qt::Alignment alignment = textItem->textAlignment();
+            if (alignment & Qt::AlignCenter) {
+                alignmentIndex = 1;
+            } else if (alignment & Qt::AlignRight) {
+                alignmentIndex = 2;
+            }
+            m_textAlignComboBox->setCurrentIndex(alignmentIndex);
+
+            // Set text color
+            m_textColor = textItem->defaultTextColor();
+            QString qss = QString("background-color: %1").arg(m_textColor.name());
+            m_textColorButton->setStyleSheet(qss);
+
+            // Unblock signals
+            m_textContentEdit->blockSignals(false);
+            m_fontFamilyComboBox->blockSignals(false);
+            m_fontSizeSpinBox->blockSignals(false);
+            m_boldCheckBox->blockSignals(false);
+            m_italicCheckBox->blockSignals(false);
+            m_textAlignComboBox->blockSignals(false);
+
+            qCDebug(rightAttrBarLog) << "Updated editable text properties: content=" << textItem->toPlainString()
+                                   << ", font=" << font.family()
+                                   << ", size=" << font.pointSize()
+                                   << ", bold=" << textItem->isBold()
+                                   << ", italic=" << textItem->isItalic()
+                                   << ", color=" << m_textColor.name();
+
+            // For text items, we don't need to update the other properties
+            return;
+        }
+    } else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(item)) {
+        // Handle simple text item properties (for backward compatibility)
+        if (type == ShapeType::Text && m_textContentEdit && m_fontFamilyComboBox &&
+            m_fontSizeSpinBox && m_boldCheckBox && m_italicCheckBox && m_textAlignComboBox) {
+
+            // Block signals to prevent triggering updates while setting values
+            m_textContentEdit->blockSignals(true);
+            m_fontFamilyComboBox->blockSignals(true);
+            m_fontSizeSpinBox->blockSignals(true);
+            m_boldCheckBox->blockSignals(true);
+            m_italicCheckBox->blockSignals(true);
+            m_textAlignComboBox->blockSignals(true);
+
+            // Set text content
+            m_textContentEdit->setText(textItem->text());
+
+            // Set font properties
+            QFont font = textItem->font();
+
+            // Set font family
+            int fontIndex = m_fontFamilyComboBox->findText(font.family());
+            if (fontIndex >= 0) {
+                m_fontFamilyComboBox->setCurrentIndex(fontIndex);
+            }
+
+            // Set font size
+            m_fontSizeSpinBox->setValue(font.pointSize());
+
+            // Set bold and italic
+            m_boldCheckBox->setChecked(font.bold());
+            m_italicCheckBox->setChecked(font.italic());
+
+            // Set text color
+            m_textColor = textItem->brush().color();
+            QString qss = QString("background-color: %1").arg(m_textColor.name());
+            m_textColorButton->setStyleSheet(qss);
+
+            // Unblock signals
+            m_textContentEdit->blockSignals(false);
+            m_fontFamilyComboBox->blockSignals(false);
+            m_fontSizeSpinBox->blockSignals(false);
+            m_boldCheckBox->blockSignals(false);
+            m_italicCheckBox->blockSignals(false);
+            m_textAlignComboBox->blockSignals(false);
+
+            qCDebug(rightAttrBarLog) << "Updated simple text properties: content=" << textItem->text()
+                                   << ", font=" << font.family()
+                                   << ", size=" << font.pointSize()
+                                   << ", bold=" << font.bold()
+                                   << ", italic=" << font.italic()
+                                   << ", color=" << m_textColor.name();
+
+            // For text items, we don't need to update the other properties
+            return;
+        }
     } else {
         return;
     }
@@ -401,6 +525,138 @@ QWidget* RightAttrBar::createCircleAttributesWidget() {
     layout->addLayout(borderStyleLayout);
     layout->addLayout(borderColorLayout);
     layout->addLayout(fillColorLayout);
+    layout->addStretch();
+
+    return widget;
+}
+
+QWidget* RightAttrBar::createTextAttributesWidget()
+{
+    QWidget* widget = new QWidget();
+    QVBoxLayout* layout = new QVBoxLayout(widget);
+    layout->setContentsMargins(5, 10, 5, 10);
+    layout->setSpacing(10);
+
+    // 1. Text content
+    QHBoxLayout* textContentLayout = new QHBoxLayout();
+    QLabel* textContentLabel = new QLabel(tr("Text:"));
+    m_textContentEdit = new QLineEdit();
+    m_textContentEdit->setPlaceholderText(tr("Enter text"));
+
+    textContentLayout->addWidget(textContentLabel);
+    textContentLayout->addWidget(m_textContentEdit);
+
+    // 2. Font family
+    QHBoxLayout* fontFamilyLayout = new QHBoxLayout();
+    QLabel* fontFamilyLabel = new QLabel(tr("Font:"));
+    m_fontFamilyComboBox = new QComboBox();
+
+    // Load system fonts
+    QFontDatabase fontDatabase;
+    QStringList fontFamilies = fontDatabase.families();
+    m_fontFamilyComboBox->addItems(fontFamilies);
+
+    // Set default font
+    int defaultIndex = fontFamilies.indexOf("Arial");
+    if (defaultIndex >= 0) {
+        m_fontFamilyComboBox->setCurrentIndex(defaultIndex);
+    }
+
+    fontFamilyLayout->addWidget(fontFamilyLabel);
+    fontFamilyLayout->addWidget(m_fontFamilyComboBox);
+
+    // 3. Font size
+    QHBoxLayout* fontSizeLayout = new QHBoxLayout();
+    QLabel* fontSizeLabel = new QLabel(tr("Size:"));
+    m_fontSizeSpinBox = new QSpinBox();
+    m_fontSizeSpinBox->setRange(6, 72);
+    m_fontSizeSpinBox->setValue(12); // Default value
+    m_fontSizeSpinBox->setSuffix(" pt");
+
+    fontSizeLayout->addWidget(fontSizeLabel);
+    fontSizeLayout->addWidget(m_fontSizeSpinBox);
+
+    // 4. Font style (Bold, Italic)
+    QHBoxLayout* fontStyleLayout = new QHBoxLayout();
+    m_boldCheckBox = new QCheckBox(tr("Bold"));
+    m_italicCheckBox = new QCheckBox(tr("Italic"));
+
+    fontStyleLayout->addWidget(m_boldCheckBox);
+    fontStyleLayout->addWidget(m_italicCheckBox);
+
+    // 5. Text alignment
+    QHBoxLayout* textAlignLayout = new QHBoxLayout();
+    QLabel* textAlignLabel = new QLabel(tr("Alignment:"));
+    m_textAlignComboBox = new QComboBox();
+    m_textAlignComboBox->addItem(tr("Left"), 0);
+    m_textAlignComboBox->addItem(tr("Center"), 1);
+    m_textAlignComboBox->addItem(tr("Right"), 2);
+
+    textAlignLayout->addWidget(textAlignLabel);
+    textAlignLayout->addWidget(m_textAlignComboBox);
+
+    // 6. Text color
+    QHBoxLayout* textColorLayout = new QHBoxLayout();
+    QLabel* textColorLabel = new QLabel(tr("Color:"));
+    m_textColorButton = new QPushButton();
+    m_textColorButton->setFixedWidth(50);
+    m_textColor = Qt::black; // Default text color
+    QString qss = QString("background-color: %1").arg(m_textColor.name());
+    m_textColorButton->setStyleSheet(qss);
+
+    textColorLayout->addWidget(textColorLabel);
+    textColorLayout->addWidget(m_textColorButton);
+
+    // Connect signals
+    connect(m_textContentEdit, &QLineEdit::textChanged, this, [this](const QString& text) {
+        emit textContentChanged(text);
+        qCDebug(rightAttrBarLog) << "Text content changed to:" << text;
+    });
+
+    connect(m_fontFamilyComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
+        QString family = m_fontFamilyComboBox->itemText(index);
+        emit fontFamilyChanged(family);
+        qCDebug(rightAttrBarLog) << "Font family changed to:" << family;
+    });
+
+    connect(m_fontSizeSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int size) {
+        emit fontSizeChanged(size);
+        qCDebug(rightAttrBarLog) << "Font size changed to:" << size;
+    });
+
+    connect(m_boldCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        emit fontBoldChanged(checked);
+        qCDebug(rightAttrBarLog) << "Font bold changed to:" << (checked ? "true" : "false");
+    });
+
+    connect(m_italicCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        emit fontItalicChanged(checked);
+        qCDebug(rightAttrBarLog) << "Font italic changed to:" << (checked ? "true" : "false");
+    });
+
+    connect(m_textAlignComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
+        emit textAlignmentChanged(index);
+        qCDebug(rightAttrBarLog) << "Text alignment changed to:" << index;
+    });
+
+    connect(m_textColorButton, &QPushButton::clicked, this, [this]() {
+        QColor color = QColorDialog::getColor(m_textColor, this, tr("Select Text Color"));
+        if (color.isValid()) {
+            m_textColor = color;
+            QString qss = QString("background-color: %1").arg(color.name());
+            m_textColorButton->setStyleSheet(qss);
+            emit textColorChanged(color);
+            qCDebug(rightAttrBarLog) << "Text color changed to:" << color.name();
+        }
+    });
+
+    // Add all layouts to the main layout
+    layout->addLayout(textContentLayout);
+    layout->addLayout(fontFamilyLayout);
+    layout->addLayout(fontSizeLayout);
+    layout->addLayout(fontStyleLayout);
+    layout->addLayout(textAlignLayout);
+    layout->addLayout(textColorLayout);
     layout->addStretch();
 
     return widget;

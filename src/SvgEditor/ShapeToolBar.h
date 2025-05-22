@@ -18,7 +18,8 @@ enum class ShapeType {
     Ellipse,
     Pentagon,
     Star,
-    Hexagon
+    Hexagon,
+    Text
 };
 
 class ShapeToolBar : public QWidget
@@ -37,18 +38,18 @@ public:
     QPushButton *pentagonBtn;
     QPushButton *starBtn;
     QPushButton *hexagonBtn;
-    
+
     QVector<QPushButton**> shapeButtons = {
-        &lineBtn, &freehandBtn, &rectangleBtn, &ellipseBtn, 
+        &lineBtn, &freehandBtn, &rectangleBtn, &ellipseBtn,
         &pentagonBtn, &starBtn, &hexagonBtn
     };
 
     // Get the currently selected shape type
     ShapeType getSelectedShapeType() const { return m_selectedShapeType; }
-    
+
     // Set the selected shape type
     void setSelectedShapeType(ShapeType type);
-    
+
     // Highlight the selected button
     void highlightButton(ShapeType type);
 
