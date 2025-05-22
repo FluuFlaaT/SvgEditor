@@ -1,4 +1,4 @@
-#include "CoreSvgEngine.h"
+﻿#include "CoreSvgEngine.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>

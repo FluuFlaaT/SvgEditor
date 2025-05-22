@@ -1,4 +1,4 @@
-#include <string>
+﻿#include <string>
 #include <sstream>
 #include "SvgElement.h"
 // #include "../LoggingService/LoggingService.h"

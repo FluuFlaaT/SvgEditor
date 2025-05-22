@@ -1,4 +1,4 @@
-#include "SvgDocument.h"
+﻿#include "SvgDocument.h"
 #include "SvgElement.h"
 #include "SvgShapes.h"
 #include "SvgText.h"

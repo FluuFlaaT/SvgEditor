@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "CoreSvgStructs.h"
 #include <string>
 #include <map>
