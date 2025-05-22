@@ -8,7 +8,8 @@ Q_LOGGING_CATEGORY(canvasAreaLog, "CanvasArea")
 CanvasArea::CanvasArea(QWidget *parent)
     : QGraphicsView(parent),
     m_backgroundItem(nullptr),
-    m_outlineItem(nullptr)
+    m_outlineItem(nullptr),
+    m_zoomFactor(1.0)
 {
     m_scene = new QGraphicsScene(this);
     setScene(m_scene);
@@ -37,6 +38,91 @@ CanvasArea::CanvasArea(QWidget *parent)
 CanvasArea::~CanvasArea()
 {
     delete m_scene;
+}
+
+void CanvasArea::zoomIn()
+{
+    setZoom(m_zoomFactor * ZOOM_FACTOR_STEP);
+}
+
+void CanvasArea::zoomOut()
+{
+    setZoom(m_zoomFactor / ZOOM_FACTOR_STEP);
+}
+
+void CanvasArea::resetZoom()
+{
+    setZoom(1.0);
+}
+
+void CanvasArea::fitInView()
+{
+    if (m_scene->items().isEmpty()) {
+        return;
+    }
+
+    // Reset the view scale
+    resetTransform();
+    m_zoomFactor = 1.0;
+
+    // Fit the scene in the view
+    QRectF sceneRect = m_scene->itemsBoundingRect();
+    if (!sceneRect.isEmpty()) {
+        fitInView(sceneRect, Qt::KeepAspectRatio);
+
+        // Calculate the new zoom factor
+        QTransform transform = this->transform();
+        m_zoomFactor = transform.m11(); // Use the horizontal scale factor
+
+        // Emit the zoom changed signal
+        emit zoomChanged(m_zoomFactor);
+        qCDebug(canvasAreaLog) << "Fit to view, new zoom factor:" << m_zoomFactor;
+    }
+}
+
+void CanvasArea::setZoom(qreal factor)
+{
+    // Clamp the zoom factor to the allowed range
+    factor = qBound(MIN_ZOOM, factor, MAX_ZOOM);
+
+    if (qFuzzyCompare(factor, m_zoomFactor)) {
+        return; // No change in zoom
+    }
+
+    // Calculate the scale factor relative to the current transform
+    qreal scaleFactor = factor / m_zoomFactor;
+
+    // Apply the scale transformation
+    scale(scaleFactor, scaleFactor);
+
+    // Update the zoom factor
+    m_zoomFactor = factor;
+
+    // Emit the zoom changed signal
+    emit zoomChanged(m_zoomFactor);
+    qCDebug(canvasAreaLog) << "Zoom changed to:" << m_zoomFactor;
+}
+
+void CanvasArea::wheelEvent(QWheelEvent *event)
+{
+    // Check if Ctrl key is pressed for zoom
+    if (event->modifiers() & Qt::ControlModifier) {
+        // Calculate zoom factor based on wheel delta
+        qreal factor = (event->angleDelta().y() > 0) ? ZOOM_FACTOR_STEP : 1.0 / ZOOM_FACTOR_STEP;
+        setZoom(m_zoomFactor * factor);
+        event->accept();
+    } else {
+        // Default wheel behavior (scroll)
+        QGraphicsView::wheelEvent(event);
+    }
+}
+
+void CanvasArea::resizeEvent(QResizeEvent *event)
+{
+    QGraphicsView::resizeEvent(event);
+
+    // If we're in "fit in view" mode, we might want to adjust the view here
+    // For now, we'll just maintain the current zoom level
 }
 
 bool CanvasArea::openFile(const QString& fileName) {
@@ -118,6 +204,9 @@ bool CanvasArea::openFile(const QString& fileName) {
 bool CanvasArea::openFileWithEngine(CoreSvgEngine* engine) {
     qCDebug(canvasAreaLog) << "Opening SVG file with engine";
     QGraphicsScene *s = scene();
+
+    // Clear the scene but don't delete the items yet
+    // This prevents accessing deleted items later
     s->clear();
 
     // Get document dimensions and background color
@@ -143,8 +232,17 @@ bool CanvasArea::openFileWithEngine(CoreSvgEngine* engine) {
     s->addItem(m_backgroundItem);
 
     // Add all graphics items from the document
-    for(auto& item : doc->m_graphicsItems) {
-        s->addItem(item);
+    // Make sure we're not adding invalid items
+    for(auto it = doc->m_graphicsItems.begin(); it != doc->m_graphicsItems.end(); ) {
+        QGraphicsItem* item = *it;
+        if (item) {
+            s->addItem(item);
+            ++it;
+        } else {
+            // Remove invalid items from the vector
+            it = doc->m_graphicsItems.erase(it);
+            qCWarning(canvasAreaLog) << "Removed invalid graphics item from document";
+        }
     }
 
     // Create outline rectangle

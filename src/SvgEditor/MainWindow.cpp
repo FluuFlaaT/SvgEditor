@@ -56,16 +56,26 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Connect RightAttrBar signals to update canvas settings
     connect(m_rightAttrBar, &RightAttrBar::canvasSizeChanged, this, [this](int width, int height) {
-        // Update canvas size in the engine
-        m_svgEngine->getCurrentDocument()->setWidth(width);
-        m_svgEngine->getCurrentDocument()->setHeight(height);
+        try {
+            // Update canvas size in the engine
+            SvgDocument* doc = m_svgEngine->getCurrentDocument();
+            if (doc) {
+                doc->setWidth(width);
+                doc->setHeight(height);
 
-        // Update the canvas view to reflect the new size
-        m_canvasArea->openFileWithEngine(m_svgEngine);
-
-        m_documentModified = true;
-        updateTitle();
-        showStatusMessage(tr("Canvas size changed to %1x%2").arg(width).arg(height), 2000);
+                // Update the canvas view to reflect the new size
+                if (m_canvasArea->openFileWithEngine(m_svgEngine)) {
+                    m_documentModified = true;
+                    updateTitle();
+                    showStatusMessage(tr("Canvas size changed to %1x%2").arg(width).arg(height), 2000);
+                } else {
+                    showStatusMessage(tr("Failed to update canvas size"), 2000);
+                }
+            }
+        } catch (const std::exception& e) {
+            qCWarning(mainWindowLog) << "Exception during canvas size change:" << e.what();
+            showStatusMessage(tr("Error changing canvas size"), 2000);
+        }
     });
 
     connect(m_rightAttrBar, &RightAttrBar::canvasColorChanged, this, [this](const QColor& color) {
@@ -87,6 +97,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Initialize the RightAttrBar with current document properties
     updateRightAttrBarFromDocument();
+
+    // Connect zoom signals
+    connect(m_canvasArea, &CanvasArea::zoomChanged, this, &MainWindow::updateZoomStatus);
+    connect(m_canvasArea, &CanvasArea::zoomChanged, m_rightAttrBar, &RightAttrBar::updateZoomLevel);
+
+    // Connect left sidebar zoom buttons
+    connect(m_leftSideBar, &LeftSideBar::zoomInRequested, m_canvasArea, &CanvasArea::zoomIn);
+    connect(m_leftSideBar, &LeftSideBar::zoomOutRequested, m_canvasArea, &CanvasArea::zoomOut);
+    connect(m_leftSideBar, &LeftSideBar::zoomResetRequested, m_canvasArea, &CanvasArea::resetZoom);
+    connect(m_leftSideBar, &LeftSideBar::zoomFitRequested, m_canvasArea, &CanvasArea::fitInView);
 
     showStatusMessage(tr("Ready"), 2000);
 
@@ -409,6 +429,34 @@ void MainWindow::setupMenus()
     connect(exitAction, &QAction::triggered, QApplication::instance(), &QApplication::quit);
     fileMenu->addAction(exitAction);
 
+    // Add View menu
+    QMenu* viewMenu = menuBar()->addMenu(tr("View"));
+
+    // Zoom actions
+    QAction* zoomInAction = new QAction(tr("Zoom In"), this);
+    zoomInAction->setShortcut(QKeySequence::ZoomIn); // Usually Ctrl++
+    zoomInAction->setIcon(QIcon::fromTheme("zoom-in", QIcon(":/icons/zoom-in.png")));
+    connect(zoomInAction, &QAction::triggered, m_canvasArea, &CanvasArea::zoomIn);
+    viewMenu->addAction(zoomInAction);
+
+    QAction* zoomOutAction = new QAction(tr("Zoom Out"), this);
+    zoomOutAction->setShortcut(QKeySequence::ZoomOut); // Usually Ctrl+-
+    zoomOutAction->setIcon(QIcon::fromTheme("zoom-out", QIcon(":/icons/zoom-out.png")));
+    connect(zoomOutAction, &QAction::triggered, m_canvasArea, &CanvasArea::zoomOut);
+    viewMenu->addAction(zoomOutAction);
+
+    QAction* resetZoomAction = new QAction(tr("Reset Zoom"), this);
+    resetZoomAction->setShortcut(QKeySequence(tr("Ctrl+0")));
+    resetZoomAction->setIcon(QIcon::fromTheme("zoom-original", QIcon(":/icons/zoom-reset.png")));
+    connect(resetZoomAction, &QAction::triggered, m_canvasArea, &CanvasArea::resetZoom);
+    viewMenu->addAction(resetZoomAction);
+
+    QAction* fitToWindowAction = new QAction(tr("Fit to Window"), this);
+    fitToWindowAction->setShortcut(QKeySequence(tr("Ctrl+F")));
+    fitToWindowAction->setIcon(QIcon::fromTheme("zoom-fit-best", QIcon(":/icons/zoom-fit.png")));
+    connect(fitToWindowAction, &QAction::triggered, m_canvasArea, &CanvasArea::fitInView);
+    viewMenu->addAction(fitToWindowAction);
+
     QMenu* settingsMenu = menuBar()->addMenu(tr("Settings"));
 
     m_languageMenu = settingsMenu->addMenu(tr("Language"));
@@ -447,17 +495,23 @@ void MainWindow::setupToolBar()
     // Add zoom controls
     QAction* zoomInAction = new QAction(tr("Zoom In"), this);
     zoomInAction->setIcon(QIcon::fromTheme("zoom-in", QIcon(":/icons/zoom-in.png")));
+    connect(zoomInAction, &QAction::triggered, m_canvasArea, &CanvasArea::zoomIn);
     m_mainToolBar->addAction(zoomInAction);
 
     QAction* zoomOutAction = new QAction(tr("Zoom Out"), this);
     zoomOutAction->setIcon(QIcon::fromTheme("zoom-out", QIcon(":/icons/zoom-out.png")));
+    connect(zoomOutAction, &QAction::triggered, m_canvasArea, &CanvasArea::zoomOut);
     m_mainToolBar->addAction(zoomOutAction);
+
+    QAction* zoomResetAction = new QAction(tr("Reset Zoom"), this);
+    zoomResetAction->setIcon(QIcon::fromTheme("zoom-original", QIcon(":/icons/zoom-reset.png")));
+    connect(zoomResetAction, &QAction::triggered, m_canvasArea, &CanvasArea::resetZoom);
+    m_mainToolBar->addAction(zoomResetAction);
 
     QAction* zoomFitAction = new QAction(tr("Fit to View"), this);
     zoomFitAction->setIcon(QIcon::fromTheme("zoom-fit-best", QIcon(":/icons/zoom-fit.png")));
+    connect(zoomFitAction, &QAction::triggered, m_canvasArea, &CanvasArea::fitInView);
     m_mainToolBar->addAction(zoomFitAction);
-
-    // TODO: Connect zoom actions to canvas area
 
     qCDebug(mainWindowLog) << "Toolbar setup complete";
 }

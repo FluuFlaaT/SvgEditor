@@ -7,6 +7,7 @@
 #include <QScopedPointer>
 #include <QSvgRenderer>
 #include <QLoggingCategory>
+#include <QWheelEvent>
 #include "XMLParser.h"
 
 // 前向声明CoreSvgEngine类
@@ -27,9 +28,35 @@ public:
 
     QGraphicsScene* scene() const { return m_scene; }
 
+    // Zoom methods
+    void zoomIn();
+    void zoomOut();
+    void resetZoom();
+    void fitInView();
+    qreal currentZoom() const { return m_zoomFactor; }
+
+signals:
+    void zoomChanged(qreal zoomFactor);
+
+protected:
+    // Override wheel event for mouse wheel zoom
+    void wheelEvent(QWheelEvent *event) override;
+
+    // Override resize event to maintain view
+    void resizeEvent(QResizeEvent *event) override;
+
 private:
     QGraphicsScene* m_scene;
     QGraphicsRectItem* m_backgroundItem;
     QGraphicsSvgItem* m_svgItem;
     QGraphicsRectItem* m_outlineItem;
+
+    // Zoom properties
+    qreal m_zoomFactor;
+    static constexpr qreal ZOOM_FACTOR_STEP = 1.2;
+    static constexpr qreal MIN_ZOOM = 0.1;
+    static constexpr qreal MAX_ZOOM = 10.0;
+
+    // Helper method to set zoom
+    void setZoom(qreal factor);
 };
