@@ -1,11 +1,4 @@
 #include "MainWindow.h"
-#include <QMenu>
-#include <QMenuBar>
-#include <QToolBar>
-#include <QStatusBar>
-#include <QFileDialog>
-#include <QDir>
-#include <QAction>
 
 Q_LOGGING_CATEGORY(mainWindowLog, "MainWindow")
 
@@ -15,15 +8,36 @@ MainWindow::MainWindow(QWidget *parent)
     m_rightAttrBar(new RightAttrBar(this)),
     m_canvasArea(new CanvasArea(this))
 {
-    qCInfo(mainWindowLog) << "MainWindow constructed.";
+    qCDebug(mainWindowLog) << "MainWindow constructed.";
+    
+    QSplitter* splitter = new QSplitter(Qt::Horizontal, this);
+    splitter->addWidget(m_leftSideBar);
+    splitter->addWidget(m_canvasArea);
+    splitter->addWidget(m_rightAttrBar);
+
+    splitter->setStretchFactor(0, 2);  // Left sidebar
+    splitter->setStretchFactor(1, 8);  // Canvas area
+    splitter->setStretchFactor(2, 3);  // Right sidebar
+
+    QList<int> sizes;
+    sizes << 150 << 800 << 300;
+    splitter->setSizes(sizes);
+    setCentralWidget(splitter);
     
     setupMenus();
     setupToolBar();
     setupStatusBar();
     setupLanguageMenu();
+
+    resize(1280, 800);
+    setWindowTitle(tr("SVG Editor"));
     
+    newFile();
+
     m_currentFilePath = "";
     updateTitle();
+
+    qCDebug(mainWindowLog) << "MainWindow construct success.";
 }
 
 MainWindow::~MainWindow()

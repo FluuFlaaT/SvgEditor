@@ -4,6 +4,14 @@
 #include <QTranslator>
 #include <QStringList>
 #include <QLoggingCategory>
+#include <QMenu>
+#include <QMenuBar>
+#include <QToolBar>
+#include <QStatusBar>
+#include <QFileDialog>
+#include <QDir>
+#include <QAction>
+#include <QSplitter>
 #include "LeftSideBar.h"
 #include "RightAttrBar.h"
 #include "CanvasArea.h"
