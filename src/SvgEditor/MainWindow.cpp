@@ -124,6 +124,13 @@ MainWindow::MainWindow(QWidget *parent)
     // Connect shape toolbar signals
     connect(m_shapeToolBar, &ShapeToolBar::shapeToolSelected, this, &MainWindow::handleShapeToolSelected);
 
+    // Connect shape created signal to mark document as modified
+    connect(m_canvasArea, &CanvasArea::shapeCreated, this, [this](QGraphicsItem*) {
+        m_documentModified = true;
+        updateTitle();
+        qCDebug(mainWindowLog) << "Document marked as modified due to shape creation";
+    });
+
     // Set the current engine for the canvas area
     m_canvasArea->setCurrentEngine(m_svgEngine);
 

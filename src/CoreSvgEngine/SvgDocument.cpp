@@ -96,16 +96,18 @@ std::string SvgDocument::generateSvgContent() const {
     // Use simple \" for quotes in attributes, as tinyxml2 expects standard XML format.
     ss << "<svg width=\"" << m_width << "\" height=\"" << m_height << "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
 
-    // �������ɫ������ȫ͸���İ�ɫ�������ӱ�������
+    // Add background color if it's not fully transparent white
     if (m_backgroundColor.alpha > 0 &&
         !(m_backgroundColor.r == 255 && m_backgroundColor.g == 255 &&
           m_backgroundColor.b == 255 && m_backgroundColor.alpha == 255)) {
          // Ensure attributes in rect also use simple \"
          ss << "  <rect width=\"100%\" height=\"100%\" fill=\"" << m_backgroundColor.toString() << "\" />\n";
     }
+
+    // Add all elements with proper line endings
     for (const auto& elem : m_elements) { // Iterate by const reference
         if (elem) {
-            ss << "  " << elem->toSvgString() << "\\n";
+            ss << "  " << elem->toSvgString() << "\n"; // Use proper newline character
         }
     }
     ss << "</svg>";

@@ -1,4 +1,6 @@
 ﻿#define MAX_N 25565
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include "CanvasArea.h"
 #include "../CoreSvgEngine/CoreSvgEngine.h"
 
@@ -156,14 +158,23 @@ void CanvasArea::finalizeShape()
 {
     // Finalize the current shape
     if (!m_currentItem) {
+        qCWarning(canvasAreaLog) << "Cannot finalize shape: current item is null";
         return;
     }
 
     // Add the shape to the document
     addShapeToDocument(m_currentItem);
 
+    // Mark the document as modified
+    if (m_currentEngine && m_currentEngine->getCurrentDocument()) {
+        // We need to notify the MainWindow that the document has been modified
+        // This will be done through the shapeCreated signal
+    }
+
     // Reset the current item pointer (ownership transferred to the document)
     m_currentItem = nullptr;
+
+    qCDebug(canvasAreaLog) << "Shape finalized and added to document";
 }
 
 void CanvasArea::setZoom(qreal factor)
@@ -265,6 +276,7 @@ QGraphicsEllipseItem* CanvasArea::createEllipse(const QPointF& startPoint, const
 QGraphicsPolygonItem* CanvasArea::createRegularPolygon(const QPointF& center, qreal radius, int sides)
 {
     if (sides < 3 || radius <= 0) {
+        qCWarning(canvasAreaLog) << "Invalid parameters for regular polygon: sides=" << sides << ", radius=" << radius;
         return nullptr;
     }
 
@@ -277,7 +289,7 @@ QGraphicsPolygonItem* CanvasArea::createRegularPolygon(const QPointF& center, qr
     for (int i = 0; i < sides; ++i) {
         qreal angle = startAngle - i * angleStep;
         qreal x = center.x() + radius * cos(angle);
-        qreal y = center.y() - radius * sin(angle);
+        qreal y = center.y() - radius * sin(angle); // Correct for Qt's coordinate system (y-axis down)
         polygon << QPointF(x, y);
     }
 
@@ -286,12 +298,15 @@ QGraphicsPolygonItem* CanvasArea::createRegularPolygon(const QPointF& center, qr
     polygonItem->setBrush(m_defaultBrush);
     polygonItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
     polygonItem->setFlag(QGraphicsItem::ItemIsMovable, true);
+
+    qCDebug(canvasAreaLog) << "Created regular polygon with" << sides << "sides at" << center << "with radius" << radius;
     return polygonItem;
 }
 
 QGraphicsPolygonItem* CanvasArea::createStar(const QPointF& center, qreal outerRadius, qreal innerRadius)
 {
     if (outerRadius <= 0 || innerRadius <= 0) {
+        qCWarning(canvasAreaLog) << "Invalid parameters for star: outerRadius=" << outerRadius << ", innerRadius=" << innerRadius;
         return nullptr;
     }
 
@@ -306,7 +321,7 @@ QGraphicsPolygonItem* CanvasArea::createStar(const QPointF& center, qreal outerR
         qreal radius = (i % 2 == 0) ? outerRadius : innerRadius;
         qreal angle = startAngle - i * angleStep;
         qreal x = center.x() + radius * cos(angle);
-        qreal y = center.y() - radius * sin(angle);
+        qreal y = center.y() - radius * sin(angle); // Correct for Qt's coordinate system (y-axis down)
         star << QPointF(x, y);
     }
 
@@ -315,6 +330,8 @@ QGraphicsPolygonItem* CanvasArea::createStar(const QPointF& center, qreal outerR
     starItem->setBrush(m_defaultBrush);
     starItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
     starItem->setFlag(QGraphicsItem::ItemIsMovable, true);
+
+    qCDebug(canvasAreaLog) << "Created star at" << center << "with outer radius" << outerRadius << "and inner radius" << innerRadius;
     return starItem;
 }
 
@@ -379,6 +396,218 @@ void CanvasArea::addShapeToDocument(QGraphicsItem* item)
     // Add the item to the scene if it's not already there
     if (!item->scene()) {
         m_scene->addItem(item);
+    }
+
+    // Get the current document
+    SvgDocument* doc = m_currentEngine->getCurrentDocument();
+    if (!doc) {
+        qCWarning(canvasAreaLog) << "Cannot add shape to document: document is null";
+        return;
+    }
+
+    // Convert the QGraphicsItem to an SvgElement based on its type
+    if (QGraphicsLineItem* lineItem = dynamic_cast<QGraphicsLineItem*>(item)) {
+        // Create an SvgLine element
+        QLineF line = lineItem->line();
+        Point p1 = {line.x1(), line.y1()};
+        Point p2 = {line.x2(), line.y2()};
+
+        auto svgLine = std::make_unique<SvgLine>(p1, p2);
+
+        // Set style properties
+        QPen pen = lineItem->pen();
+        svgLine->setStrokeColor(Color(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha()));
+        svgLine->setStrokeWidth(pen.width());
+        svgLine->setOpacity(item->opacity());
+
+        // Add the element to the document
+        doc->addElement(std::move(svgLine));
+
+        // Add the graphics item to the document's graphics items list
+        doc->m_graphicsItems.push_back(item);
+
+        qCDebug(canvasAreaLog) << "Added line to document";
+    }
+    else if (QGraphicsRectItem* rectItem = dynamic_cast<QGraphicsRectItem*>(item)) {
+        // Create an SvgRectangle element
+        QRectF rect = rectItem->rect();
+        Point topLeft = {rect.x(), rect.y()};
+
+        auto svgRect = std::make_unique<SvgRectangle>(topLeft, rect.width(), rect.height());
+
+        // Set style properties
+        QPen pen = rectItem->pen();
+        QBrush brush = rectItem->brush();
+        svgRect->setStrokeColor(Color(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha()));
+        svgRect->setFillColor(Color(brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha()));
+        svgRect->setStrokeWidth(pen.width());
+        svgRect->setOpacity(item->opacity());
+
+        // Add the element to the document
+        doc->addElement(std::move(svgRect));
+
+        // Add the graphics item to the document's graphics items list
+        doc->m_graphicsItems.push_back(item);
+
+        qCDebug(canvasAreaLog) << "Added rectangle to document";
+    }
+    else if (QGraphicsEllipseItem* ellipseItem = dynamic_cast<QGraphicsEllipseItem*>(item)) {
+        // Create an SvgEllipse element
+        QRectF rect = ellipseItem->rect();
+        Point center = {rect.x() + rect.width()/2, rect.y() + rect.height()/2};
+
+        // Check if it's a circle (equal width and height)
+        if (qFuzzyCompare(rect.width(), rect.height())) {
+            auto svgCircle = std::make_unique<SvgCircle>(center, rect.width()/2);
+
+            // Set style properties
+            QPen pen = ellipseItem->pen();
+            QBrush brush = ellipseItem->brush();
+            svgCircle->setStrokeColor(Color(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha()));
+            svgCircle->setFillColor(Color(brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha()));
+            svgCircle->setStrokeWidth(pen.width());
+            svgCircle->setOpacity(item->opacity());
+
+            // Add the element to the document
+            doc->addElement(std::move(svgCircle));
+        } else {
+            auto svgEllipse = std::make_unique<SvgEllipse>(center, rect.width()/2, rect.height()/2);
+
+            // Set style properties
+            QPen pen = ellipseItem->pen();
+            QBrush brush = ellipseItem->brush();
+            svgEllipse->setStrokeColor(Color(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha()));
+            svgEllipse->setFillColor(Color(brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha()));
+            svgEllipse->setStrokeWidth(pen.width());
+            svgEllipse->setOpacity(item->opacity());
+
+            // Add the element to the document
+            doc->addElement(std::move(svgEllipse));
+        }
+
+        // Add the graphics item to the document's graphics items list
+        doc->m_graphicsItems.push_back(item);
+
+        qCDebug(canvasAreaLog) << "Added ellipse to document";
+    }
+    else if (QGraphicsPolygonItem* polygonItem = dynamic_cast<QGraphicsPolygonItem*>(item)) {
+        QPolygonF polygon = polygonItem->polygon();
+
+        // Convert QPolygonF to vector of Points
+        std::vector<Point> points;
+        for (const QPointF& point : polygon) {
+            points.push_back({point.x(), point.y()});
+        }
+
+        // Determine if it's a regular polygon (pentagon, hexagon) or a star
+        if (m_currentShapeType == ShapeType::Pentagon) {
+            // Calculate center and radius
+            QPointF center = polygon.boundingRect().center();
+            qreal radius = QLineF(center, polygon.at(0)).length();
+
+            auto svgPentagon = std::make_unique<SvgPentagon>(Point{center.x(), center.y()}, radius);
+
+            // Set style properties
+            QPen pen = polygonItem->pen();
+            QBrush brush = polygonItem->brush();
+            svgPentagon->setStrokeColor(Color(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha()));
+            svgPentagon->setFillColor(Color(brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha()));
+            svgPentagon->setStrokeWidth(pen.width());
+            svgPentagon->setOpacity(item->opacity());
+
+            // Add the element to the document
+            doc->addElement(std::move(svgPentagon));
+        }
+        else if (m_currentShapeType == ShapeType::Hexagon) {
+            // Calculate center and radius
+            QPointF center = polygon.boundingRect().center();
+            qreal radius = QLineF(center, polygon.at(0)).length();
+
+            auto svgHexagon = std::make_unique<SvgHexagon>(Point{center.x(), center.y()}, radius);
+
+            // Set style properties
+            QPen pen = polygonItem->pen();
+            QBrush brush = polygonItem->brush();
+            svgHexagon->setStrokeColor(Color(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha()));
+            svgHexagon->setFillColor(Color(brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha()));
+            svgHexagon->setStrokeWidth(pen.width());
+            svgHexagon->setOpacity(item->opacity());
+
+            // Add the element to the document
+            doc->addElement(std::move(svgHexagon));
+        }
+        else if (m_currentShapeType == ShapeType::Star) {
+            // Calculate center and radii
+            QPointF center = polygon.boundingRect().center();
+            qreal outerRadius = 0;
+            qreal innerRadius = 0;
+
+            // For a star, alternate points are at outer and inner radii
+            if (polygon.size() >= 10) { // 5-pointed star has 10 points
+                outerRadius = QLineF(center, polygon.at(0)).length();
+                innerRadius = QLineF(center, polygon.at(1)).length();
+            }
+
+            auto svgStar = std::make_unique<SvgStar>(Point{center.x(), center.y()}, outerRadius, innerRadius);
+
+            // Set style properties
+            QPen pen = polygonItem->pen();
+            QBrush brush = polygonItem->brush();
+            svgStar->setStrokeColor(Color(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha()));
+            svgStar->setFillColor(Color(brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha()));
+            svgStar->setStrokeWidth(pen.width());
+            svgStar->setOpacity(item->opacity());
+
+            // Add the element to the document
+            doc->addElement(std::move(svgStar));
+        }
+        else {
+            // Generic polygon
+            auto svgPolygon = std::make_unique<SvgPolygon>(points);
+
+            // Set style properties
+            QPen pen = polygonItem->pen();
+            QBrush brush = polygonItem->brush();
+            svgPolygon->setStrokeColor(Color(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha()));
+            svgPolygon->setFillColor(Color(brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha()));
+            svgPolygon->setStrokeWidth(pen.width());
+            svgPolygon->setOpacity(item->opacity());
+
+            // Add the element to the document
+            doc->addElement(std::move(svgPolygon));
+        }
+
+        // Add the graphics item to the document's graphics items list
+        doc->m_graphicsItems.push_back(item);
+
+        qCDebug(canvasAreaLog) << "Added polygon to document";
+    }
+    else if (QGraphicsPathItem* pathItem = dynamic_cast<QGraphicsPathItem*>(item)) {
+        // For freehand drawing, convert to polyline
+        QPainterPath path = pathItem->path();
+        std::vector<Point> points;
+
+        // Extract points from the path
+        for (int i = 0; i < path.elementCount(); ++i) {
+            QPainterPath::Element element = path.elementAt(i);
+            points.push_back({element.x, element.y});
+        }
+
+        auto svgPolyline = std::make_unique<SvgPolyline>(points);
+
+        // Set style properties
+        QPen pen = pathItem->pen();
+        svgPolyline->setStrokeColor(Color(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha()));
+        svgPolyline->setStrokeWidth(pen.width());
+        svgPolyline->setOpacity(item->opacity());
+
+        // Add the element to the document
+        doc->addElement(std::move(svgPolyline));
+
+        // Add the graphics item to the document's graphics items list
+        doc->m_graphicsItems.push_back(item);
+
+        qCDebug(canvasAreaLog) << "Added path to document";
     }
 
     // Emit the shape created signal
