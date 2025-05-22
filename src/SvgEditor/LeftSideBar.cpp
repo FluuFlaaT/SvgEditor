@@ -44,21 +44,39 @@ LeftSideBar::LeftSideBar(QWidget *parent)
 
     mainLayout->addSpacing(20);
 
-    // Create zoom section with four buttons
+    // Create zoom section with toggle button
     QLabel* zoomLabel = new QLabel("Zoom", this);
     zoomLabel->setAlignment(Qt::AlignCenter);
     zoomLabel->setStyleSheet("font-weight: bold;");
     mainLayout->addWidget(zoomLabel);
+
+    zoomToggleBtn = new QPushButton(tr("Zoom"), this);
+    mainLayout->addWidget(zoomToggleBtn);
 
     zoomInBtn = new QPushButton(tr("Zoom In"), this);
     zoomOutBtn = new QPushButton(tr("Zoom Out"), this);
     resetZoomBtn = new QPushButton(tr("Reset Zoom"), this);
     fitToWindowBtn = new QPushButton(tr("Fit to Window"), this);
 
+    // 初始隐藏四个按钮
+    zoomInBtn->setVisible(false);
+    zoomOutBtn->setVisible(false);
+    resetZoomBtn->setVisible(false);
+    fitToWindowBtn->setVisible(false);
+
     mainLayout->addWidget(zoomInBtn);
     mainLayout->addWidget(zoomOutBtn);
     mainLayout->addWidget(resetZoomBtn);
     mainLayout->addWidget(fitToWindowBtn);
+
+    // Zoom主按钮点击展开/收起
+    connect(zoomToggleBtn, &QPushButton::clicked, this, [this]() {
+        zoomExpanded = !zoomExpanded;
+        zoomInBtn->setVisible(zoomExpanded);
+        zoomOutBtn->setVisible(zoomExpanded);
+        resetZoomBtn->setVisible(zoomExpanded);
+        fitToWindowBtn->setVisible(zoomExpanded);
+    });
 
     // Connect zoom buttons to signals
     connect(zoomInBtn, &QPushButton::clicked, this, &LeftSideBar::zoomInRequested);

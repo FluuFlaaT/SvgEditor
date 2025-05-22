@@ -30,6 +30,9 @@ public:
     QPushButton *resetZoomBtn;
     QPushButton *fitToWindowBtn;
 
+    QPushButton *zoomToggleBtn;
+    bool zoomExpanded = false;
+
 signals:
     // Only keep the zoomInRequested signal
     void zoomInRequested();
