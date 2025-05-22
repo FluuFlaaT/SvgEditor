@@ -9,15 +9,14 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     setLayout(mainLayout);
 
-    QPushButton *selectBtn = new QPushButton("Select", this);
-    QPushButton *drawBtn = new QPushButton("Draw", this);
-    QPushButton *shapeBtn = new QPushButton("Shapes", this);
-    QPushButton *textBtn = new QPushButton("Text", this);
+    selectBtn = new QPushButton("Select", this);
+    drawBtn = new QPushButton("Draw", this);
+    shapeBtn = new QPushButton("Shapes", this);
+    textBtn = new QPushButton("Text", this);
 
-    mainLayout->addWidget(selectBtn);
-    mainLayout->addWidget(drawBtn);
-    mainLayout->addWidget(shapeBtn);
-    mainLayout->addWidget(textBtn);
+    for(auto btn : btnGroup) {
+        mainLayout->addWidget(*btn);
+    }
 
     mainLayout->addStretch();
 
