@@ -210,6 +210,15 @@ void SvgDocument::parseChildElements(tinyxml2::XMLElement* element) {
     }
 }
 
+void SvgDocument::setGraphicsItemFlags(QGraphicsItem* item) {
+    if (item) {
+        // Set the item to be selectable
+        item->setFlag(QGraphicsItem::ItemIsSelectable, true);
+        // Also make it movable when selected
+        item->setFlag(QGraphicsItem::ItemIsMovable, true);
+    }
+}
+
 void SvgDocument::parseSvgLine(tinyxml2::XMLElement* element) {
     double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
     element->QueryDoubleAttribute("x1", &x1);
@@ -228,6 +237,9 @@ void SvgDocument::parseSvgLine(tinyxml2::XMLElement* element) {
     pen.setColor(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha));
     graphicsItem->setPen(pen);
     graphicsItem->setOpacity(line->getOpacity());
+
+    // Set the item flags
+    setGraphicsItemFlags(graphicsItem);
 
     // �洢��ͼ�����б�
     m_graphicsItems.push_back(graphicsItem);
@@ -259,6 +271,9 @@ void SvgDocument::parseSvgRectangle(tinyxml2::XMLElement* element) {
 
     graphicsItem->setOpacity(rect->getOpacity());
 
+    // Set the item flags
+    setGraphicsItemFlags(graphicsItem);
+
     m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(rect));
 }
@@ -284,6 +299,9 @@ void SvgDocument::parseSvgCircle(tinyxml2::XMLElement* element) {
     graphicsItem->setBrush(QBrush(QColor(fillColor.r, fillColor.g, fillColor.b, fillColor.alpha)));
 
     graphicsItem->setOpacity(circle->getOpacity());
+
+    // Set the item flags
+    setGraphicsItemFlags(graphicsItem);
 
     m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(circle));
@@ -311,6 +329,9 @@ void SvgDocument::parseSvgEllipse(tinyxml2::XMLElement* element) {
     graphicsItem->setBrush(QBrush(QColor(fillColor.r, fillColor.g, fillColor.b, fillColor.alpha)));
 
     graphicsItem->setOpacity(ellipse->getOpacity());
+
+    // Set the item flags
+    setGraphicsItemFlags(graphicsItem);
 
     m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(ellipse));
@@ -365,6 +386,9 @@ void SvgDocument::parseSvgPolygon(tinyxml2::XMLElement* element) {
     graphicsItem->setBrush(QBrush(QColor(fillColor.r, fillColor.g, fillColor.b, fillColor.alpha)));
 
     graphicsItem->setOpacity(polygon->getOpacity());
+
+    // Set the item flags
+    setGraphicsItemFlags(graphicsItem);
 
     m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(polygon));
@@ -422,9 +446,12 @@ void SvgDocument::parseSvgPolyline(tinyxml2::XMLElement* element) {
     graphicsItem->setPen(pen);
 
     Color fillColor = polyline->getFillColor();
-    graphicsItem->setBrush(Qt::NoBrush); 
+    graphicsItem->setBrush(Qt::NoBrush);
 
     graphicsItem->setOpacity(polyline->getOpacity());
+
+    // Set the item flags
+    setGraphicsItemFlags(graphicsItem);
 
     m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(polyline));
@@ -482,6 +509,9 @@ void SvgDocument::parseSvgText(tinyxml2::XMLElement* element) {
     }
 
     graphicsItem->setOpacity(textElement->getOpacity());
+
+    // Set the item flags
+    setGraphicsItemFlags(graphicsItem);
 
     m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(textElement));

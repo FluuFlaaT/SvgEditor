@@ -1064,6 +1064,10 @@ bool CanvasArea::openFileWithEngine(CoreSvgEngine* engine) {
     for(auto it = doc->m_graphicsItems.begin(); it != doc->m_graphicsItems.end(); ) {
         QGraphicsItem* item = *it;
         if (item) {
+            // Set the item to be selectable
+            item->setFlag(QGraphicsItem::ItemIsSelectable, true);
+            // Also make it movable when selected
+            item->setFlag(QGraphicsItem::ItemIsMovable, true);
             s->addItem(item);
             ++it;
         } else {
