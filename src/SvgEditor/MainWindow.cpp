@@ -70,6 +70,50 @@ void MainWindow::handleToolSelected(int toolId)
 
 void MainWindow::setupMenus()
 {
+    QMenu* fileMenu = menuBar()->addMenu(tr("File"));
+
+    QAction* newAction = new QAction(tr("New"), this);
+    newAction->setShortcut(QKeySequence::New);
+    connect(newAction, &QAction::triggered, this, &MainWindow::newFile);
+    fileMenu->addAction(newAction);
+    
+    QAction* openAction = new QAction(tr("Open"), this);
+    openAction->setShortcut(QKeySequence::Open);
+    connect(openAction, &QAction::triggered, this, &MainWindow::openFile);
+    fileMenu->addAction(openAction);
+    
+    fileMenu->addSeparator();
+    
+    QAction* saveAction = new QAction(tr("Save"), this);
+    saveAction->setShortcut(QKeySequence::Save);
+    connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
+    fileMenu->addAction(saveAction);
+    
+    QAction* saveAsAction = new QAction(tr("Save As..."), this);
+    saveAsAction->setShortcut(QKeySequence::SaveAs);
+    connect(saveAsAction, &QAction::triggered, this, &MainWindow::saveFileAs);
+    fileMenu->addAction(saveAsAction);
+    
+    fileMenu->addSeparator();
+    
+    QAction* exportAction = new QAction(tr("Export PNG..."), this);
+    connect(exportAction, &QAction::triggered, this, &MainWindow::exportToPNG);
+    fileMenu->addAction(exportAction);
+    
+    fileMenu->addSeparator();
+    
+    QAction* exitAction = new QAction(tr("Exit"), this); 
+    exitAction->setShortcut(QKeySequence::Quit);
+    connect(exitAction, &QAction::triggered, QApplication::instance(), &QApplication::quit);
+    fileMenu->addAction(exitAction);
+    
+    QMenu* settingsMenu = menuBar()->addMenu(tr("Settings"));
+    
+    m_languageMenu = settingsMenu->addMenu(tr("Language"));
+    
+    // TODO: Add Edit menu and other menus
+    
+    qCDebug(mainWindowLog) << "Menu Setup success.";
 }
 
 void MainWindow::setupToolBar()

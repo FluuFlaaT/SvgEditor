@@ -12,6 +12,7 @@
 #include <QDir>
 #include <QAction>
 #include <QSplitter>
+#include <QApplication>
 #include "LeftSideBar.h"
 #include "RightAttrBar.h"
 #include "CanvasArea.h"
