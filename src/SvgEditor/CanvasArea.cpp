@@ -76,23 +76,27 @@ bool CanvasArea::openFile(const QString& fileName) {
     s->addItem(m_backgroundItem);
     qCDebug(canvasAreaLog) << "Added background item, visible:" << drawBackground;
 
-    // 将svgItem中的物品遍历分层添加到QVector中去
-    QList<QGraphicsItem *> items = m_svgItem->childItems();
-    qCDebug(canvasAreaLog) << "Found" << items.size() << "child items in SVG";
-    
+    // Extract and add individual SVG items based on extracted IDs
     int layerCount = 0;
-    for (QGraphicsItem *item : items) {
-        if (item->type() == QGraphicsSvgItem::Type) {
-            QGraphicsSvgItem *svgChild = qgraphicsitem_cast<QGraphicsSvgItem *>(item);
-            svgChild->setSharedRenderer(m_svgItem->renderer());
-            svgChild->setZValue(layerCount++);
-            s->addItem(svgChild);
-            qCDebug(canvasAreaLog) << "Added child SVG item" << layerCount << "to scene, bounding rect:" << svgChild->boundingRect();
-        } else {
-            qCDebug(canvasAreaLog) << "Skipping non-SVG item of type:" << item->type();
-        }
+    for (const QString& id : extractedIds) {
+        QGraphicsSvgItem* svgChild = new QGraphicsSvgItem();
+        svgChild->setSharedRenderer(m_svgItem->renderer());
+        svgChild->setElementId(id);
+        
+        // Copy important properties from the parent SVG item
+        svgChild->setFlags(QGraphicsItem::ItemClipsToShape);
+        svgChild->setCacheMode(QGraphicsItem::NoCache);
+        svgChild->setZValue(layerCount++);
+        svgChild->setPos(m_svgItem->pos());
+        svgChild->setTransform(m_svgItem->transform());
+        svgChild->setOpacity(m_svgItem->opacity());
+        
+        s->addItem(svgChild);
+        qCDebug(canvasAreaLog) << "Added SVG item with ID:" << id 
+                              << "Layer:" << layerCount 
+                              << "Bounds:" << svgChild->boundingRect();
     }
-    qCDebug(canvasAreaLog) << "Added" << layerCount << "child SVG items to scene";
+    qCDebug(canvasAreaLog) << "Added" << layerCount << "SVG items to scene";
 
     m_outlineItem = new QGraphicsRectItem(m_svgItem->boundingRect());
     QPen outline(Qt::black, 2, Qt::DashLine);
