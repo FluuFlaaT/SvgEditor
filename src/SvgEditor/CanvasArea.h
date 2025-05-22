@@ -27,6 +27,7 @@
 #include "XMLParser.h"
 #include "ShapeToolBar.h"
 #include "EditableTextItem.h"
+#include "Commands/CommandManager.h"
 
 // 前向声明CoreSvgEngine类
 class CoreSvgEngine;

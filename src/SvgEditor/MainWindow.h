@@ -22,6 +22,7 @@
 #include "CanvasArea.h"
 #include "ShapeToolBar.h"
 #include "../CoreSvgEngine/CoreSvgEngine.h"
+#include "Commands/CommandManager.h"
 
 Q_DECLARE_LOGGING_CATEGORY(mainWindowLog)
 
@@ -63,6 +64,10 @@ private slots:
     void updateSelectedItemTextAlignment(int alignment);
     void updateSelectedItemTextColor(const QColor& color);
 
+    // Undo/Redo slots
+    void undo();
+    void redo();
+
 private:
     LeftSideBar* m_leftSideBar;
     RightAttrBar* m_rightAttrBar;
@@ -98,4 +103,9 @@ private:
     void updateTitle();
     bool maybeSave();
     void updateRightAttrBarFromDocument();
+    void updateUndoRedoActions();
+
+    // Undo/Redo actions
+    QAction* m_undoAction;
+    QAction* m_redoAction;
 };

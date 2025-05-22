@@ -1,6 +1,9 @@
 ﻿#include "MainWindow.h"
 #include <QTimer>
 
+// Include the undo/redo implementation
+#include "MainWindow_UndoRedo.cpp"
+
 Q_LOGGING_CATEGORY(mainWindowLog, "MainWindow")
 
 static inline QString picturesLocation()
@@ -15,7 +18,9 @@ MainWindow::MainWindow(QWidget *parent)
     m_canvasArea(new CanvasArea(this)),
     m_shapeToolBar(new ShapeToolBar(this)),
     m_svgEngine(new CoreSvgEngine),
-    m_documentModified(false)
+    m_documentModified(false),
+    m_undoAction(nullptr),
+    m_redoAction(nullptr)
 {
     qCDebug(mainWindowLog) << "MainWindow constructed.";
 
@@ -158,6 +163,13 @@ MainWindow::MainWindow(QWidget *parent)
     // Set the current engine for the canvas area
     m_canvasArea->setCurrentEngine(m_svgEngine);
 
+    // Initialize undo/redo actions state
+    updateUndoRedoActions();
+
+    // Connect to CommandManager's undoRedoChanged signal
+    connect(CommandManager::instance(), &CommandManager::undoRedoChanged,
+            this, &MainWindow::updateUndoRedoActions);
+
     showStatusMessage(tr("Ready"), 2000);
 
     qCDebug(mainWindowLog) << "MainWindow construct success.";
@@ -197,6 +209,10 @@ void MainWindow::newFile()
             if (m_svgEngine->saveSvgFile(fileName.toStdString())) {
                 m_currentFilePath = fileName;
                 m_documentModified = false;
+
+                // Clear the command history for the new file
+                CommandManager::instance()->clear();
+                updateUndoRedoActions();
 
                 loadFileWithEngine(fileName);
                 updateRightAttrBarFromDocument();
@@ -239,6 +255,10 @@ void MainWindow::openFile()
             qCDebug(mainWindowLog) << "Opening file:" << fileName;
 
             if (m_svgEngine->loadSvgFile(fileName.toStdString())) {
+                // Clear the command history for the opened file
+                CommandManager::instance()->clear();
+                updateUndoRedoActions();
+
                 if (loadFileWithEngine(fileName)) {
                     showStatusMessage(tr("File opened"), 2000);
                 }
@@ -514,11 +534,32 @@ void MainWindow::setupMenus()
     connect(fitToWindowAction, &QAction::triggered, m_canvasArea, &CanvasArea::fitToView);
     viewMenu->addAction(fitToWindowAction);
 
+    // Add Edit menu with undo/redo
+    QMenu* editMenu = menuBar()->addMenu(tr("Edit"));
+
+    // Create undo action
+    m_undoAction = new QAction(tr("Undo"), this);
+    m_undoAction->setShortcut(QKeySequence::Undo);
+    m_undoAction->setIcon(QIcon::fromTheme("edit-undo", QIcon(":/icons/undo.png")));
+    m_undoAction->setEnabled(false);
+    connect(m_undoAction, &QAction::triggered, this, &MainWindow::undo);
+    editMenu->addAction(m_undoAction);
+
+    // Create redo action
+    m_redoAction = new QAction(tr("Redo"), this);
+    m_redoAction->setShortcut(QKeySequence::Redo);
+    m_redoAction->setIcon(QIcon::fromTheme("edit-redo", QIcon(":/icons/redo.png")));
+    m_redoAction->setEnabled(false);
+    connect(m_redoAction, &QAction::triggered, this, &MainWindow::redo);
+    editMenu->addAction(m_redoAction);
+
+    // Connect to CommandManager's undoRedoChanged signal
+    connect(CommandManager::instance(), &CommandManager::undoRedoChanged,
+            this, &MainWindow::updateUndoRedoActions);
+
     QMenu* settingsMenu = menuBar()->addMenu(tr("Settings"));
 
     m_languageMenu = settingsMenu->addMenu(tr("Language"));
-
-    // TODO: Add Edit menu and other menus
 
     qCDebug(mainWindowLog) << "Menu Setup success.";
 }
@@ -546,6 +587,12 @@ void MainWindow::setupToolBar()
     saveAction->setIcon(QIcon::fromTheme("document-save", QIcon(":/icons/save.png")));
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
     m_mainToolBar->addAction(saveAction);
+
+    m_mainToolBar->addSeparator();
+
+    // Add undo/redo actions to toolbar
+    m_mainToolBar->addAction(m_undoAction);
+    m_mainToolBar->addAction(m_redoAction);
 
     m_mainToolBar->addSeparator();
 

@@ -7,6 +7,8 @@
 #include "../CoreSvgEngine/SvgDocument.h"
 #include "../CoreSvgEngine/SvgShapes.h"
 #include "../CoreSvgEngine/SvgText.h"
+#include "Commands/AddShapeCommand.h"
+#include "Commands/RemoveShapeCommand.h"
 
 Q_LOGGING_CATEGORY(canvasAreaLog, "CanvasArea")
 
@@ -213,20 +215,12 @@ void CanvasArea::finalizeShape()
 
     qCDebug(canvasAreaLog) << "Finalizing shape of type" << static_cast<int>(m_currentShapeType);
 
-    // Store a reference to the current item before adding it to the document
+    // Store a reference to the current item
     QGraphicsItem* finalizedItem = m_currentItem;
 
-    // Add the shape to the document
-    addShapeToDocument(m_currentItem);
-
-    // Mark the document as modified
-    if (m_currentEngine && m_currentEngine->getCurrentDocument()) {
-        qCDebug(canvasAreaLog) << "Document marked as modified";
-        // We need to notify the MainWindow that the document has been modified
-        // This will be done through the shapeCreated signal
-    } else {
-        qCWarning(canvasAreaLog) << "Cannot mark document as modified: engine or document is null";
-    }
+    // Create and execute an AddShapeCommand
+    auto command = std::make_unique<AddShapeCommand>(this, m_currentItem, m_currentShapeType);
+    CommandManager::instance()->executeCommand(std::move(command));
 
     // For text items, ensure they're selected so the properties panel updates
     if (m_currentShapeType == ShapeType::Text) {
@@ -239,10 +233,10 @@ void CanvasArea::finalizeShape()
         qCDebug(canvasAreaLog) << "Text item selected after creation";
     }
 
-    // Reset the current item pointer (ownership transferred to the document)
+    // Reset the current item pointer (ownership transferred to the command)
     m_currentItem = nullptr;
 
-    qCDebug(canvasAreaLog) << "Shape finalized and added to document";
+    qCDebug(canvasAreaLog) << "Shape finalized and added to document via command";
 }
 
 void CanvasArea::setZoom(qreal factor)
@@ -475,6 +469,12 @@ void CanvasArea::addShapeToDocument(QGraphicsItem* item)
     SvgDocument* doc = m_currentEngine->getCurrentDocument();
     if (!doc) {
         qCWarning(canvasAreaLog) << "Cannot add shape to document: document is null";
+        return;
+    }
+
+    // Check if the item is already in the document's graphics items list
+    if (doc->m_graphicsItems.contains(item)) {
+        qCDebug(canvasAreaLog) << "Item is already in document, skipping addition";
         return;
     }
 

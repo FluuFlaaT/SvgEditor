@@ -13,6 +13,10 @@ set(SOURCES
     XMLParser.cpp
     ShapeToolBar.cpp
     EditableTextItem.cpp
+    Commands/Command.cpp
+    Commands/CommandManager.cpp
+    Commands/AddShapeCommand.cpp
+    Commands/RemoveShapeCommand.cpp
 )
 
 set(HEADERS
@@ -23,6 +27,11 @@ set(HEADERS
     XMLParser.h
     ShapeToolBar.h
     EditableTextItem.h
+    Commands/Command.h
+    Commands/CommandManager.h
+    Commands/AddShapeCommand.h
+    Commands/RemoveShapeCommand.h
+    Commands/CommandUtils.h
 )
 
 file(GLOB UI_FILES *.ui)
@@ -50,6 +59,6 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     Qt5::Widgets
     Qt5::Svg
     Qt5::Xml
-    CoreSvgEngine
+    CoreSvgEngine_static
 )
 
