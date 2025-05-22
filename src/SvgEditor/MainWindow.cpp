@@ -72,6 +72,7 @@ void MainWindow::setupMenus()
 {
     QMenu* fileMenu = menuBar()->addMenu(tr("File"));
 
+
     QAction* newAction = new QAction(tr("New"), this);
     newAction->setShortcut(QKeySequence::New);
     connect(newAction, &QAction::triggered, this, &MainWindow::newFile);

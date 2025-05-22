@@ -2,6 +2,8 @@
 
 #include <QWidget>
 #include <vector>
+#include <QVector>
+#include <QPushButton>
 
 class LeftSideBar : public QWidget
 {
@@ -15,7 +17,7 @@ public:
     QPushButton *drawBtn;
     QPushButton *shapeBtn;
     QPushButton *textBtn;
-    std::vector<QPushButton**> btnGroup = {&selectBtn, &drawBtn, &shapeBtn, &textBtn};
+    QVector<QPushButton**> btnGroup = {&selectBtn, &drawBtn, &shapeBtn, &textBtn};
 
 private:
     
