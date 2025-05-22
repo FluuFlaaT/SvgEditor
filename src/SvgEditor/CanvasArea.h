@@ -32,7 +32,7 @@ public:
     void zoomIn();
     void zoomOut();
     void resetZoom();
-    void fitInView();
+    void fitToView(); // Changed from fitInView to avoid conflict with QGraphicsView::fitInView
     qreal currentZoom() const { return m_zoomFactor; }
 
 signals:

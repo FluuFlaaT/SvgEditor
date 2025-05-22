@@ -55,7 +55,7 @@ void CanvasArea::resetZoom()
     setZoom(1.0);
 }
 
-void CanvasArea::fitInView()
+void CanvasArea::fitToView()
 {
     if (m_scene->items().isEmpty()) {
         return;
@@ -68,7 +68,8 @@ void CanvasArea::fitInView()
     // Fit the scene in the view
     QRectF sceneRect = m_scene->itemsBoundingRect();
     if (!sceneRect.isEmpty()) {
-        fitInView(sceneRect, Qt::KeepAspectRatio);
+        // Call the parent class's fitInView method
+        QGraphicsView::fitInView(sceneRect, Qt::KeepAspectRatio);
 
         // Calculate the new zoom factor
         QTransform transform = this->transform();

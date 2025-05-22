@@ -106,7 +106,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_leftSideBar, &LeftSideBar::zoomInRequested, m_canvasArea, &CanvasArea::zoomIn);
     connect(m_leftSideBar, &LeftSideBar::zoomOutRequested, m_canvasArea, &CanvasArea::zoomOut);
     connect(m_leftSideBar, &LeftSideBar::zoomResetRequested, m_canvasArea, &CanvasArea::resetZoom);
-    connect(m_leftSideBar, &LeftSideBar::zoomFitRequested, m_canvasArea, &CanvasArea::fitInView);
+    connect(m_leftSideBar, &LeftSideBar::zoomFitRequested, m_canvasArea, &CanvasArea::fitToView);
 
     showStatusMessage(tr("Ready"), 2000);
 
@@ -454,7 +454,7 @@ void MainWindow::setupMenus()
     QAction* fitToWindowAction = new QAction(tr("Fit to Window"), this);
     fitToWindowAction->setShortcut(QKeySequence(tr("Ctrl+F")));
     fitToWindowAction->setIcon(QIcon::fromTheme("zoom-fit-best", QIcon(":/icons/zoom-fit.png")));
-    connect(fitToWindowAction, &QAction::triggered, m_canvasArea, &CanvasArea::fitInView);
+    connect(fitToWindowAction, &QAction::triggered, m_canvasArea, &CanvasArea::fitToView);
     viewMenu->addAction(fitToWindowAction);
 
     QMenu* settingsMenu = menuBar()->addMenu(tr("Settings"));
@@ -510,7 +510,7 @@ void MainWindow::setupToolBar()
 
     QAction* zoomFitAction = new QAction(tr("Fit to View"), this);
     zoomFitAction->setIcon(QIcon::fromTheme("zoom-fit-best", QIcon(":/icons/zoom-fit.png")));
-    connect(zoomFitAction, &QAction::triggered, m_canvasArea, &CanvasArea::fitInView);
+    connect(zoomFitAction, &QAction::triggered, m_canvasArea, &CanvasArea::fitToView);
     m_mainToolBar->addAction(zoomFitAction);
 
     qCDebug(mainWindowLog) << "Toolbar setup complete";
