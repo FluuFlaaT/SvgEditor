@@ -15,7 +15,6 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     setLayout(mainLayout);
 
-    // Create tool buttons
     selectBtn = new QPushButton("Select", this);
     drawBtn = new QPushButton("Draw", this);
     shapeBtn = new QPushButton("Shapes", this);
@@ -23,7 +22,6 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     dragBtn = new QPushButton("Drag", this);
     zoomBtn = new QPushButton("Zoom", this);
 
-    // Make tool buttons checkable for radio button-like behavior
     selectBtn->setCheckable(true);
     drawBtn->setCheckable(true);
     shapeBtn->setCheckable(true);
@@ -31,7 +29,6 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     dragBtn->setCheckable(true);
     zoomBtn->setCheckable(true);
 
-    // Set tooltips for buttons
     selectBtn->setToolTip(tr("Select and manipulate objects"));
     drawBtn->setToolTip(tr("Draw freehand lines"));
     shapeBtn->setToolTip(tr("Create shapes"));
@@ -39,10 +36,8 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     dragBtn->setToolTip(tr("Pan/scroll the canvas view"));
     zoomBtn->setToolTip(tr("Zoom controls"));
 
-    // Set cursor for drag button to indicate its function
     dragBtn->setCursor(Qt::OpenHandCursor);
 
-    // Create button group for mutually exclusive selection
     m_toolButtonGroup = new QButtonGroup(this);
     m_toolButtonGroup->addButton(selectBtn, 0);
     m_toolButtonGroup->addButton(drawBtn, 1);
@@ -52,11 +47,9 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     m_toolButtonGroup->addButton(zoomBtn, 5);
     m_toolButtonGroup->setExclusive(true);
 
-    // Connect button signals
     connect(dragBtn, &QPushButton::clicked, this, &LeftSideBar::dragToolRequested);
     connect(zoomBtn, &QPushButton::clicked, this, &LeftSideBar::zoomToolRequested);
 
-    // Add tool buttons to layout
     QLabel* toolsLabel = new QLabel("Tools", this);
     toolsLabel->setAlignment(Qt::AlignCenter);
     toolsLabel->setStyleSheet("font-weight: bold;");
@@ -66,38 +59,31 @@ LeftSideBar::LeftSideBar(QWidget *parent)
         mainLayout->addWidget(*btn);
     }
 
-    // Create zoom tools widget (initially hidden)
     zoomToolsWidget = new QWidget(this);
     QVBoxLayout* zoomLayout = new QVBoxLayout(zoomToolsWidget);
     zoomLayout->setContentsMargins(5, 5, 5, 5);
     zoomLayout->setSpacing(5);
 
-    // Add a header label for Zoom Tools similar to Shape Tools
     QLabel* zoomToolsLabel = new QLabel("Zoom Tools", zoomToolsWidget);
     zoomToolsLabel->setAlignment(Qt::AlignCenter);
     zoomToolsLabel->setStyleSheet("font-weight: bold;");
     zoomLayout->addWidget(zoomToolsLabel);
 
-    // Create zoom sub-buttons
     zoomInBtn = new QPushButton(tr("Zoom In"), zoomToolsWidget);
     zoomOutBtn = new QPushButton(tr("Zoom Out"), zoomToolsWidget);
     resetZoomBtn = new QPushButton(tr("Reset Zoom"), zoomToolsWidget);
     fitToWindowBtn = new QPushButton(tr("Fit to Window"), zoomToolsWidget);
 
-    // Initialize the zoom button group
     zoomBtnGroup = {zoomInBtn, zoomOutBtn, resetZoomBtn, fitToWindowBtn};
 
-    // Add zoom buttons to layout
     zoomLayout->addWidget(zoomInBtn);
     zoomLayout->addWidget(zoomOutBtn);
     zoomLayout->addWidget(resetZoomBtn);
     zoomLayout->addWidget(fitToWindowBtn);
 
-    // Add zoom tools widget to main layout
     mainLayout->addWidget(zoomToolsWidget);
-    zoomToolsWidget->hide(); // Initially hidden
+    zoomToolsWidget->hide();
 
-    // Connect zoom buttons to signals with highlighting
     connect(zoomInBtn, &QPushButton::clicked, this, [this]() {
         highlightZoomButton(0);
         emit zoomInRequested();

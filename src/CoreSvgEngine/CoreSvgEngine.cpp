@@ -2,7 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-// #include "../LoggingService/LoggingService.h"
 #include <QLoggingCategory>
 #include <QString>
 Q_DECLARE_LOGGING_CATEGORY(coreSvgEngineLog)
@@ -15,7 +14,6 @@ CoreSvgEngine::CoreSvgEngine() : m_document(new SvgDocument()) {
 
 CoreSvgEngine::~CoreSvgEngine() {
     qCDebug(coreSvgEngineLog) << "Destroying CoreSvgEngine instance";
-    // 换成智能指针后不需要 delete 
 }
 
 void CoreSvgEngine::createNewDocument(double width, double height, Color bgColor) {
@@ -28,10 +26,10 @@ bool CoreSvgEngine::loadSvgFile(const std::string& filePath) {
     m_document.get()->clearElements();
     if (!m_document) {
         qCDebug(coreSvgEngineLog) << "No document instance, creating new document";
-        m_document = std::make_unique<SvgDocument>(); // 如果没有文档则创建一个
+        m_document = std::make_unique<SvgDocument>();
     } else {
         qCDebug(coreSvgEngineLog) << "Clearing elements from existing document";
-        m_document->clearElements(); // 清空现有元素
+        m_document->clearElements();
     }
     std::ifstream file(filePath);
     if (!file.is_open()) {

@@ -431,15 +431,13 @@ QWidget* RightAttrBar::createCircleAttributesWidget() {
     layout->setContentsMargins(5, 10, 5, 10);
     layout->setSpacing(10);
 
-    // 1. Border width
     QHBoxLayout* borderWidthLayout = new QHBoxLayout();
     QLabel* borderWidthLabel = new QLabel(tr("Border Width:"));
     m_borderWidthSpinBox = new QSpinBox();
     m_borderWidthSpinBox->setRange(0, 9);
-    m_borderWidthSpinBox->setValue(1); // Default value
+    m_borderWidthSpinBox->setValue(1);
     m_borderWidthSpinBox->setSuffix(" px");
 
-    // Connect border width change
     connect(m_borderWidthSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int width) {
         emit borderWidthChanged(width);
         qCDebug(rightAttrBarLog) << "Border width changed to:" << width;
@@ -448,7 +446,6 @@ QWidget* RightAttrBar::createCircleAttributesWidget() {
     borderWidthLayout->addWidget(borderWidthLabel);
     borderWidthLayout->addWidget(m_borderWidthSpinBox);
 
-    // 2. Border style
     QHBoxLayout* borderStyleLayout = new QHBoxLayout();
     QLabel* borderStyleLabel = new QLabel(tr("Border Style:"));
     m_borderStyleComboBox = new QComboBox();
@@ -458,7 +455,6 @@ QWidget* RightAttrBar::createCircleAttributesWidget() {
     m_borderStyleComboBox->addItem(tr("Dash Dot Line"), static_cast<int>(Qt::DashDotLine));
     m_borderStyleComboBox->addItem(tr("Dash Dot Dot Line"), static_cast<int>(Qt::DashDotDotLine));
 
-    // Connect border style change
     connect(m_borderStyleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
         Qt::PenStyle style = Qt::SolidLine;
         switch (index) {
@@ -476,7 +472,6 @@ QWidget* RightAttrBar::createCircleAttributesWidget() {
     borderStyleLayout->addWidget(borderStyleLabel);
     borderStyleLayout->addWidget(m_borderStyleComboBox);
 
-    // 3. Border color
     QHBoxLayout* borderColorLayout = new QHBoxLayout();
     QLabel* borderColorLabel = new QLabel(tr("Border Color:"));
     m_borderColorButton = new QPushButton();
@@ -498,7 +493,6 @@ QWidget* RightAttrBar::createCircleAttributesWidget() {
     borderColorLayout->addWidget(borderColorLabel);
     borderColorLayout->addWidget(m_borderColorButton);
 
-    // 4. Fill color
     QHBoxLayout* fillColorLayout = new QHBoxLayout();
     QLabel* fillColorLabel = new QLabel(tr("Fill Color:"));
     m_fillColorButton = new QPushButton();
@@ -536,15 +530,13 @@ QWidget* RightAttrBar::createRectangleAttributesWidget()
     layout->setContentsMargins(5, 10, 5, 10);
     layout->setSpacing(10);
 
-    // 1. Border width
     QHBoxLayout* borderWidthLayout = new QHBoxLayout();
     QLabel* borderWidthLabel = new QLabel(tr("Border Width:"));
     m_borderWidthSpinBox = new QSpinBox();
     m_borderWidthSpinBox->setRange(0, 9);
-    m_borderWidthSpinBox->setValue(1); // Default value
+    m_borderWidthSpinBox->setValue(1);
     m_borderWidthSpinBox->setSuffix(" px");
 
-    // Connect border width change
     connect(m_borderWidthSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int width) {
         emit borderWidthChanged(width);
         qCDebug(rightAttrBarLog) << "Border width changed to:" << width;
@@ -553,7 +545,6 @@ QWidget* RightAttrBar::createRectangleAttributesWidget()
     borderWidthLayout->addWidget(borderWidthLabel);
     borderWidthLayout->addWidget(m_borderWidthSpinBox);
 
-    // 2. Border style
     QHBoxLayout* borderStyleLayout = new QHBoxLayout();
     QLabel* borderStyleLabel = new QLabel(tr("Border Style:"));
     m_borderStyleComboBox = new QComboBox();
@@ -563,7 +554,6 @@ QWidget* RightAttrBar::createRectangleAttributesWidget()
     m_borderStyleComboBox->addItem(tr("Dash Dot Line"), static_cast<int>(Qt::DashDotLine));
     m_borderStyleComboBox->addItem(tr("Dash Dot Dot Line"), static_cast<int>(Qt::DashDotDotLine));
 
-    // Connect border style change
     connect(m_borderStyleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
         Qt::PenStyle style = Qt::SolidLine;
         switch (index) {
@@ -581,7 +571,6 @@ QWidget* RightAttrBar::createRectangleAttributesWidget()
     borderStyleLayout->addWidget(borderStyleLabel);
     borderStyleLayout->addWidget(m_borderStyleComboBox);
 
-    // 3. Border color
     QHBoxLayout* borderColorLayout = new QHBoxLayout();
     QLabel* borderColorLabel = new QLabel(tr("Border Color:"));
     m_borderColorButton = new QPushButton();
@@ -603,7 +592,6 @@ QWidget* RightAttrBar::createRectangleAttributesWidget()
     borderColorLayout->addWidget(borderColorLabel);
     borderColorLayout->addWidget(m_borderColorButton);
 
-    // 4. Fill color
     QHBoxLayout* fillColorLayout = new QHBoxLayout();
     QLabel* fillColorLabel = new QLabel(tr("Fill Color:"));
     m_fillColorButton = new QPushButton();
@@ -641,15 +629,13 @@ QWidget* RightAttrBar::createLineAttributesWidget()
     layout->setContentsMargins(5, 10, 5, 10);
     layout->setSpacing(10);
 
-    // 1. Border width
     QHBoxLayout* borderWidthLayout = new QHBoxLayout();
     QLabel* borderWidthLabel = new QLabel(tr("Line Width:"));
     m_borderWidthSpinBox = new QSpinBox();
     m_borderWidthSpinBox->setRange(0, 9);
-    m_borderWidthSpinBox->setValue(1); // Default value
+    m_borderWidthSpinBox->setValue(1);
     m_borderWidthSpinBox->setSuffix(" px");
 
-    // Connect border width change
     connect(m_borderWidthSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int width) {
         emit borderWidthChanged(width);
         qCDebug(rightAttrBarLog) << "Line width changed to:" << width;
@@ -658,7 +644,6 @@ QWidget* RightAttrBar::createLineAttributesWidget()
     borderWidthLayout->addWidget(borderWidthLabel);
     borderWidthLayout->addWidget(m_borderWidthSpinBox);
 
-    // 2. Border style
     QHBoxLayout* borderStyleLayout = new QHBoxLayout();
     QLabel* borderStyleLabel = new QLabel(tr("Line Style:"));
     m_borderStyleComboBox = new QComboBox();
@@ -668,7 +653,6 @@ QWidget* RightAttrBar::createLineAttributesWidget()
     m_borderStyleComboBox->addItem(tr("Dash Dot Line"), static_cast<int>(Qt::DashDotLine));
     m_borderStyleComboBox->addItem(tr("Dash Dot Dot Line"), static_cast<int>(Qt::DashDotDotLine));
 
-    // Connect border style change
     connect(m_borderStyleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
         Qt::PenStyle style = Qt::SolidLine;
         switch (index) {
@@ -686,7 +670,6 @@ QWidget* RightAttrBar::createLineAttributesWidget()
     borderStyleLayout->addWidget(borderStyleLabel);
     borderStyleLayout->addWidget(m_borderStyleComboBox);
 
-    // 3. Border color
     QHBoxLayout* borderColorLayout = new QHBoxLayout();
     QLabel* borderColorLabel = new QLabel(tr("Line Color:"));
     m_borderColorButton = new QPushButton();

@@ -172,9 +172,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::newFile()
 {
-    // Check if we need to save current document
     if (m_documentModified && !maybeSave()) {
-        return; // User canceled the operation
+        return;
     }
 
     QFileDialog fileDialog(this);
@@ -193,18 +192,13 @@ void MainWindow::newFile()
         if (!fileDialog.selectedFiles().isEmpty()) {
             QString fileName = fileDialog.selectedFiles().constFirst();
 
-            // Create a new SVG document with default size
             m_svgEngine->createNewDocument(800, 600);
 
-            // Save the new document
             if (m_svgEngine->saveSvgFile(fileName.toStdString())) {
                 m_currentFilePath = fileName;
                 m_documentModified = false;
 
-                // Load the new file
                 loadFileWithEngine(fileName);
-
-                // Ensure the RightAttrBar is in sync with the new document
                 updateRightAttrBarFromDocument();
 
                 qCDebug(mainWindowLog) << "New file created:" << fileName;
@@ -280,10 +274,7 @@ bool MainWindow::loadFileWithEngine(const QString& fileName) {
     m_currentFilePath = fileName;
     m_documentModified = false;
     updateTitle();
-
-    // Update the RightAttrBar with the document properties
     updateRightAttrBarFromDocument();
-
     m_canvasArea->update();
 
     qCDebug(mainWindowLog) << "File loaded successfully:" << fileName;
@@ -302,10 +293,7 @@ void MainWindow::saveFile()
     if (m_svgEngine->saveSvgFile(m_currentFilePath.toStdString())) {
         m_documentModified = false;
         updateTitle();
-
-        // Ensure the RightAttrBar is in sync with the saved document
         updateRightAttrBarFromDocument();
-
         showStatusMessage(tr("File saved"), 2000);
         qCDebug(mainWindowLog) << "File saved successfully";
     } else {

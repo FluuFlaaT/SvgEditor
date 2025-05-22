@@ -100,22 +100,16 @@ void CanvasArea::createShape(const QPointF& startPoint, const QPointF& endPoint)
     qCDebug(canvasAreaLog) << "Creating shape of type" << static_cast<int>(m_currentShapeType)
                           << "from" << startPoint << "to" << endPoint;
 
-    // For text items, we don't want to remove the previous item
-    // as we want to support multiple text elements on the canvas
     if (m_currentShapeType != ShapeType::Text) {
-        // Remove the current item if it exists
         if (m_currentItem) {
             m_scene->removeItem(m_currentItem);
             delete m_currentItem;
             m_currentItem = nullptr;
         }
     } else {
-        // For text items, just set the current item to nullptr
-        // without removing any existing items from the scene
         m_currentItem = nullptr;
     }
 
-    // Create a new shape based on the current shape type
     switch (m_currentShapeType) {
         case ShapeType::Line:
             qCDebug(canvasAreaLog) << "Creating Line";
@@ -134,7 +128,6 @@ void CanvasArea::createShape(const QPointF& startPoint, const QPointF& endPoint)
             QPointF center = QPointF((startPoint.x() + endPoint.x()) / 2, (startPoint.y() + endPoint.y()) / 2);
             qreal radius = QLineF(center, endPoint).length();
 
-            // Ensure a minimum radius of 10 pixels
             if (radius < 10.0) {
                 radius = 10.0;
                 qCDebug(canvasAreaLog) << "  Using minimum radius of 10.0";
@@ -185,7 +178,6 @@ void CanvasArea::createShape(const QPointF& startPoint, const QPointF& endPoint)
             break;
     }
 
-    // Add the item to the scene
     if (m_currentItem) {
         m_scene->addItem(m_currentItem);
         qCDebug(canvasAreaLog) << "Added item to scene:" << m_currentItem;
@@ -196,23 +188,18 @@ void CanvasArea::createShape(const QPointF& startPoint, const QPointF& endPoint)
 
 void CanvasArea::updateShape(const QPointF& endPoint)
 {
-    // Update the current shape based on the new end point
     if (!m_currentItem) {
         qCWarning(canvasAreaLog) << "Cannot update shape: current item is null";
         return;
     }
 
-    // For text items, we don't update during mouse movement
     if (m_currentShapeType == ShapeType::Text) {
         return;
     }
 
     qCDebug(canvasAreaLog) << "Updating shape from" << m_startPoint << "to" << endPoint;
 
-    // Remove the current item
     m_scene->removeItem(m_currentItem);
-
-    // Create a new shape with the updated end point
     createShape(m_startPoint, endPoint);
 }
 
@@ -425,13 +412,11 @@ QGraphicsPolygonItem* CanvasArea::createStar(const QPointF& center, qreal outerR
 void CanvasArea::setDragMode(bool enabled)
 {
     if (enabled) {
-        // Enable drag mode (pan/scroll)
         QGraphicsView::setDragMode(QGraphicsView::ScrollHandDrag);
         viewport()->setCursor(Qt::OpenHandCursor);
         m_currentShapeType = ShapeType::None;
         qCDebug(canvasAreaLog) << "Drag mode enabled";
     } else {
-        // Disable drag mode (back to selection)
         QGraphicsView::setDragMode(QGraphicsView::RubberBandDrag);
         viewport()->setCursor(Qt::ArrowCursor);
         qCDebug(canvasAreaLog) << "Drag mode disabled";
@@ -442,7 +427,6 @@ void CanvasArea::setShapeCreationMode(ShapeType type)
 {
     m_currentShapeType = type;
 
-    // Set appropriate cursor for shape creation
     switch (type) {
         case ShapeType::Line:
         case ShapeType::Rectangle:
@@ -463,7 +447,6 @@ void CanvasArea::setShapeCreationMode(ShapeType type)
             break;
     }
 
-    // Disable drag mode when in shape creation mode
     QGraphicsView::setDragMode(QGraphicsView::NoDrag);
     qCDebug(canvasAreaLog) << "Shape creation mode set to:" << static_cast<int>(type);
 }

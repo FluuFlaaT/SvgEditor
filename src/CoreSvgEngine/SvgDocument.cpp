@@ -26,7 +26,6 @@
 Q_DECLARE_LOGGING_CATEGORY(svgDocumentLog)
 Q_LOGGING_CATEGORY(svgDocumentLog, "SvgDocument")
 
-
 SvgDocument::~SvgDocument() {
     qCDebug(svgDocumentLog) << "Destroying SVG document with" << m_elements.size() << "elements";
 }
@@ -78,12 +77,8 @@ void SvgDocument::clearElements() {
     qCInfo(svgDocumentLog) << "Clearing all elements from document, count: " + QString::fromStdString(std::to_string(m_elements.size()));
     m_elements.clear();
 
-    // Properly delete all graphics items before clearing the vector
-    // This prevents memory leaks and dangling pointers
     for (auto* item : m_graphicsItems) {
         if (item && item->scene() == nullptr) {
-            // Only delete items that are not in a scene
-            // Items in a scene will be deleted by the scene
             delete item;
         }
     }
@@ -93,21 +88,17 @@ void SvgDocument::clearElements() {
 std::string SvgDocument::generateSvgContent() const {
     qCInfo(svgDocumentLog) << "Generating SVG content for document with " + QString::fromStdString(std::to_string(m_elements.size())) + " elements";
     std::stringstream ss;
-    // Use simple \" for quotes in attributes, as tinyxml2 expects standard XML format.
     ss << "<svg width=\"" << m_width << "\" height=\"" << m_height << "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
 
-    // Add background color if it's not fully transparent white
     if (m_backgroundColor.alpha > 0 &&
         !(m_backgroundColor.r == 255 && m_backgroundColor.g == 255 &&
           m_backgroundColor.b == 255 && m_backgroundColor.alpha == 255)) {
-         // Ensure attributes in rect also use simple \"
          ss << "  <rect width=\"100%\" height=\"100%\" fill=\"" << m_backgroundColor.toString() << "\" />\n";
     }
 
-    // Add all elements with proper line endings
-    for (const auto& elem : m_elements) { // Iterate by const reference
+    for (const auto& elem : m_elements) {
         if (elem) {
-            ss << "  " << elem->toSvgString() << "\n"; // Use proper newline character
+            ss << "  " << elem->toSvgString() << "\n";
         }
     }
     ss << "</svg>";
@@ -131,7 +122,6 @@ bool SvgDocument::parseSvgContent(const std::string& content) {
         return false;
     }
 
-    // Parse width and height
     const char* widthStr = svgRootElement->Attribute("width");
     if (widthStr) {
         std::string width(widthStr);
@@ -152,7 +142,6 @@ bool SvgDocument::parseSvgContent(const std::string& content) {
 
     tinyxml2::XMLElement* childElementToParse = svgRootElement->FirstChildElement();
 
-    // Check if the first child is a background rectangle
     if (childElementToParse && strcmp(childElementToParse->Name(), "rect") == 0) {
         const char* rectWidthAttr = childElementToParse->Attribute("width");
         const char* rectHeightAttr = childElementToParse->Attribute("height");
@@ -169,12 +158,12 @@ bool SvgDocument::parseSvgContent(const std::string& content) {
 
             if (isFullWidth && isFullHeight) {
                 setBackgroundColor(Color::fromString(rectFillAttr));
-                childElementToParse = childElementToParse->NextSiblingElement(); // Skip this rect for general parsing
+                childElementToParse = childElementToParse->NextSiblingElement();
             }
         }
     }
 
-    parseChildElements(childElementToParse); // Pass the potentially advanced child pointer
+    parseChildElements(childElementToParse);
 
     qCInfo(svgDocumentLog) << "SVG content parsed successfully with " + QString::fromStdString(std::to_string(m_elements.size())) + " elements";
     return true;
@@ -195,7 +184,6 @@ void SvgDocument::setBackgroundColor(const Color& color) {
     m_backgroundColor = color;
 }
 
-// Modified to take the starting element to parse
 void SvgDocument::parseChildElements(tinyxml2::XMLElement* element) {
     while (element) {
         std::string elementName = element->Name();
@@ -215,7 +203,7 @@ void SvgDocument::parseChildElements(tinyxml2::XMLElement* element) {
         } else if (elementName == "text") {
             parseSvgText(element);
         } else if (elementName == "g") {
-            parseChildElements(element->FirstChildElement()); // Recursively parse children of <g>
+            parseChildElements(element->FirstChildElement());
         }
 
         element = element->NextSiblingElement();
@@ -232,10 +220,8 @@ void SvgDocument::parseSvgLine(tinyxml2::XMLElement* element) {
     auto line = std::make_unique<SvgLine>(Point{x1, y1}, Point{x2, y2});
     parseCommonAttributes(element, line.get());
 
-    // ����QGraphicsLineItem
     auto graphicsItem = new QGraphicsLineItem(x1, y1, x2, y2);
 
-    // Ӧ����ʽ����
     QPen pen;
     pen.setWidth(line->getStrokeWidth());
     Color strokeColor = line->getStrokeColor();
@@ -260,24 +246,18 @@ void SvgDocument::parseSvgRectangle(tinyxml2::XMLElement* element) {
     auto rect = std::make_unique<SvgRectangle>(Point{x, y}, width, height, rx, ry);
     parseCommonAttributes(element, rect.get());
 
-    // ����QGraphicsRectItem
     auto graphicsItem = new QGraphicsRectItem(x, y, width, height);
 
-    // Ӧ����ʽ����
     QPen pen;
     pen.setWidth(rect->getStrokeWidth());
     Color strokeColor = rect->getStrokeColor();
     pen.setColor(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha));
     graphicsItem->setPen(pen);
 
-    // ���������ɫ
     Color fillColor = rect->getFillColor();
     graphicsItem->setBrush(QBrush(QColor(fillColor.r, fillColor.g, fillColor.b, fillColor.alpha)));
 
-    // ����͸����
     graphicsItem->setOpacity(rect->getOpacity());
-
-    // QGraphicsRectItem��ֱ��֧��Բ�ǣ�����Բ�������QPainterPath���˴�����
 
     m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(rect));
@@ -292,22 +272,17 @@ void SvgDocument::parseSvgCircle(tinyxml2::XMLElement* element) {
     auto circle = std::make_unique<SvgCircle>(Point{cx, cy}, r);
     parseCommonAttributes(element, circle.get());
 
-    // ����QGraphicsEllipseItem����Բ����Ա�ʾԲ��
-    // ע�⣺��Բ�Ĳ��������Ͻ�����(cx-r, cy-r)�Ϳ���(2r, 2r)
     auto graphicsItem = new QGraphicsEllipseItem(cx-r, cy-r, 2*r, 2*r);
 
-    // Ӧ����ʽ����
     QPen pen;
     pen.setWidth(circle->getStrokeWidth());
     Color strokeColor = circle->getStrokeColor();
     pen.setColor(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha));
     graphicsItem->setPen(pen);
 
-    // ���������ɫ
     Color fillColor = circle->getFillColor();
     graphicsItem->setBrush(QBrush(QColor(fillColor.r, fillColor.g, fillColor.b, fillColor.alpha)));
 
-    // ����͸����
     graphicsItem->setOpacity(circle->getOpacity());
 
     m_graphicsItems.push_back(graphicsItem);
@@ -324,22 +299,17 @@ void SvgDocument::parseSvgEllipse(tinyxml2::XMLElement* element) {
     auto ellipse = std::make_unique<SvgEllipse>(Point{cx, cy}, rx, ry);
     parseCommonAttributes(element, ellipse.get());
 
-    // ����QGraphicsEllipseItem
-    // ע�⣺��Բ�Ĳ��������Ͻ�����(cx-rx, cy-ry)�Ϳ���(2rx, 2ry)
     auto graphicsItem = new QGraphicsEllipseItem(cx-rx, cy-ry, 2*rx, 2*ry);
 
-    // Ӧ����ʽ����
     QPen pen;
     pen.setWidth(ellipse->getStrokeWidth());
     Color strokeColor = ellipse->getStrokeColor();
     pen.setColor(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha));
     graphicsItem->setPen(pen);
 
-    // ���������ɫ
     Color fillColor = ellipse->getFillColor();
     graphicsItem->setBrush(QBrush(QColor(fillColor.r, fillColor.g, fillColor.b, fillColor.alpha)));
 
-    // ����͸����
     graphicsItem->setOpacity(ellipse->getOpacity());
 
     m_graphicsItems.push_back(graphicsItem);
@@ -379,7 +349,6 @@ void SvgDocument::parseSvgPolygon(tinyxml2::XMLElement* element) {
     auto polygon = std::make_unique<SvgPolygon>(points);
     parseCommonAttributes(element, polygon.get());
 
-    // ����QGraphicsPolygonItem
     QPolygonF qPolygon;
     for (const auto& point : points) {
         qPolygon << QPointF(point.x, point.y);
@@ -387,18 +356,14 @@ void SvgDocument::parseSvgPolygon(tinyxml2::XMLElement* element) {
 
     auto graphicsItem = new QGraphicsPolygonItem(qPolygon);
 
-    // Ӧ����ʽ����
     QPen pen;
     pen.setWidth(polygon->getStrokeWidth());
     Color strokeColor = polygon->getStrokeColor();
     pen.setColor(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha));
     graphicsItem->setPen(pen);
-
-    // ���������ɫ
     Color fillColor = polygon->getFillColor();
     graphicsItem->setBrush(QBrush(QColor(fillColor.r, fillColor.g, fillColor.b, fillColor.alpha)));
 
-    // ����͸����
     graphicsItem->setOpacity(polygon->getOpacity());
 
     m_graphicsItems.push_back(graphicsItem);
@@ -438,7 +403,6 @@ void SvgDocument::parseSvgPolyline(tinyxml2::XMLElement* element) {
     auto polyline = std::make_unique<SvgPolyline>(points);
     parseCommonAttributes(element, polyline.get());
 
-    // �����ʺ϶���ߵ�QGraphicsPathItem
     QPainterPath path;
 
     if (!points.empty()) {
@@ -451,18 +415,15 @@ void SvgDocument::parseSvgPolyline(tinyxml2::XMLElement* element) {
 
     auto graphicsItem = new QGraphicsPathItem(path);
 
-    // Ӧ����ʽ����
     QPen pen;
     pen.setWidth(polyline->getStrokeWidth());
     Color strokeColor = polyline->getStrokeColor();
     pen.setColor(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha));
     graphicsItem->setPen(pen);
 
-    // PolylineĬ��ͨ������䣬�����������ɫ�Է���Ҫ
     Color fillColor = polyline->getFillColor();
-    graphicsItem->setBrush(Qt::NoBrush); // Ĭ�������
+    graphicsItem->setBrush(Qt::NoBrush); 
 
-    // ����͸����
     graphicsItem->setOpacity(polyline->getOpacity());
 
     m_graphicsItems.push_back(graphicsItem);
@@ -491,11 +452,9 @@ void SvgDocument::parseSvgText(tinyxml2::XMLElement* element) {
 
     parseCommonAttributes(element, textElement.get());
 
-    // ����QGraphicsSimpleTextItem����ʾ�ı�
     auto graphicsItem = new QGraphicsSimpleTextItem(QString::fromStdString(text));
     graphicsItem->setPos(x, y);
 
-    // ��������
     QFont font;
     if (fontFamily) {
         font.setFamily(QString::fromStdString(textElement->getFontFamily()));
@@ -508,12 +467,10 @@ void SvgDocument::parseSvgText(tinyxml2::XMLElement* element) {
     if (textColor.alpha > 0) {
         graphicsItem->setBrush(QBrush(QColor(textColor.r, textColor.g, textColor.b, textColor.alpha)));
     } else {
-        // ������ɫ��͸���ģ�ʹ�������ɫ
         Color strokeColor = textElement->getStrokeColor();
         graphicsItem->setBrush(QBrush(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha)));
     }
 
-    // �����ı����� (��ѡ��ͨ���ı�����Ҫ����)
     QPen pen;
     Color strokeColor = textElement->getStrokeColor();
     if (strokeColor.alpha > 0 && textElement->getStrokeWidth() > 0) {
@@ -524,7 +481,6 @@ void SvgDocument::parseSvgText(tinyxml2::XMLElement* element) {
         graphicsItem->setPen(Qt::NoPen); // Ĭ��������
     }
 
-    // ����͸����
     graphicsItem->setOpacity(textElement->getOpacity());
 
     m_graphicsItems.push_back(graphicsItem);
