@@ -44,28 +44,27 @@ LeftSideBar::LeftSideBar(QWidget *parent)
 
     mainLayout->addSpacing(20);
 
-    // Create zoom section with menu
+    // Create zoom section with four buttons
     QLabel* zoomLabel = new QLabel("Zoom", this);
     zoomLabel->setAlignment(Qt::AlignCenter);
     zoomLabel->setStyleSheet("font-weight: bold;");
     mainLayout->addWidget(zoomLabel);
 
-    zoomMenuBtn = new QToolButton(this);
-    zoomMenuBtn->setText(tr("Zoom Menu"));
-    zoomMenuBtn->setPopupMode(QToolButton::InstantPopup);
-    zoomMenu = new QMenu(this);
-    zoomInAction = zoomMenu->addAction(tr("Zoom In"));
-    zoomOutAction = zoomMenu->addAction(tr("Zoom Out"));
-    resetZoomAction = zoomMenu->addAction(tr("Reset Zoom"));
-    fitToWindowAction = zoomMenu->addAction(tr("Fit to Window"));
-    zoomMenuBtn->setMenu(zoomMenu);
-    mainLayout->addWidget(zoomMenuBtn);
+    zoomInBtn = new QPushButton(tr("Zoom In"), this);
+    zoomOutBtn = new QPushButton(tr("Zoom Out"), this);
+    resetZoomBtn = new QPushButton(tr("Reset Zoom"), this);
+    fitToWindowBtn = new QPushButton(tr("Fit to Window"), this);
 
-    // Connect zoom actions to signals
-    connect(zoomInAction, &QAction::triggered, this, &LeftSideBar::zoomInRequested);
-    connect(zoomOutAction, &QAction::triggered, this, &LeftSideBar::zoomOutRequested);
-    connect(resetZoomAction, &QAction::triggered, this, &LeftSideBar::resetZoomRequested);
-    connect(fitToWindowAction, &QAction::triggered, this, &LeftSideBar::fitToWindowRequested);
+    mainLayout->addWidget(zoomInBtn);
+    mainLayout->addWidget(zoomOutBtn);
+    mainLayout->addWidget(resetZoomBtn);
+    mainLayout->addWidget(fitToWindowBtn);
+
+    // Connect zoom buttons to signals
+    connect(zoomInBtn, &QPushButton::clicked, this, &LeftSideBar::zoomInRequested);
+    connect(zoomOutBtn, &QPushButton::clicked, this, &LeftSideBar::zoomOutRequested);
+    connect(resetZoomBtn, &QPushButton::clicked, this, &LeftSideBar::resetZoomRequested);
+    connect(fitToWindowBtn, &QPushButton::clicked, this, &LeftSideBar::fitToWindowRequested);
 
     mainLayout->addStretch();
 

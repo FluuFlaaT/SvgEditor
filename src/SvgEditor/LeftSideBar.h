@@ -26,13 +26,9 @@ public:
 
     // Zoom buttons - simplified to only keep zoomInBtn
     QPushButton *zoomInBtn;
-
-    QToolButton *zoomMenuBtn;
-    QMenu *zoomMenu;
-    QAction *zoomInAction;
-    QAction *zoomOutAction;
-    QAction *resetZoomAction;
-    QAction *fitToWindowAction;
+    QPushButton *zoomOutBtn;
+    QPushButton *resetZoomBtn;
+    QPushButton *fitToWindowBtn;
 
 signals:
     // Only keep the zoomInRequested signal
