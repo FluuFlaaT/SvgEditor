@@ -5,12 +5,14 @@ set(SOURCES
     MainWindow.cpp
     LeftSideBar.cpp
     RightAttrBar.cpp
+    CanvasArea.cpp
 )
 
 set(HEADERS
     MainWindow.h
     LeftSideBar.h
     RightAttrBar.h
+    CanvasArea.h
 )
 
 file(GLOB UI_FILES *.ui)

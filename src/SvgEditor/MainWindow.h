@@ -3,9 +3,10 @@
 #include <QString>
 #include <QTranslator>
 #include <QStringList>
+#include <QLoggingCategory>
 #include "LeftSideBar.h"
 #include "RightAttrBar.h"
-#include <QLoggingCategory>
+#include "CanvasArea.h"
 
 Q_DECLARE_LOGGING_CATEGORY(mainWindowLog)
 
@@ -29,6 +30,7 @@ private slots:
 private:
     LeftSideBar* m_leftSideBar;
     RightAttrBar* m_rightAttrBar;
+    CanvasArea* m_canvasArea;
 
     QMenu* m_languageMenu;
     // QDir* m_translationsDir;

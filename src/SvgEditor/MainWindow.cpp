@@ -12,7 +12,8 @@ Q_LOGGING_CATEGORY(mainWindowLog, "MainWindow")
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     m_leftSideBar(new LeftSideBar(this)),
-    m_rightAttrBar(new RightAttrBar(this))
+    m_rightAttrBar(new RightAttrBar(this)),
+    m_canvasArea(new CanvasArea(this))
 {
     qCInfo(mainWindowLog) << "MainWindow constructed.";
     
