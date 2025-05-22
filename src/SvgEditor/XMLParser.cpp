@@ -6,7 +6,6 @@ Q_LOGGING_CATEGORY(xmlParserLog, "xmlParser")
 
 namespace {
 static const QSet<QString> kTargetTags = {
-    QStringLiteral("g"),
     QStringLiteral("path"),
     QStringLiteral("rect"),
     QStringLiteral("ellipse"),
