@@ -8,7 +8,9 @@
 #include <QAction>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), m_currentLanguage("en"), m_translationsPath("translations")
+    : QMainWindow(parent), 
+    m_currentLanguage("en_US"), 
+    m_translationsPath("translations")
 {
     m_leftSideBar = new LeftSideBar(this);
     m_rightAttrBar = new RightAttrBar(this);

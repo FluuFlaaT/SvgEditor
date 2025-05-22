@@ -19,6 +19,7 @@ add_executable(${TARGET_NAME}
     ${SOURCES}
     ${HEADERS}
     ${UI_FILES}
+    ${qrc_FILES}
 )
 
 set_target_properties(${TARGET_NAME} PROPERTIES
