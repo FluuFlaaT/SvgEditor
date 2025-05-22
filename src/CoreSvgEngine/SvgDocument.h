@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <QGraphicsSvgItem>
 #include "SvgElement.h"
 
 namespace tinyxml2 {
@@ -11,6 +12,7 @@ namespace tinyxml2 {
 class SvgDocument {
 private:
     std::vector<std::unique_ptr<SvgElement>> m_elements;
+    QVector<QGraphicsSvgItem*> m_svgItems; 
     double m_width;
     double m_height;
     Color m_backgroundColor;

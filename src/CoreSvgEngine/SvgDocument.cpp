@@ -205,6 +205,7 @@ void SvgDocument::parseSvgLine(tinyxml2::XMLElement* element) {
     
     auto line = std::make_unique<SvgLine>(Point{x1, y1}, Point{x2, y2});
     parseCommonAttributes(element, line.get());
+    m_svgItems.push_back(&QGraphicsSvgItem(QString::fromStdString(line.get()->toSvgString())));
     addElement(std::move(line));
 }
 
@@ -219,6 +220,7 @@ void SvgDocument::parseSvgRectangle(tinyxml2::XMLElement* element) {
     
     auto rect = std::make_unique<SvgRectangle>(Point{x, y}, width, height, rx, ry);
     parseCommonAttributes(element, rect.get());
+    m_svgItems.push_back(&QGraphicsSvgItem(QString::fromStdString(rect.get()->toSvgString())));
     addElement(std::move(rect));
 }
 
@@ -230,6 +232,7 @@ void SvgDocument::parseSvgCircle(tinyxml2::XMLElement* element) {
     
     auto circle = std::make_unique<SvgCircle>(Point{cx, cy}, r);
     parseCommonAttributes(element, circle.get());
+    m_svgItems.push_back(&QGraphicsSvgItem(QString::fromStdString(circle.get()->toSvgString())));
     addElement(std::move(circle));
 }
 
@@ -243,6 +246,7 @@ void SvgDocument::parseSvgEllipse(tinyxml2::XMLElement* element) {
     auto ellipse = std::make_unique<SvgEllipse>(Point{cx, cy}, rx, ry);
     parseCommonAttributes(element, ellipse.get());
     addElement(std::move(ellipse));
+    m_svgItems.push_back(&QGraphicsSvgItem(QString::fromStdString(ellipse.get()->toSvgString())));
 }
 
 void SvgDocument::parseSvgPolygon(tinyxml2::XMLElement* element) {
@@ -277,6 +281,7 @@ void SvgDocument::parseSvgPolygon(tinyxml2::XMLElement* element) {
     
     auto polygon = std::make_unique<SvgPolygon>(points);
     parseCommonAttributes(element, polygon.get());
+    m_svgItems.push_back(&QGraphicsSvgItem(QString::fromStdString(polygon.get()->toSvgString())));
     addElement(std::move(polygon));
 }
 
@@ -312,6 +317,7 @@ void SvgDocument::parseSvgPolyline(tinyxml2::XMLElement* element) {
     
     auto polyline = std::make_unique<SvgPolyline>(points);
     parseCommonAttributes(element, polyline.get());
+    m_svgItems.push_back(&QGraphicsSvgItem(QString::fromStdString(polyline.get()->toSvgString())));
     addElement(std::move(polyline));
 }
 
@@ -336,6 +342,7 @@ void SvgDocument::parseSvgText(tinyxml2::XMLElement* element) {
     }
     
     parseCommonAttributes(element, textElement.get());
+    m_svgItems.push_back(&QGraphicsSvgItem(QString::fromStdString(textElement.get()->toSvgString())));
     addElement(std::move(textElement));
 }
 
