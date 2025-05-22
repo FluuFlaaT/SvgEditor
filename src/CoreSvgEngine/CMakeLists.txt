@@ -15,7 +15,6 @@ target_include_directories(${TARGET_NAME} PUBLIC
 )
 
 target_link_libraries(${TARGET_NAME} PRIVATE 
-    LoggingService 
     tinyxml2::tinyxml2
     Qt5::Core
     Qt5::Gui
