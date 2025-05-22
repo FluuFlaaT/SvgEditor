@@ -58,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     resize(1280, 800);
     setWindowTitle(tr("SVG Editor"));
+    setWindowIcon(QIcon(":/icon/images/icon.svg"));
 
     m_currentFilePath = "";
     m_documentModified = false;
