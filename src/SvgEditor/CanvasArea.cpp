@@ -65,7 +65,7 @@ bool CanvasArea::openFile(const QString& fileName) {
     m_svgItem->setFlags(QGraphicsItem::ItemClipsToShape);
     m_svgItem->setCacheMode(QGraphicsItem::NoCache);
     m_svgItem->setZValue(0);
-    s->addItem(m_svgItem);
+    // s->addItem(m_svgItem);
     qCDebug(canvasAreaLog) << "Added main SVG item to scene, bounding rect:" << m_svgItem->boundingRect();
 
     m_backgroundItem = new QGraphicsRectItem(m_svgItem->boundingRect());
