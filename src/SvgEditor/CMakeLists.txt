@@ -37,3 +37,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     Qt5::Widgets
     Qt5::Svg
 )
+
+qt5_add_resources(qrc_FILES
+                edtSource.qrc
+)
