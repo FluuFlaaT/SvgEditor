@@ -9,8 +9,10 @@ set(CMAKE_AUTOUIC ON)
 
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
-find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets Svg LinguistTools REQUIRED)
 
-add_subdirectory(src/SvgEditor_Core Core) 
-add_subdirectory(src/SvgEditor_UI UI)     
-add_subdirectory(src/SvgEditor_App App)   
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+add_subdirectory(src/SvgEditor)

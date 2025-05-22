@@ -22,7 +22,6 @@ private slots:
     void exportToPNG();
     
     void handleToolSelected(int toolId);
-    void createCircle(); // SVG测试用例
 
 private:
     LeftSideBar* m_leftSideBar;

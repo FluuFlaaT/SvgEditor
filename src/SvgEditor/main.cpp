@@ -1,4 +1,3 @@
-#include "MainWindow.h"
 #include <QApplication>
 #include <QTranslator>
 #include <QLibraryInfo>
@@ -6,8 +5,10 @@
 #include <QDir>
 #include <QString>
 #include <QLoggingCategory>
+#include "MainWindow.h"
 
-Q_DECLARE_LOGGING_CATEGORY(svgEditorLog, "SvgEditor")
+Q_DECLARE_LOGGING_CATEGORY(svgEditorLog)
+Q_LOGGING_CATEGORY(svgEditorLog, "SvgEditor")
 
 int main(int argc, char *argv[])
 {

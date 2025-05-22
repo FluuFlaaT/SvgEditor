@@ -3,14 +3,12 @@ set(TARGET_NAME SvgEditor)
 set(SOURCES
     main.cpp
     MainWindow.cpp
-    DrawingLayer.cpp
     LeftSideBar.cpp
     RightAttrBar.cpp
 )
 
 set(HEADERS
     MainWindow.h
-    DrawingLayer.h
     LeftSideBar.h
     RightAttrBar.h
 )
@@ -31,5 +29,11 @@ set_target_properties(${TARGET_NAME} PROPERTIES
 target_include_directories(${TARGET_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/src
-    ${CMAKE_SOURCE_DIR}/src/LoggingService
+)
+
+target_link_libraries(${TARGET_NAME} PRIVATE
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+    Qt5::Svg
 )

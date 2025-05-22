@@ -1,9 +1,13 @@
 #pragma once
 
-class LeftSideBar
+#include <QWidget>
+
+class LeftSideBar : public QWidget
 {
+    Q_OBJECT
+
 public:
-    LeftSideBar();
+    explicit LeftSideBar(QWidget *parent = nullptr);
     ~LeftSideBar();
 
 private:
