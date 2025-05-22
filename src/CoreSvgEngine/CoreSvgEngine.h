@@ -16,6 +16,6 @@ public:
     SvgDocument* getCurrentDocument() const { return m_document.get(); }
     void createNewDocument(double width, double height, Color bgColor = {255,255,255,255});
 
-    bool loadSvgFile(const std::string& filePath);    bool saveSvgFile(const std::string& filePath) const;
+    bool loadSvgFile(const std::string& filePath);
+    bool saveSvgFile(const std::string& filePath) const;
 };
-
