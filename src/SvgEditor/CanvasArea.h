@@ -2,6 +2,13 @@
 #include <QGraphicsView>
 #include <QGraphicsSvgItem>
 #include <QGraphicsRectItem>
+#include <QGraphicsScene>
+#include <QFileInfo>
+#include <QScopedPointer>
+#include <QSvgRenderer>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(canvasAreaLog)
 
 class CanvasArea : public QGraphicsView
 {
