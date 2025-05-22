@@ -20,55 +20,54 @@ SvgDocument::~SvgDocument() {
 
 void SvgDocument::addElement(std::unique_ptr<SvgElement> element) {
     if (element) {
-        LoggingService::getInstance().info("Adding new element to document, type: " + 
-            std::to_string(static_cast<int>(element->getType())) + 
-            (element->getID().empty() ? "" : ", ID: " + element->getID()));
+        qCInfo(svgDocumentLog) << "Adding new element to document, type: " + 
+            QString::fromStdString(std::to_string(static_cast<int>(element->getType()))) + 
+            QString::fromStdString(element->getID().empty() ? "" : ", ID: " + element->getID());
         m_elements.push_back(std::move(element)); 
     }
 }
 
 bool SvgDocument::removeElementById(const std::string& id) {
-    LoggingService::getInstance().info("Removing element by ID: " + id);
+    qCInfo(svgDocumentLog) << "Removing element by ID: " + QString::fromStdString(id);
     auto it = std::remove_if(m_elements.begin(), m_elements.end(),
                              [&id](const std::unique_ptr<SvgElement>& elem){ return elem && elem->getID() == id; });
     if (it != m_elements.end()) {
         int removedCount = std::distance(it, m_elements.end());
         m_elements.erase(it, m_elements.end()); 
-        LoggingService::getInstance().info("Successfully removed " + std::to_string(removedCount) + " element(s) with ID: " + id);
+        qCInfo(svgDocumentLog) << "Successfully removed " + QString::fromStdString(std::to_string(removedCount)) + " element(s) with ID: " + QString::fromStdString(id);
         return true;
     }
-    LoggingService::getInstance().info("No element found with ID: " + id);
+    qCInfo(svgDocumentLog) << "No element found with ID: " + QString::fromStdString(id);
     return false;
 }
 
 bool SvgDocument::removeElement(const SvgElement* element_ptr) {
     if (element_ptr) {
-        LoggingService::getInstance().info("Removing element by pointer, type: " + 
-            std::to_string(static_cast<int>(element_ptr->getType())) + 
-            (element_ptr->getID().empty() ? "" : ", ID: " + element_ptr->getID()));
+        qCInfo(svgDocumentLog) << "Removing element by pointer, type: " + QString::fromStdString(std::to_string(static_cast<int>(element_ptr->getType()))) + 
+            (element_ptr->getID().empty() ? "" : ", ID: " + QString::fromStdString(element_ptr->getID()));
     } else {
-        LoggingService::getInstance().warn("Attempt to remove null element pointer");
+        qCWarning(svgDocumentLog) << "Attempt to remove null element pointer";
         return false;
     }
-    
+
     auto it = std::find_if(m_elements.begin(), m_elements.end(),
                            [element_ptr](const std::unique_ptr<SvgElement>& elem){ return elem.get() == element_ptr; });
     if (it != m_elements.end()) {
-        m_elements.erase(it); 
-        LoggingService::getInstance().info("Element successfully removed");
+        m_elements.erase(it);
+        qCInfo(svgDocumentLog) << "Element successfully removed";
         return true;
     }
-    LoggingService::getInstance().warn("Element not found in document");
+    qCWarning(svgDocumentLog) << "Element not found in document";
     return false;
 }
 
 void SvgDocument::clearElements() {
-    LoggingService::getInstance().info("Clearing all elements from document, count: " + std::to_string(m_elements.size()));
-    m_elements.clear(); 
+    qCInfo(svgDocumentLog) << "Clearing all elements from document, count: " + QString::fromStdString(std::to_string(m_elements.size()));
+    m_elements.clear();
 }
 
 std::string SvgDocument::generateSvgContent() const {
-    LoggingService::getInstance().info("Generating SVG content for document with " + std::to_string(m_elements.size()) + " elements");
+    qCInfo(svgDocumentLog) << "Generating SVG content for document with " + QString::fromStdString(std::to_string(m_elements.size())) + " elements";
     std::stringstream ss;
     // Use simple \" for quotes in attributes, as tinyxml2 expects standard XML format.
     ss << "<svg width=\"" << m_width << "\" height=\"" << m_height << "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
@@ -90,29 +89,29 @@ std::string SvgDocument::generateSvgContent() const {
 }
 
 bool SvgDocument::parseSvgContent(const std::string& content) {
-    LoggingService::getInstance().info("Parsing SVG content, content length: " + std::to_string(content.length()));
-    
+    qCInfo(svgDocumentLog) << "Parsing SVG content, content length: " + QString::fromStdString(std::to_string(content.length()));
+
     clearElements();
     
     tinyxml2::XMLDocument doc;
     if (doc.Parse(content.c_str(), content.size()) != tinyxml2::XML_SUCCESS) {
-        LoggingService::getInstance().error("Failed to parse SVG content: " + std::string(doc.ErrorStr()));
+        qCWarning(svgDocumentLog) << "Failed to parse SVG content: " + QString::fromStdString(std::string(doc.ErrorStr()));
         return false;
     }
     
     tinyxml2::XMLElement* svgRootElement = doc.FirstChildElement("svg");
     if (!svgRootElement) {
-        LoggingService::getInstance().error("Failed to find <svg> root element");
+        qCWarning(svgDocumentLog) << "Failed to find <svg> root element";
         return false;
     }
-    
+
     // Parse width and height
     const char* widthStr = svgRootElement->Attribute("width");
     if (widthStr) {
         std::string width(widthStr);
         if (width.find("px") != std::string::npos) width = width.substr(0, width.find("px"));
         try { setWidth(std::stod(width)); } catch (const std::exception& e) {
-            LoggingService::getInstance().warn("Failed to parse SVG width: " + std::string(e.what()));
+            qCWarning(svgDocumentLog) << "Failed to parse SVG width: " + QString::fromStdString(std::string(e.what()));
         }
     }
     
@@ -121,7 +120,7 @@ bool SvgDocument::parseSvgContent(const std::string& content) {
         std::string height(heightStr);
         if (height.find("px") != std::string::npos) height = height.substr(0, height.find("px"));
         try { setHeight(std::stod(height)); } catch (const std::exception& e) {
-            LoggingService::getInstance().warn("Failed to parse SVG height: " + std::string(e.what()));
+            qCWarning(svgDocumentLog) << "Failed to parse SVG height: " + QString::fromStdString(std::string(e.what()));
         }
     }
     
@@ -150,24 +149,23 @@ bool SvgDocument::parseSvgContent(const std::string& content) {
     }
     
     parseChildElements(childElementToParse); // Pass the potentially advanced child pointer
-    
-    LoggingService::getInstance().info("SVG content parsed successfully with " + 
-                                      std::to_string(m_elements.size()) + " elements");
+
+    qCInfo(svgDocumentLog) << "SVG content parsed successfully with " + QString::fromStdString(std::to_string(m_elements.size())) + " elements";
     return true;
 }
 
 void SvgDocument::setWidth(double w) { 
-    LoggingService::getInstance().info("Setting document width: " + std::to_string(m_width) + " to " + std::to_string(w > 0 ? w : 1));
+    qCInfo(svgDocumentLog) << "Setting document width: " + QString::fromStdString(std::to_string(m_width)) + " to " + QString::fromStdString(std::to_string(w > 0 ? w : 1));
     m_width = (w > 0 ? w : 1); 
 }
 
 void SvgDocument::setHeight(double h) { 
-    LoggingService::getInstance().info("Setting document height: " + std::to_string(m_height) + " to " + std::to_string(h > 0 ? h : 1));
+    qCInfo(svgDocumentLog) << "Setting document height: " + QString::fromStdString(std::to_string(m_height)) + " to " + QString::fromStdString(std::to_string(h > 0 ? h : 1));
     m_height = (h > 0 ? h : 1); 
 }
 
 void SvgDocument::setBackgroundColor(const Color& color) { 
-    LoggingService::getInstance().info("Setting document background color: " + m_backgroundColor.toString() + " to " + color.toString());
+    qCInfo(svgDocumentLog) << "Setting document background color: " + QString::fromStdString(m_backgroundColor.toString()) + " to " + QString::fromStdString(color.toString());
     m_backgroundColor = color; 
 }
 
@@ -250,7 +248,7 @@ void SvgDocument::parseSvgEllipse(tinyxml2::XMLElement* element) {
 void SvgDocument::parseSvgPolygon(tinyxml2::XMLElement* element) {
     const char* pointsStr = element->Attribute("points");
     if (!pointsStr) {
-        LoggingService::getInstance().warn("Polygon element missing 'points' attribute");
+        qCWarning(svgDocumentLog) << "Polygon element missing 'points' attribute";
         return;
     }
     
@@ -267,13 +265,13 @@ void SvgDocument::parseSvgPolygon(tinyxml2::XMLElement* element) {
                 double y = std::stod(pointPair.substr(commaPos + 1));
                 points.push_back({x, y});
             } catch (const std::exception& e) {
-                LoggingService::getInstance().warn("Failed to parse polygon point: " + std::string(e.what()));
+                qCWarning(svgDocumentLog) << "Failed to parse polygon point: " + QString::fromStdString(std::string(e.what()));
             }
         }
     }
     
     if (points.size() < 3) {
-        LoggingService::getInstance().warn("Polygon has fewer than 3 points, skipping");
+        qCWarning(svgDocumentLog) << "Polygon has fewer than 3 points, skipping";
         return;
     }
     
@@ -285,7 +283,7 @@ void SvgDocument::parseSvgPolygon(tinyxml2::XMLElement* element) {
 void SvgDocument::parseSvgPolyline(tinyxml2::XMLElement* element) {
     const char* pointsStr = element->Attribute("points");
     if (!pointsStr) {
-        LoggingService::getInstance().warn("Polyline element missing 'points' attribute");
+        qCWarning(svgDocumentLog) << "Polyline element missing 'points' attribute";
         return;
     }
     
@@ -302,13 +300,13 @@ void SvgDocument::parseSvgPolyline(tinyxml2::XMLElement* element) {
                 double y = std::stod(pointPair.substr(commaPos + 1));
                 points.push_back({x, y});
             } catch (const std::exception& e) {
-                LoggingService::getInstance().warn("Failed to parse polyline point: " + std::string(e.what()));
+                qCWarning(svgDocumentLog) << "Failed to parse polyline point: " + QString::fromStdString(std::string(e.what()));
             }
         }
     }
     
     if (points.size() < 2) {
-        LoggingService::getInstance().warn("Polyline has fewer than 2 points, skipping");
+        qCWarning(svgDocumentLog) << "Polyline has fewer than 2 points, skipping";
         return;
     }
     
