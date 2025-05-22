@@ -1,4 +1,5 @@
 ﻿#include "MainWindow.h"
+#include <QTimer>
 
 Q_LOGGING_CATEGORY(mainWindowLog, "MainWindow")
 
@@ -49,8 +50,45 @@ MainWindow::MainWindow(QWidget *parent)
     m_documentModified = false;
     updateTitle();
 
-    // Create a new document by default
-    newFile();
+    // Initialize with an empty canvas ready for drawing
+    m_svgEngine->createNewDocument(800, 600);
+    m_canvasArea->openFileWithEngine(m_svgEngine);
+
+    // Connect RightAttrBar signals to update canvas settings
+    connect(m_rightAttrBar, &RightAttrBar::canvasSizeChanged, this, [this](int width, int height) {
+        // Update canvas size in the engine
+        m_svgEngine->getCurrentDocument()->setWidth(width);
+        m_svgEngine->getCurrentDocument()->setHeight(height);
+
+        // Update the canvas view to reflect the new size
+        m_canvasArea->openFileWithEngine(m_svgEngine);
+
+        m_documentModified = true;
+        updateTitle();
+        showStatusMessage(tr("Canvas size changed to %1x%2").arg(width).arg(height), 2000);
+    });
+
+    connect(m_rightAttrBar, &RightAttrBar::canvasColorChanged, this, [this](const QColor& color) {
+        // Update canvas background color in the engine
+        Color bgColor;
+        bgColor.r = color.red();
+        bgColor.g = color.green();
+        bgColor.b = color.blue();
+        bgColor.alpha = color.alpha();
+        m_svgEngine->getCurrentDocument()->setBackgroundColor(bgColor);
+
+        // Update the canvas view to reflect the new background color
+        m_canvasArea->openFileWithEngine(m_svgEngine);
+
+        m_documentModified = true;
+        updateTitle();
+        showStatusMessage(tr("Canvas color changed"), 2000);
+    });
+
+    // Initialize the RightAttrBar with current document properties
+    updateRightAttrBarFromDocument();
+
+    showStatusMessage(tr("Ready"), 2000);
 
     qCDebug(mainWindowLog) << "MainWindow construct success.";
 }
@@ -96,8 +134,11 @@ void MainWindow::newFile()
                 // Load the new file
                 loadFileWithEngine(fileName);
 
+                // Ensure the RightAttrBar is in sync with the new document
+                updateRightAttrBarFromDocument();
+
                 qCDebug(mainWindowLog) << "New file created:" << fileName;
-                statusBar()->showMessage(tr("New file created"), 2000);
+                showStatusMessage(tr("New file created"), 2000);
             } else {
                 QMessageBox::critical(this, tr("New SVG File"),
                                      tr("Could not create file '%1'.").arg(QDir::toNativeSeparators(fileName)));
@@ -135,7 +176,7 @@ void MainWindow::openFile()
 
             if (m_svgEngine->loadSvgFile(fileName.toStdString())) {
                 if (loadFileWithEngine(fileName)) {
-                    statusBar()->showMessage(tr("File opened"), 2000);
+                    showStatusMessage(tr("File opened"), 2000);
                 }
             } else {
                 QMessageBox::critical(this, tr("Open SVG File"),
@@ -169,6 +210,10 @@ bool MainWindow::loadFileWithEngine(const QString& fileName) {
     m_currentFilePath = fileName;
     m_documentModified = false;
     updateTitle();
+
+    // Update the RightAttrBar with the document properties
+    updateRightAttrBarFromDocument();
+
     m_canvasArea->update();
 
     qCDebug(mainWindowLog) << "File loaded successfully:" << fileName;
@@ -187,7 +232,11 @@ void MainWindow::saveFile()
     if (m_svgEngine->saveSvgFile(m_currentFilePath.toStdString())) {
         m_documentModified = false;
         updateTitle();
-        statusBar()->showMessage(tr("File saved"), 2000);
+
+        // Ensure the RightAttrBar is in sync with the saved document
+        updateRightAttrBarFromDocument();
+
+        showStatusMessage(tr("File saved"), 2000);
         qCDebug(mainWindowLog) << "File saved successfully";
     } else {
         QMessageBox::critical(this, tr("Save SVG File"),
@@ -261,7 +310,7 @@ void MainWindow::exportToPNG()
 
         // Save the pixmap as PNG
         if (pixmap.save(fileName, "PNG")) {
-            statusBar()->showMessage(tr("Exported to PNG"), 2000);
+            showStatusMessage(tr("Exported to PNG"), 2000);
             qCDebug(mainWindowLog) << "Successfully exported to PNG:" << fileName;
         } else {
             QMessageBox::critical(this, tr("Export to PNG"),
@@ -287,15 +336,34 @@ void MainWindow::handleToolSelected(int toolId)
 
     // Update status bar
     QString toolName;
+    int attrWidgetType = RightAttrBar::CommonAttributes; // Default to common attributes
+
     switch (toolId) {
-        case 0: toolName = tr("Select Tool"); break;
-        case 1: toolName = tr("Draw Tool"); break;
-        case 2: toolName = tr("Shape Tool"); break;
-        case 3: toolName = tr("Text Tool"); break;
-        default: toolName = tr("Unknown Tool");
+        case 0:
+            toolName = tr("Select Tool");
+            attrWidgetType = RightAttrBar::CommonAttributes;
+            break;
+        case 1:
+            toolName = tr("Draw Tool");
+            attrWidgetType = RightAttrBar::CommonAttributes;
+            break;
+        case 2:
+            toolName = tr("Shape Tool");
+            attrWidgetType = RightAttrBar::CircleAttributes;
+            break;
+        case 3:
+            toolName = tr("Text Tool");
+            attrWidgetType = RightAttrBar::CommonAttributes;
+            break;
+        default:
+            toolName = tr("Unknown Tool");
+            attrWidgetType = RightAttrBar::CommonAttributes;
     }
 
-    statusBar()->showMessage(tr("Current tool: %1").arg(toolName), 2000);
+    // Switch the right attribute bar to show the appropriate widget
+    m_rightAttrBar->setCurrentWidget(attrWidgetType);
+
+    showStatusMessage(tr("Current tool: %1").arg(toolName), 2000);
 
     // TODO: Set the appropriate tool in the canvas area
     // m_canvasArea->setActiveTool(toolId);
@@ -404,7 +472,41 @@ void MainWindow::setupStatusBar()
     m_zoomLabel = new QLabel(tr("Zoom: 100%"));
     statusBar()->addPermanentWidget(m_zoomLabel);
 
+    // Initialize status message handling
+    m_statusTimer = new QTimer(this);
+    m_statusTimer->setSingleShot(true);
+    connect(m_statusTimer, &QTimer::timeout, this, &MainWindow::clearStatusMessage);
+    m_statusMessageActive = false;
+
     qCDebug(mainWindowLog) << "Status bar setup complete";
+}
+
+void MainWindow::showStatusMessage(const QString& message, int timeout)
+{
+    // If a message is already active, stop its timer
+    if (m_statusMessageActive) {
+        m_statusTimer->stop();
+    }
+
+    // Show the new message
+    m_statusLabel->setText(message);
+    m_statusMessageActive = true;
+
+    // Start the timer for auto-clearing
+    if (timeout > 0) {
+        m_statusTimer->start(timeout);
+    }
+
+    qCDebug(mainWindowLog) << "Status message:" << message;
+}
+
+void MainWindow::clearStatusMessage()
+{
+    if (m_statusMessageActive) {
+        m_statusLabel->setText(tr("Ready"));
+        m_statusMessageActive = false;
+        qCDebug(mainWindowLog) << "Status message cleared";
+    }
 }
 
 void MainWindow::updateZoomStatus(qreal zoomFactor)
@@ -518,4 +620,27 @@ bool MainWindow::maybeSave()
     }
 
     return true; // User chose Discard
+}
+
+void MainWindow::updateRightAttrBarFromDocument()
+{
+    if (!m_svgEngine || !m_svgEngine->getCurrentDocument()) {
+        qCWarning(mainWindowLog) << "No document to update RightAttrBar from";
+        return;
+    }
+
+    SvgDocument* doc = m_svgEngine->getCurrentDocument();
+
+    // Update canvas size
+    double width = doc->getWidth();
+    double height = doc->getHeight();
+    m_rightAttrBar->updateCanvasSize(static_cast<int>(width), static_cast<int>(height));
+
+    // Update canvas color
+    Color bgColor = doc->getBackgroundColor();
+    QColor qBgColor(bgColor.r, bgColor.g, bgColor.b, bgColor.alpha);
+    m_rightAttrBar->updateCanvasColor(qBgColor);
+
+    qCDebug(mainWindowLog) << "Updated RightAttrBar from document - Size:" << width << "x" << height
+                          << "Color:" << QString::fromStdString(bgColor.toString());
 }

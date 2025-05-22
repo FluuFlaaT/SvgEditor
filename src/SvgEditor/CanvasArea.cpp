@@ -24,7 +24,7 @@ CanvasArea::CanvasArea(QWidget *parent)
     tilePainter.fillRect(0, 0, 32, 32, color);
     tilePainter.fillRect(32, 32, 32, 32, color);
     tilePainter.end();
-    
+
     setRenderHint(QPainter::Antialiasing);
     setDragMode(QGraphicsView::RubberBandDrag);
     setOptimizationFlags(QGraphicsView::DontSavePainterState);
@@ -50,7 +50,7 @@ bool CanvasArea::openFile(const QString& fileName) {
     m_backgroundItem = nullptr;
     m_svgItem = nullptr;
     m_outlineItem = nullptr;
-    
+
     const bool drawBackground = (m_backgroundItem ? m_backgroundItem->isVisible() : false);
     const bool drawOutline = (m_outlineItem ? m_outlineItem->isVisible() : true);
 
@@ -83,7 +83,7 @@ bool CanvasArea::openFile(const QString& fileName) {
         QGraphicsSvgItem* svgChild = new QGraphicsSvgItem();
         svgChild->setSharedRenderer(m_svgItem->renderer());
         svgChild->setElementId(id);
-        
+
         // Copy important properties from the parent SVG item
         svgChild->setFlags(QGraphicsItem::ItemClipsToShape);
         svgChild->setCacheMode(QGraphicsItem::NoCache);
@@ -91,10 +91,10 @@ bool CanvasArea::openFile(const QString& fileName) {
         svgChild->setPos(m_svgItem->pos());
         svgChild->setTransform(m_svgItem->transform());
         svgChild->setOpacity(m_svgItem->opacity());
-        
+
         s->addItem(svgChild);
-        qCDebug(canvasAreaLog) << "Added SVG item with ID:" << id 
-                              << "Layer:" << layerCount 
+        qCDebug(canvasAreaLog) << "Added SVG item with ID:" << id
+                              << "Layer:" << layerCount
                               << "Bounds:" << svgChild->boundingRect();
     }
     qCDebug(canvasAreaLog) << "Added" << layerCount << "SVG items to scene";
@@ -111,7 +111,7 @@ bool CanvasArea::openFile(const QString& fileName) {
 
     s->setSceneRect(m_outlineItem->boundingRect().adjusted(-10, -10, 10, 10));
     qCDebug(canvasAreaLog) << "Set scene rect to:" << s->sceneRect();
-    
+
     return true;
 }
 
@@ -119,8 +119,46 @@ bool CanvasArea::openFileWithEngine(CoreSvgEngine* engine) {
     qCDebug(canvasAreaLog) << "Opening SVG file with engine";
     QGraphicsScene *s = scene();
     s->clear();
-    for(auto& item : engine->getCurrentDocument()->m_graphicsItems) {
+
+    // Get document dimensions and background color
+    SvgDocument* doc = engine->getCurrentDocument();
+    if (!doc) {
+        qCWarning(canvasAreaLog) << "No document in engine";
+        return false;
+    }
+
+    double width = doc->getWidth();
+    double height = doc->getHeight();
+    Color bgColor = doc->getBackgroundColor();
+
+    qCDebug(canvasAreaLog) << "Document dimensions:" << width << "x" << height;
+    qCDebug(canvasAreaLog) << "Background color:" << QString::fromStdString(bgColor.toString());
+
+    // Create background rectangle
+    QRectF docRect(0, 0, width, height);
+    m_backgroundItem = new QGraphicsRectItem(docRect);
+    m_backgroundItem->setBrush(QColor(bgColor.r, bgColor.g, bgColor.b, bgColor.alpha));
+    m_backgroundItem->setPen(Qt::NoPen);
+    m_backgroundItem->setZValue(-1); // Ensure it's behind all other items
+    s->addItem(m_backgroundItem);
+
+    // Add all graphics items from the document
+    for(auto& item : doc->m_graphicsItems) {
         s->addItem(item);
     }
+
+    // Create outline rectangle
+    m_outlineItem = new QGraphicsRectItem(docRect);
+    QPen outline(Qt::black, 2, Qt::DashLine);
+    outline.setCosmetic(true);
+    m_outlineItem->setPen(outline);
+    m_outlineItem->setBrush(Qt::NoBrush);
+    m_outlineItem->setZValue(MAX_N); // Ensure it's in front of all other items
+    s->addItem(m_outlineItem);
+
+    // Set scene rect with some padding
+    s->setSceneRect(docRect.adjusted(-10, -10, 10, 10));
+
+    qCDebug(canvasAreaLog) << "Scene setup complete with" << doc->m_graphicsItems.size() << "items";
     return true;
 }

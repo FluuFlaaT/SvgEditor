@@ -43,6 +43,8 @@ private slots:
 
     void handleToolSelected(int toolId);
     void updateZoomStatus(qreal zoomFactor);
+    void showStatusMessage(const QString& message, int timeout = 2000);
+    void clearStatusMessage();
 
 private:
     LeftSideBar* m_leftSideBar;
@@ -61,6 +63,9 @@ private:
     QLabel* m_statusLabel;
     QLabel* m_zoomLabel;
 
+    QTimer* m_statusTimer;
+    bool m_statusMessageActive;
+
     void setupMenus();
     void setupToolBar();
     void setupStatusBar();
@@ -74,4 +79,5 @@ private:
 
     void updateTitle();
     bool maybeSave();
+    void updateRightAttrBarFromDocument();
 };
