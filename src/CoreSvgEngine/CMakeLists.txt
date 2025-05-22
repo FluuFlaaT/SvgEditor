@@ -3,7 +3,7 @@
 file(GLOB_RECURSE SOURCES *.cpp)
 file(GLOB_RECURSE HEADERS *.h)
 
-add_library(${TARGET_NAME} STATIC
+add_library(${TARGET_NAME} SHARED
     ${SOURCES}
     ${HEADERS}
 )
@@ -14,7 +14,11 @@ target_include_directories(${TARGET_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_link_libraries(${TARGET_NAME} PRIVATE 
+target_compile_definitions(${TARGET_NAME} PRIVATE
+    CORESVGENGINE_LIBRARY
+)
+
+target_link_libraries(${TARGET_NAME} PRIVATE
     tinyxml2::tinyxml2
     Qt5::Core
     Qt5::Gui
@@ -26,4 +30,5 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 set_target_properties(${TARGET_NAME} PROPERTIES
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED ON
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
 )

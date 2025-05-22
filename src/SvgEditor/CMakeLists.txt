@@ -59,6 +59,6 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     Qt5::Widgets
     Qt5::Svg
     Qt5::Xml
-    CoreSvgEngine_static
+    CoreSvgEngine
 )
 
