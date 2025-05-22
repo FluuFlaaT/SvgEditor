@@ -24,6 +24,8 @@ CanvasArea::CanvasArea(QWidget *parent)
     setOptimizationFlags(QGraphicsView::DontSavePainterState);
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+
+    setBackgroundBrush(tilePixmap);
 }
 
 CanvasArea::~CanvasArea()
