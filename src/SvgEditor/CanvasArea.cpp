@@ -14,7 +14,6 @@ CanvasArea::CanvasArea(QWidget *parent)
     m_scene = new QGraphicsScene(this);
     setScene(m_scene);
     setTransformationAnchor(AnchorUnderMouse);
-    setDragMode(ScrollHandDrag);
     setViewportUpdateMode(FullViewportUpdate);
 
     // Init Background
@@ -27,6 +26,7 @@ CanvasArea::CanvasArea(QWidget *parent)
     tilePainter.end();
 
     setRenderHint(QPainter::Antialiasing);
+    // Default to RubberBandDrag mode for selection
     setDragMode(QGraphicsView::RubberBandDrag);
     setOptimizationFlags(QGraphicsView::DontSavePainterState);
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
@@ -124,6 +124,21 @@ void CanvasArea::resizeEvent(QResizeEvent *event)
 
     // If we're in "fit in view" mode, we might want to adjust the view here
     // For now, we'll just maintain the current zoom level
+}
+
+void CanvasArea::setDragMode(bool enabled)
+{
+    if (enabled) {
+        // Enable drag mode (pan/scroll)
+        QGraphicsView::setDragMode(QGraphicsView::ScrollHandDrag);
+        viewport()->setCursor(Qt::OpenHandCursor);
+        qCDebug(canvasAreaLog) << "Drag mode enabled";
+    } else {
+        // Disable drag mode (back to selection)
+        QGraphicsView::setDragMode(QGraphicsView::RubberBandDrag);
+        viewport()->setCursor(Qt::ArrowCursor);
+        qCDebug(canvasAreaLog) << "Drag mode disabled";
+    }
 }
 
 bool CanvasArea::openFile(const QString& fileName) {

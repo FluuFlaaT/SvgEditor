@@ -18,19 +18,18 @@ public:
     QPushButton *drawBtn;
     QPushButton *shapeBtn;
     QPushButton *textBtn;
-    QVector<QPushButton**> btnGroup = {&selectBtn, &drawBtn, &shapeBtn, &textBtn};
+    QPushButton *dragBtn;  // New drag tool button
+    QVector<QPushButton**> btnGroup = {&selectBtn, &drawBtn, &shapeBtn, &textBtn, &dragBtn};
 
-    // Zoom buttons
+    // Zoom buttons - simplified to only keep zoomInBtn
     QPushButton *zoomInBtn;
-    QPushButton *zoomOutBtn;
-    QPushButton *zoomResetBtn;
-    QPushButton *zoomFitBtn;
 
 signals:
+    // Only keep the zoomInRequested signal
     void zoomInRequested();
-    void zoomOutRequested();
-    void zoomResetRequested();
-    void zoomFitRequested();
+
+    // Add a signal for the drag tool
+    void dragToolRequested();
 
 private:
 

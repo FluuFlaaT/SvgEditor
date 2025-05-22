@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_leftSideBar->drawBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(1); });
     connect(m_leftSideBar->shapeBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(2); });
     connect(m_leftSideBar->textBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(3); });
+    connect(m_leftSideBar->dragBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(4); });
 
     resize(1280, 800);
     setWindowTitle(tr("SVG Editor"));
@@ -102,11 +103,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_canvasArea, &CanvasArea::zoomChanged, this, &MainWindow::updateZoomStatus);
     connect(m_canvasArea, &CanvasArea::zoomChanged, m_rightAttrBar, &RightAttrBar::updateZoomLevel);
 
-    // Connect left sidebar zoom buttons
+    // Connect left sidebar zoom button (only zoomIn remains)
     connect(m_leftSideBar, &LeftSideBar::zoomInRequested, m_canvasArea, &CanvasArea::zoomIn);
-    connect(m_leftSideBar, &LeftSideBar::zoomOutRequested, m_canvasArea, &CanvasArea::zoomOut);
-    connect(m_leftSideBar, &LeftSideBar::zoomResetRequested, m_canvasArea, &CanvasArea::resetZoom);
-    connect(m_leftSideBar, &LeftSideBar::zoomFitRequested, m_canvasArea, &CanvasArea::fitToView);
+
+    // Connect drag tool signal
+    connect(m_leftSideBar, &LeftSideBar::dragToolRequested, this, [this]() { handleToolSelected(4); });
 
     showStatusMessage(tr("Ready"), 2000);
 
@@ -358,6 +359,9 @@ void MainWindow::handleToolSelected(int toolId)
     QString toolName;
     int attrWidgetType = RightAttrBar::CommonAttributes; // Default to common attributes
 
+    // Reset drag mode by default
+    m_canvasArea->setDragMode(false);
+
     switch (toolId) {
         case 0:
             toolName = tr("Select Tool");
@@ -375,6 +379,12 @@ void MainWindow::handleToolSelected(int toolId)
             toolName = tr("Text Tool");
             attrWidgetType = RightAttrBar::CommonAttributes;
             break;
+        case 4:
+            toolName = tr("Drag Tool");
+            attrWidgetType = RightAttrBar::CommonAttributes;
+            // Enable drag mode for the canvas
+            m_canvasArea->setDragMode(true);
+            break;
         default:
             toolName = tr("Unknown Tool");
             attrWidgetType = RightAttrBar::CommonAttributes;
@@ -384,9 +394,6 @@ void MainWindow::handleToolSelected(int toolId)
     m_rightAttrBar->setCurrentWidget(attrWidgetType);
 
     showStatusMessage(tr("Current tool: %1").arg(toolName), 2000);
-
-    // TODO: Set the appropriate tool in the canvas area
-    // m_canvasArea->setActiveTool(toolId);
 }
 
 void MainWindow::setupMenus()

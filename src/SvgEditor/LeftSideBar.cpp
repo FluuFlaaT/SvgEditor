@@ -14,6 +14,20 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     drawBtn = new QPushButton("Draw", this);
     shapeBtn = new QPushButton("Shapes", this);
     textBtn = new QPushButton("Text", this);
+    dragBtn = new QPushButton("Drag", this);
+
+    // Set tooltips for buttons
+    selectBtn->setToolTip(tr("Select and manipulate objects"));
+    drawBtn->setToolTip(tr("Draw freehand lines"));
+    shapeBtn->setToolTip(tr("Create shapes"));
+    textBtn->setToolTip(tr("Add text"));
+    dragBtn->setToolTip(tr("Pan/scroll the canvas view"));
+
+    // Set cursor for drag button to indicate its function
+    dragBtn->setCursor(Qt::OpenHandCursor);
+
+    // Connect drag button signal
+    connect(dragBtn, &QPushButton::clicked, this, &LeftSideBar::dragToolRequested);
 
     // Add tool buttons to layout
     QLabel* toolsLabel = new QLabel("Tools", this);
@@ -27,28 +41,20 @@ LeftSideBar::LeftSideBar(QWidget *parent)
 
     mainLayout->addSpacing(20);
 
-    // Create zoom buttons
+    // Create zoom section with only Zoom In button
     QLabel* zoomLabel = new QLabel("Zoom", this);
     zoomLabel->setAlignment(Qt::AlignCenter);
     zoomLabel->setStyleSheet("font-weight: bold;");
     mainLayout->addWidget(zoomLabel);
 
     zoomInBtn = new QPushButton("Zoom In", this);
-    zoomOutBtn = new QPushButton("Zoom Out", this);
-    zoomResetBtn = new QPushButton("Reset Zoom", this);
-    zoomFitBtn = new QPushButton("Fit to Window", this);
+    zoomInBtn->setToolTip(tr("Increase zoom level (Ctrl++)"));
 
-    // Add zoom buttons to layout
+    // Add zoom button to layout
     mainLayout->addWidget(zoomInBtn);
-    mainLayout->addWidget(zoomOutBtn);
-    mainLayout->addWidget(zoomResetBtn);
-    mainLayout->addWidget(zoomFitBtn);
 
-    // Connect zoom button signals
+    // Connect zoom button signal
     connect(zoomInBtn, &QPushButton::clicked, this, &LeftSideBar::zoomInRequested);
-    connect(zoomOutBtn, &QPushButton::clicked, this, &LeftSideBar::zoomOutRequested);
-    connect(zoomResetBtn, &QPushButton::clicked, this, &LeftSideBar::zoomResetRequested);
-    connect(zoomFitBtn, &QPushButton::clicked, this, &LeftSideBar::zoomFitRequested);
 
     mainLayout->addStretch();
 

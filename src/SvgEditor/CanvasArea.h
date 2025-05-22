@@ -35,6 +35,9 @@ public:
     void fitToView(); // Changed from fitInView to avoid conflict with QGraphicsView::fitInView
     qreal currentZoom() const { return m_zoomFactor; }
 
+    // Tool methods
+    void setDragMode(bool enabled);  // Enable/disable drag mode
+
 signals:
     void zoomChanged(qreal zoomFactor);
 
