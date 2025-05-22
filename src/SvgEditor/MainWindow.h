@@ -5,6 +5,9 @@
 #include <QStringList>
 #include "LeftSideBar.h"
 #include "RightAttrBar.h"
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(mainWindowLog)
 
 class MainWindow : public QMainWindow
 {

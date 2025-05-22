@@ -7,13 +7,14 @@
 #include <QDir>
 #include <QAction>
 
+Q_LOGGING_CATEGORY(mainWindowLog, "MainWindow")
+
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), 
-    m_currentLanguage("en_US"), 
-    m_translationsPath("translations")
+    : QMainWindow(parent),
+    m_leftSideBar(new LeftSideBar(this)),
+    m_rightAttrBar(new RightAttrBar(this))
 {
-    m_leftSideBar = new LeftSideBar(this);
-    m_rightAttrBar = new RightAttrBar(this);
+    qCInfo(mainWindowLog) << "MainWindow constructed.";
     
     setupMenus();
     setupToolBar();
