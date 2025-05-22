@@ -25,6 +25,8 @@ public:
     bool openFile(const QString&);
     bool openFileWithEngine(CoreSvgEngine* engine);
 
+    QGraphicsScene* scene() const { return m_scene; }
+
 private:
     QGraphicsScene* m_scene;
     QGraphicsRectItem* m_backgroundItem;

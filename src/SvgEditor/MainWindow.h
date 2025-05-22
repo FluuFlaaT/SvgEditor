@@ -15,6 +15,8 @@
 #include <QApplication>
 #include <QStandardPaths>
 #include <QMessageBox>
+#include <QPainter>
+#include <QLabel>
 #include "LeftSideBar.h"
 #include "RightAttrBar.h"
 #include "CanvasArea.h"
@@ -38,8 +40,9 @@ private slots:
     void saveFile();
     void saveFileAs();
     void exportToPNG();
-    
+
     void handleToolSelected(int toolId);
+    void updateZoomStatus(qreal zoomFactor);
 
 private:
     LeftSideBar* m_leftSideBar;
@@ -49,20 +52,26 @@ private:
 
     QMenu* m_languageMenu;
     // QDir* m_translationsDir;
-    QTranslator m_translator;  
-    QString m_currentLanguage; 
+    QTranslator m_translator;
+    QString m_currentLanguage;
     QString m_translationsPath;
     QStringList m_languages;
-    
+
+    QToolBar* m_mainToolBar;
+    QLabel* m_statusLabel;
+    QLabel* m_zoomLabel;
+
     void setupMenus();
     void setupToolBar();
     void setupStatusBar();
     void setupLanguageMenu();
-    void switchLanguage(const QString& locale); 
-    QStringList getAvailableLanguages() const;  
-    
+    void switchLanguage(const QString& locale);
+    QStringList getAvailableLanguages() const;
+
     // CoreSvgEngine m_svgEngine;
     QString m_currentFilePath;
-    
+    bool m_documentModified;
+
     void updateTitle();
+    bool maybeSave();
 };
