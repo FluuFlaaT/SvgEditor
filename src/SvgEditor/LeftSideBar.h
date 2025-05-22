@@ -7,6 +7,10 @@
 #include <QToolButton>
 #include <QMenu>
 #include <QAction>
+#include <QButtonGroup>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(leftSideBarLog)
 
 class LeftSideBar : public QWidget
 {
@@ -21,29 +25,39 @@ public:
     QPushButton *drawBtn;
     QPushButton *shapeBtn;
     QPushButton *textBtn;
-    QPushButton *dragBtn;  // New drag tool button
-    QVector<QPushButton**> btnGroup = {&selectBtn, &drawBtn, &shapeBtn, &textBtn, &dragBtn};
+    QPushButton *dragBtn;
+    QPushButton *zoomBtn;  // New zoom tool button
+    QVector<QPushButton**> btnGroup = {&selectBtn, &drawBtn, &shapeBtn, &textBtn, &dragBtn, &zoomBtn};
 
-    // Zoom buttons - simplified to only keep zoomInBtn
+    // Zoom sub-buttons
     QPushButton *zoomInBtn;
     QPushButton *zoomOutBtn;
     QPushButton *resetZoomBtn;
     QPushButton *fitToWindowBtn;
+    QVector<QPushButton*> zoomBtnGroup = {zoomInBtn, zoomOutBtn, resetZoomBtn, fitToWindowBtn};
 
-    QPushButton *zoomToggleBtn;
+    // Widget for zoom tools
+    QWidget *zoomToolsWidget;
     bool zoomExpanded = false;
+    int lastSelectedZoomBtn = -1; // Track which zoom button was last selected
+
+    // Highlight the selected tool button
+    void highlightButton(int toolId);
+
+    // Highlight a zoom sub-button
+    void highlightZoomButton(int btnIndex);
 
 signals:
-    // Only keep the zoomInRequested signal
+    // Zoom signals
     void zoomInRequested();
-
-    // Add a signal for the drag tool
-    void dragToolRequested();
-
     void zoomOutRequested();
     void resetZoomRequested();
     void fitToWindowRequested();
 
-private:
+    // Tool signals
+    void dragToolRequested();
+    void zoomToolRequested();
 
+private:
+    QButtonGroup *m_toolButtonGroup; // For mutually exclusive selection
 };

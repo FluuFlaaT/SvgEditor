@@ -55,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_leftSideBar->shapeBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(2); });
     connect(m_leftSideBar->textBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(3); });
     connect(m_leftSideBar->dragBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(4); });
+    connect(m_leftSideBar->zoomBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(5); });
 
     resize(1280, 800);
     setWindowTitle(tr("SVG Editor"));
@@ -122,8 +123,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_leftSideBar, &LeftSideBar::resetZoomRequested, m_canvasArea, &CanvasArea::resetZoom);
     connect(m_leftSideBar, &LeftSideBar::fitToWindowRequested, m_canvasArea, &CanvasArea::fitToView);
 
-    // Connect drag tool signal
+    // Connect tool signals
     connect(m_leftSideBar, &LeftSideBar::dragToolRequested, this, [this]() { handleToolSelected(4); });
+    connect(m_leftSideBar, &LeftSideBar::zoomToolRequested, this, [this]() { handleToolSelected(5); });
 
     // Connect shape toolbar signals
     connect(m_shapeToolBar, &ShapeToolBar::shapeToolSelected, this, &MainWindow::handleShapeToolSelected);
@@ -392,15 +394,8 @@ void MainWindow::handleToolSelected(int toolId)
 {
     qCDebug(mainWindowLog) << "Tool selected:" << toolId;
 
-    // Highlight the selected button
-    for (int i = 0; i < m_leftSideBar->btnGroup.size(); ++i) {
-        QPushButton* btn = *(m_leftSideBar->btnGroup[i]);
-        if (i == toolId) {
-            btn->setStyleSheet("background-color: #AED6F1; font-weight: bold;");
-        } else {
-            btn->setStyleSheet("");
-        }
-    }
+    // Use the LeftSideBar's highlightButton method to handle button highlighting
+    m_leftSideBar->highlightButton(toolId);
 
     // Update status bar
     QString toolName;
@@ -442,6 +437,11 @@ void MainWindow::handleToolSelected(int toolId)
             attrWidgetType = RightAttrBar::CommonAttributes;
             // Enable drag mode for the canvas
             m_canvasArea->setDragMode(true);
+            break;
+        case 5:
+            toolName = tr("Zoom Tool");
+            attrWidgetType = RightAttrBar::CommonAttributes;
+            // No specific canvas mode for zoom, just show the zoom tools
             break;
         default:
             toolName = tr("Unknown Tool");
