@@ -13,6 +13,8 @@
 #include <QAction>
 #include <QSplitter>
 #include <QApplication>
+#include <QStandardPaths>
+#include <QMessageBox>
 #include "LeftSideBar.h"
 #include "RightAttrBar.h"
 #include "CanvasArea.h"
@@ -30,6 +32,7 @@ public:
 private slots:
     void newFile();
     void openFile();
+    bool loadFile(const QString&);
     void saveFile();
     void saveFileAs();
     void exportToPNG();

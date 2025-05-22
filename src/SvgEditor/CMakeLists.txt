@@ -1,5 +1,9 @@
 set(TARGET_NAME SvgEditor)
 
+qt5_add_resources(qrc_FILES
+                edtSource.qrc
+)
+
 set(SOURCES
     main.cpp
     MainWindow.cpp
@@ -41,6 +45,3 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     Qt5::Svg
 )
 
-qt5_add_resources(qrc_FILES
-                edtSource.qrc
-)

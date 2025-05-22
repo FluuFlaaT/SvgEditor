@@ -2,6 +2,11 @@
 
 Q_LOGGING_CATEGORY(mainWindowLog, "MainWindow")
 
+static inline QString picturesLocation()
+{
+    return QStandardPaths::standardLocations(QStandardPaths::PicturesLocation).value(0, QDir::currentPath());
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     m_leftSideBar(new LeftSideBar(this)),
@@ -50,6 +55,24 @@ void MainWindow::newFile()
 
 void MainWindow::openFile()
 {
+    QFileDialog fileDialog(this);
+    fileDialog.setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
+    fileDialog.setMimeTypeFilters(QStringList() << "image/svg+xml" << "image/svg+xml-compressed");
+    fileDialog.setWindowTitle(tr("Open SVG File"));
+    
+    if(m_currentFilePath.isEmpty()) {
+        fileDialog.setDirectory(picturesLocation());
+    }
+
+    while (fileDialog.exec() == QDialog::Accepted && !loadFile(fileDialog.selectedFiles().constFirst()));
+}
+
+bool MainWindow::loadFile(const QString& fileName) {
+    if (!QFileInfo::exists(fileName) || !m_canvasArea->openFile(fileName)) {
+        QMessageBox::critical(this, tr("Open SVG File"),
+                              tr("Could not open file '%1'.").arg(QDir::toNativeSeparators(fileName)));
+        return false;
+    }
 }
 
 void MainWindow::saveFile()
