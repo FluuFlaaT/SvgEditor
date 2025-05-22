@@ -39,6 +39,8 @@ CanvasArea::~CanvasArea()
 }
 
 bool CanvasArea::openFile(const QString& fileName) {
+    auto extractedIds = XMLParser::getInstance().processIds(fileName);
+
     QGraphicsScene *s = scene();
     qCDebug(canvasAreaLog) << "Opening SVG file:" << fileName;
 
@@ -51,12 +53,7 @@ bool CanvasArea::openFile(const QString& fileName) {
     const bool drawBackground = (m_backgroundItem ? m_backgroundItem->isVisible() : false);
     const bool drawOutline = (m_outlineItem ? m_outlineItem->isVisible() : true);
 
-    // 文件不存在时 return false
-    if (!QFileInfo::exists(fileName)) {
-        qCWarning(canvasAreaLog) << "File does not exist:" << fileName;
-        return false;
-    }
-    
+
     QScopedPointer<QGraphicsSvgItem> svgItem(new QGraphicsSvgItem(fileName));
     if(!svgItem->renderer()->isValid()) {
         qCWarning(canvasAreaLog) << "Invalid SVG renderer for file:" << fileName;

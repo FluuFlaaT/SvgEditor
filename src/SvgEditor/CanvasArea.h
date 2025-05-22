@@ -7,6 +7,7 @@
 #include <QScopedPointer>
 #include <QSvgRenderer>
 #include <QLoggingCategory>
+#include "XMLParser.h"
 
 Q_DECLARE_LOGGING_CATEGORY(canvasAreaLog)
 

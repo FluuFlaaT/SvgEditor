@@ -10,6 +10,7 @@ set(SOURCES
     LeftSideBar.cpp
     RightAttrBar.cpp
     CanvasArea.cpp
+    XMLParser.cpp
 )
 
 set(HEADERS
@@ -17,6 +18,7 @@ set(HEADERS
     LeftSideBar.h
     RightAttrBar.h
     CanvasArea.h
+    XMLParser.h
 )
 
 file(GLOB UI_FILES *.ui)
@@ -43,5 +45,6 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     Qt5::Gui
     Qt5::Widgets
     Qt5::Svg
+    Qt5::Xml
 )
 

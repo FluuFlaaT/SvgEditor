@@ -5,6 +5,9 @@
 #include <QGraphicsSvgItem>
 #include <QStringList>
 #include <QLoggingCategory>
+#include <QXmlStreamWriter>
+#include <QSaveFile>
+#include <QDomDocument>
 
 // Q_DECLARE_LOGGING_CATEGORY(xmlParserLog)
 
@@ -17,7 +20,7 @@ public:
     }
 
     // Function to parse SVG file and return QGraphicsSvgItem
-    QStringList getIds(const QString& fileName);
+    static QStringList processIds(const QString &fileName);
 
     private:
         XMLParser() = default;

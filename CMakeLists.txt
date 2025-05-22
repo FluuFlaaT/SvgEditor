@@ -7,9 +7,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON) 
 set(CMAKE_AUTOUIC ON)
 
-include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+include(C:/code/kingsoft/thirdparty_install/vcpkg/scripts/buildsystems/vcpkg.cmake)
 
-find_package(Qt5 COMPONENTS Core Gui Widgets Svg LinguistTools REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets Svg LinguistTools Xml REQUIRED)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
