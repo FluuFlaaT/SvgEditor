@@ -9,6 +9,9 @@
 #include <QLoggingCategory>
 #include "XMLParser.h"
 
+// 前向声明CoreSvgEngine类
+class CoreSvgEngine;
+
 Q_DECLARE_LOGGING_CATEGORY(canvasAreaLog)
 
 class CanvasArea : public QGraphicsView
@@ -20,6 +23,7 @@ public:
     ~CanvasArea();
 
     bool openFile(const QString&);
+    bool openFileWithEngine(CoreSvgEngine* engine);
 
 private:
     QGraphicsScene* m_scene;

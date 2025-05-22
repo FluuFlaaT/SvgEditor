@@ -1,4 +1,4 @@
-#include "MainWindow.h"
+﻿#include "MainWindow.h"
 
 Q_LOGGING_CATEGORY(mainWindowLog, "MainWindow")
 
@@ -11,7 +11,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     m_leftSideBar(new LeftSideBar(this)),
     m_rightAttrBar(new RightAttrBar(this)),
-    m_canvasArea(new CanvasArea(this))
+    m_canvasArea(new CanvasArea(this)),
+    m_svgEngine(new CoreSvgEngine)
 {
     qCDebug(mainWindowLog) << "MainWindow constructed.";
     
@@ -63,8 +64,16 @@ void MainWindow::openFile()
     if(m_currentFilePath.isEmpty()) {
         fileDialog.setDirectory(picturesLocation());
     }
-
-    while (fileDialog.exec() == QDialog::Accepted && !loadFile(fileDialog.selectedFiles().constFirst()));
+    fileDialog.setOption(QFileDialog::DontUseNativeDialog, false);
+    
+    // 使用exec()模态对话框方式，等待用户选择文件
+    if (fileDialog.exec() == QDialog::Accepted) {
+        if (!fileDialog.selectedFiles().isEmpty()) {
+            QString fileName = fileDialog.selectedFiles().constFirst();
+            m_svgEngine->loadSvgFile(fileName.toStdString());
+            loadFileWithEngine(fileName);
+        }
+    }
 }
 
 bool MainWindow::loadFile(const QString& fileName) {
@@ -73,6 +82,17 @@ bool MainWindow::loadFile(const QString& fileName) {
                               tr("Could not open file '%1'.").arg(QDir::toNativeSeparators(fileName)));
         return false;
     }
+}
+
+bool MainWindow::loadFileWithEngine(const QString& fileName) {
+    if (!QFileInfo::exists(fileName) || !m_canvasArea->openFileWithEngine(m_svgEngine)) {
+        
+        QMessageBox::critical(this, tr("Open SVG File"),
+                              tr("Could not open file '%1'.").arg(QDir::toNativeSeparators(fileName)));
+        return false;
+    }
+    m_canvasArea->update();
+    return true;
 }
 
 void MainWindow::saveFile()

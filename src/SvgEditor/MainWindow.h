@@ -18,6 +18,7 @@
 #include "LeftSideBar.h"
 #include "RightAttrBar.h"
 #include "CanvasArea.h"
+#include "../CoreSvgEngine/CoreSvgEngine.h"
 
 Q_DECLARE_LOGGING_CATEGORY(mainWindowLog)
 
@@ -33,6 +34,7 @@ private slots:
     void newFile();
     void openFile();
     bool loadFile(const QString&);
+    bool loadFileWithEngine(const QString& fileName);
     void saveFile();
     void saveFileAs();
     void exportToPNG();
@@ -43,6 +45,7 @@ private:
     LeftSideBar* m_leftSideBar;
     RightAttrBar* m_rightAttrBar;
     CanvasArea* m_canvasArea;
+    CoreSvgEngine* m_svgEngine;
 
     QMenu* m_languageMenu;
     // QDir* m_translationsDir;

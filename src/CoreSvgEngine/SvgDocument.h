@@ -12,11 +12,10 @@ namespace tinyxml2 {
 class SvgDocument {
 private:
     std::vector<std::unique_ptr<SvgElement>> m_elements;
-    QVector<QGraphicsSvgItem*> m_svgItems; 
     double m_width;
     double m_height;
     Color m_backgroundColor;
-
+    
     // SVG解析帮助方法
     void parseChildElements(tinyxml2::XMLElement* parentElement);
     void parseSvgLine(tinyxml2::XMLElement* element);
@@ -27,15 +26,16 @@ private:
     void parseSvgPolyline(tinyxml2::XMLElement* element);
     void parseSvgText(tinyxml2::XMLElement* element);
     void parseCommonAttributes(tinyxml2::XMLElement* element, SvgElement* svgElement);
-
-public:
+    
+    public:
     SvgDocument(double w = 600, double h = 400, Color bg = {255,255,255,255}) // 默认白色背景
-        : m_width(w), m_height(h), m_backgroundColor(bg) {}
+    : m_width(w), m_height(h), m_backgroundColor(bg) {}
     
     ~SvgDocument();
-
+    
     SvgDocument(const SvgDocument&) = delete;
     SvgDocument& operator=(const SvgDocument&) = delete;
+    QVector<QGraphicsSvgItem*> m_svgItems; 
     
     SvgDocument(SvgDocument&&) = default;
     SvgDocument& operator=(SvgDocument&&) = default;

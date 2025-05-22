@@ -1,5 +1,6 @@
 ﻿#define MAX_N 25565
 #include "CanvasArea.h"
+#include "../CoreSvgEngine/CoreSvgEngine.h"
 
 Q_LOGGING_CATEGORY(canvasAreaLog, "CanvasArea")
 
@@ -111,5 +112,12 @@ bool CanvasArea::openFile(const QString& fileName) {
     s->setSceneRect(m_outlineItem->boundingRect().adjusted(-10, -10, 10, 10));
     qCDebug(canvasAreaLog) << "Set scene rect to:" << s->sceneRect();
     
+    return true;
+}
+
+bool CanvasArea::openFileWithEngine(CoreSvgEngine* engine) {
+    for(auto& item : engine->getCurrentDocument()->m_svgItems) {
+        m_scene->addItem(item);
+    }
     return true;
 }
