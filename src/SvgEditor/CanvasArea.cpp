@@ -32,3 +32,7 @@ CanvasArea::~CanvasArea()
 {
     delete m_scene;
 }
+
+bool CanvasArea::openFile(const QString& filePath) {
+    return false; // demo use
+}
