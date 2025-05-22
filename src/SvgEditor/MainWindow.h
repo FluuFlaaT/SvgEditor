@@ -20,6 +20,7 @@
 #include "LeftSideBar.h"
 #include "RightAttrBar.h"
 #include "CanvasArea.h"
+#include "ShapeToolBar.h"
 #include "../CoreSvgEngine/CoreSvgEngine.h"
 
 Q_DECLARE_LOGGING_CATEGORY(mainWindowLog)
@@ -42,6 +43,7 @@ private slots:
     void exportToPNG();
 
     void handleToolSelected(int toolId);
+    void handleShapeToolSelected(ShapeType type);
     void updateZoomStatus(qreal zoomFactor);
     void showStatusMessage(const QString& message, int timeout = 2000);
     void clearStatusMessage();
@@ -50,6 +52,7 @@ private:
     LeftSideBar* m_leftSideBar;
     RightAttrBar* m_rightAttrBar;
     CanvasArea* m_canvasArea;
+    ShapeToolBar* m_shapeToolBar;
     CoreSvgEngine* m_svgEngine;
 
     QMenu* m_languageMenu;

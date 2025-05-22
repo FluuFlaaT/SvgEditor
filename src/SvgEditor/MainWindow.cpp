@@ -13,13 +13,25 @@ MainWindow::MainWindow(QWidget *parent)
     m_leftSideBar(new LeftSideBar(this)),
     m_rightAttrBar(new RightAttrBar(this)),
     m_canvasArea(new CanvasArea(this)),
+    m_shapeToolBar(new ShapeToolBar(this)),
     m_svgEngine(new CoreSvgEngine),
     m_documentModified(false)
 {
     qCDebug(mainWindowLog) << "MainWindow constructed.";
 
+    // Create a horizontal splitter for the main layout
     QSplitter* splitter = new QSplitter(Qt::Horizontal, this);
-    splitter->addWidget(m_leftSideBar);
+
+    // Create a vertical splitter for the left sidebar and shape toolbar
+    QSplitter* leftSplitter = new QSplitter(Qt::Vertical, this);
+    leftSplitter->addWidget(m_leftSideBar);
+    leftSplitter->addWidget(m_shapeToolBar);
+
+    // Initially hide the shape toolbar
+    m_shapeToolBar->hide();
+
+    // Add the left splitter, canvas area, and right sidebar to the main splitter
+    splitter->addWidget(leftSplitter);
     splitter->addWidget(m_canvasArea);
     splitter->addWidget(m_rightAttrBar);
 
@@ -108,6 +120,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Connect drag tool signal
     connect(m_leftSideBar, &LeftSideBar::dragToolRequested, this, [this]() { handleToolSelected(4); });
+
+    // Connect shape toolbar signals
+    connect(m_shapeToolBar, &ShapeToolBar::shapeToolSelected, this, &MainWindow::handleShapeToolSelected);
+
+    // Set the current engine for the canvas area
+    m_canvasArea->setCurrentEngine(m_svgEngine);
 
     showStatusMessage(tr("Ready"), 2000);
 
@@ -362,18 +380,28 @@ void MainWindow::handleToolSelected(int toolId)
     // Reset drag mode by default
     m_canvasArea->setDragMode(false);
 
+    // Hide shape toolbar by default
+    m_shapeToolBar->hide();
+
     switch (toolId) {
         case 0:
             toolName = tr("Select Tool");
             attrWidgetType = RightAttrBar::CommonAttributes;
+            m_canvasArea->setSelectMode();
             break;
         case 1:
             toolName = tr("Draw Tool");
             attrWidgetType = RightAttrBar::CommonAttributes;
+            // Set freehand drawing mode
+            m_canvasArea->setShapeCreationMode(ShapeType::Freehand);
             break;
         case 2:
             toolName = tr("Shape Tool");
             attrWidgetType = RightAttrBar::CircleAttributes;
+            // Show the shape toolbar
+            m_shapeToolBar->show();
+            m_shapeToolBar->setSelectedShapeType(ShapeType::Rectangle); // Default to rectangle
+            m_canvasArea->setShapeCreationMode(ShapeType::Rectangle);
             break;
         case 3:
             toolName = tr("Text Tool");
@@ -575,6 +603,45 @@ void MainWindow::updateZoomStatus(qreal zoomFactor)
     if (m_zoomLabel) {
         m_zoomLabel->setText(tr("Zoom: %1%").arg(int(zoomFactor * 100)));
     }
+}
+
+void MainWindow::handleShapeToolSelected(ShapeType type)
+{
+    qCDebug(mainWindowLog) << "Shape tool selected:" << static_cast<int>(type);
+
+    // Set the shape creation mode in the canvas area
+    m_canvasArea->setShapeCreationMode(type);
+
+    // Update the status bar
+    QString shapeName;
+    switch (type) {
+        case ShapeType::Line:
+            shapeName = tr("Line");
+            break;
+        case ShapeType::Freehand:
+            shapeName = tr("Freehand");
+            break;
+        case ShapeType::Rectangle:
+            shapeName = tr("Rectangle");
+            break;
+        case ShapeType::Ellipse:
+            shapeName = tr("Ellipse");
+            break;
+        case ShapeType::Pentagon:
+            shapeName = tr("Pentagon");
+            break;
+        case ShapeType::Star:
+            shapeName = tr("Star");
+            break;
+        case ShapeType::Hexagon:
+            shapeName = tr("Hexagon");
+            break;
+        default:
+            shapeName = tr("Unknown");
+            break;
+    }
+
+    showStatusMessage(tr("Shape tool: %1").arg(shapeName), 2000);
 }
 
 void MainWindow::setupLanguageMenu()
