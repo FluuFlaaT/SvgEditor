@@ -63,9 +63,14 @@ public:
     CoreSvgEngine* getCurrentEngine() const { return m_currentEngine; }
     void setCurrentEngine(CoreSvgEngine* engine) { m_currentEngine = engine; }
 
+    // Get the currently selected item
+    QGraphicsItem* getSelectedItem() const;
+    ShapeType getSelectedItemType() const;
+
 signals:
     void zoomChanged(qreal zoomFactor);
     void shapeCreated(QGraphicsItem* item);
+    void itemSelected(QGraphicsItem* item, ShapeType type);
 
 protected:
     // Override wheel event for mouse wheel zoom

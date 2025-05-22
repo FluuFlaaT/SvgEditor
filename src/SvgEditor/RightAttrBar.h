@@ -13,6 +13,8 @@
 #include <QComboBox>
 #include <QVariant>
 #include <QPen>
+#include <QGraphicsItem>
+#include "ShapeToolBar.h" // 包含ShapeType定义
 
 Q_DECLARE_LOGGING_CATEGORY(rightAttrBarLog)
 class RightAttrBar : public QWidget
@@ -37,14 +39,31 @@ public slots:
     void updateCanvasColor(const QColor& color);
     void updateZoomLevel(qreal zoomFactor);
 
+    // New slots for handling selected elements
+    void updateForSelectedItem(QGraphicsItem* item, ShapeType type);
+    void updateShapeProperties(QGraphicsItem* item, ShapeType type);
+    void clearSelection();
+
 public:
     QColor getCanvasColor() const { return m_canvasColor; }
     int getCanvasWidth() const { return m_canvasWidthSpinBox ? m_canvasWidthSpinBox->value() : 800; }
     int getCanvasHeight() const { return m_canvasHeightSpinBox ? m_canvasHeightSpinBox->value() : 600; }
 
+    // Get current shape properties
+    QColor getBorderColor() const { return m_borderColor; }
+    QColor getFillColor() const { return m_fillColor; }
+    int getBorderWidth() const { return m_borderWidthSpinBox ? m_borderWidthSpinBox->value() : 1; }
+    Qt::PenStyle getBorderStyle() const;
+
 signals:
     void canvasSizeChanged(int width, int height);
     void canvasColorChanged(const QColor& color);
+
+    // New signals for shape property changes
+    void borderColorChanged(const QColor& color);
+    void fillColorChanged(const QColor& color);
+    void borderWidthChanged(int width);
+    void borderStyleChanged(Qt::PenStyle style);
 
 private:
     QVBoxLayout* m_mainLayout;
@@ -57,13 +76,17 @@ private:
     QPushButton* m_canvasColorButton;
     QColor m_canvasColor;
 
-    // Circle attributes controls
+    // Shape attributes controls
     QSpinBox* m_borderWidthSpinBox;
     QComboBox* m_borderStyleComboBox;
     QPushButton* m_borderColorButton;
     QPushButton* m_fillColorButton;
     QColor m_borderColor;
     QColor m_fillColor;
+
+    // Currently selected item
+    QGraphicsItem* m_selectedItem;
+    ShapeType m_selectedItemType;
 
     QWidget* createCommonAttributesWidget();
     QWidget* createCircleAttributesWidget();

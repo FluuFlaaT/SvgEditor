@@ -131,6 +131,15 @@ MainWindow::MainWindow(QWidget *parent)
         qCDebug(mainWindowLog) << "Document marked as modified due to shape creation";
     });
 
+    // Connect item selection signal to update the right attribute bar
+    connect(m_canvasArea, &CanvasArea::itemSelected, m_rightAttrBar, &RightAttrBar::updateForSelectedItem);
+
+    // Connect property change signals to update the selected item
+    connect(m_rightAttrBar, &RightAttrBar::borderColorChanged, this, &MainWindow::updateSelectedItemBorderColor);
+    connect(m_rightAttrBar, &RightAttrBar::fillColorChanged, this, &MainWindow::updateSelectedItemFillColor);
+    connect(m_rightAttrBar, &RightAttrBar::borderWidthChanged, this, &MainWindow::updateSelectedItemBorderWidth);
+    connect(m_rightAttrBar, &RightAttrBar::borderStyleChanged, this, &MainWindow::updateSelectedItemBorderStyle);
+
     // Set the current engine for the canvas area
     m_canvasArea->setCurrentEngine(m_svgEngine);
 
@@ -427,6 +436,10 @@ void MainWindow::handleToolSelected(int toolId)
 
     // Switch the right attribute bar to show the appropriate widget
     m_rightAttrBar->setCurrentWidget(attrWidgetType);
+
+    // Clear any current selection when switching tools
+    m_rightAttrBar->clearSelection();
+    m_canvasArea->scene()->clearSelection();
 
     showStatusMessage(tr("Current tool: %1").arg(toolName), 2000);
 }
@@ -755,6 +768,154 @@ bool MainWindow::maybeSave()
     }
 
     return true; // User chose Discard
+}
+
+void MainWindow::updateSelectedItemBorderColor(const QColor& color)
+{
+    QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
+    if (!selectedItem) {
+        qCWarning(mainWindowLog) << "No item selected for border color update";
+        return;
+    }
+
+    QPen pen;
+
+    // Get the current pen from the item
+    if (auto lineItem = dynamic_cast<QGraphicsLineItem*>(selectedItem)) {
+        pen = lineItem->pen();
+        pen.setColor(color);
+        lineItem->setPen(pen);
+    } else if (auto rectItem = dynamic_cast<QGraphicsRectItem*>(selectedItem)) {
+        pen = rectItem->pen();
+        pen.setColor(color);
+        rectItem->setPen(pen);
+    } else if (auto ellipseItem = dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
+        pen = ellipseItem->pen();
+        pen.setColor(color);
+        ellipseItem->setPen(pen);
+    } else if (auto polygonItem = dynamic_cast<QGraphicsPolygonItem*>(selectedItem)) {
+        pen = polygonItem->pen();
+        pen.setColor(color);
+        polygonItem->setPen(pen);
+    } else if (auto pathItem = dynamic_cast<QGraphicsPathItem*>(selectedItem)) {
+        pen = pathItem->pen();
+        pen.setColor(color);
+        pathItem->setPen(pen);
+    }
+
+    // Mark document as modified
+    m_documentModified = true;
+    updateTitle();
+
+    qCDebug(mainWindowLog) << "Updated selected item border color to:" << color.name();
+}
+
+void MainWindow::updateSelectedItemFillColor(const QColor& color)
+{
+    QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
+    if (!selectedItem) {
+        qCWarning(mainWindowLog) << "No item selected for fill color update";
+        return;
+    }
+
+    QBrush brush(color);
+
+    // Apply the brush to the item
+    if (auto rectItem = dynamic_cast<QGraphicsRectItem*>(selectedItem)) {
+        rectItem->setBrush(brush);
+    } else if (auto ellipseItem = dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
+        ellipseItem->setBrush(brush);
+    } else if (auto polygonItem = dynamic_cast<QGraphicsPolygonItem*>(selectedItem)) {
+        polygonItem->setBrush(brush);
+    } else if (auto pathItem = dynamic_cast<QGraphicsPathItem*>(selectedItem)) {
+        pathItem->setBrush(brush);
+    }
+
+    // Mark document as modified
+    m_documentModified = true;
+    updateTitle();
+
+    qCDebug(mainWindowLog) << "Updated selected item fill color to:" << color.name();
+}
+
+void MainWindow::updateSelectedItemBorderWidth(int width)
+{
+    QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
+    if (!selectedItem) {
+        qCWarning(mainWindowLog) << "No item selected for border width update";
+        return;
+    }
+
+    QPen pen;
+
+    // Get the current pen from the item and update its width
+    if (auto lineItem = dynamic_cast<QGraphicsLineItem*>(selectedItem)) {
+        pen = lineItem->pen();
+        pen.setWidth(width);
+        lineItem->setPen(pen);
+    } else if (auto rectItem = dynamic_cast<QGraphicsRectItem*>(selectedItem)) {
+        pen = rectItem->pen();
+        pen.setWidth(width);
+        rectItem->setPen(pen);
+    } else if (auto ellipseItem = dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
+        pen = ellipseItem->pen();
+        pen.setWidth(width);
+        ellipseItem->setPen(pen);
+    } else if (auto polygonItem = dynamic_cast<QGraphicsPolygonItem*>(selectedItem)) {
+        pen = polygonItem->pen();
+        pen.setWidth(width);
+        polygonItem->setPen(pen);
+    } else if (auto pathItem = dynamic_cast<QGraphicsPathItem*>(selectedItem)) {
+        pen = pathItem->pen();
+        pen.setWidth(width);
+        pathItem->setPen(pen);
+    }
+
+    // Mark document as modified
+    m_documentModified = true;
+    updateTitle();
+
+    qCDebug(mainWindowLog) << "Updated selected item border width to:" << width;
+}
+
+void MainWindow::updateSelectedItemBorderStyle(Qt::PenStyle style)
+{
+    QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
+    if (!selectedItem) {
+        qCWarning(mainWindowLog) << "No item selected for border style update";
+        return;
+    }
+
+    QPen pen;
+
+    // Get the current pen from the item and update its style
+    if (auto lineItem = dynamic_cast<QGraphicsLineItem*>(selectedItem)) {
+        pen = lineItem->pen();
+        pen.setStyle(style);
+        lineItem->setPen(pen);
+    } else if (auto rectItem = dynamic_cast<QGraphicsRectItem*>(selectedItem)) {
+        pen = rectItem->pen();
+        pen.setStyle(style);
+        rectItem->setPen(pen);
+    } else if (auto ellipseItem = dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
+        pen = ellipseItem->pen();
+        pen.setStyle(style);
+        ellipseItem->setPen(pen);
+    } else if (auto polygonItem = dynamic_cast<QGraphicsPolygonItem*>(selectedItem)) {
+        pen = polygonItem->pen();
+        pen.setStyle(style);
+        polygonItem->setPen(pen);
+    } else if (auto pathItem = dynamic_cast<QGraphicsPathItem*>(selectedItem)) {
+        pen = pathItem->pen();
+        pen.setStyle(style);
+        pathItem->setPen(pen);
+    }
+
+    // Mark document as modified
+    m_documentModified = true;
+    updateTitle();
+
+    qCDebug(mainWindowLog) << "Updated selected item border style to:" << static_cast<int>(style);
 }
 
 void MainWindow::updateRightAttrBarFromDocument()

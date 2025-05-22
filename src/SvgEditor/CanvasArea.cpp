@@ -1,6 +1,7 @@
 ﻿#define MAX_N 25565
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <QtMath>
 #include "CanvasArea.h"
 #include "../CoreSvgEngine/CoreSvgEngine.h"
 #include "../CoreSvgEngine/SvgDocument.h"
@@ -95,6 +96,9 @@ void CanvasArea::fitToView()
 
 void CanvasArea::createShape(const QPointF& startPoint, const QPointF& endPoint)
 {
+    qCDebug(canvasAreaLog) << "Creating shape of type" << static_cast<int>(m_currentShapeType)
+                          << "from" << startPoint << "to" << endPoint;
+
     // Remove the current item if it exists
     if (m_currentItem) {
         m_scene->removeItem(m_currentItem);
@@ -105,40 +109,74 @@ void CanvasArea::createShape(const QPointF& startPoint, const QPointF& endPoint)
     // Create a new shape based on the current shape type
     switch (m_currentShapeType) {
         case ShapeType::Line:
+            qCDebug(canvasAreaLog) << "Creating Line";
             m_currentItem = createLine(startPoint, endPoint);
             break;
         case ShapeType::Rectangle:
+            qCDebug(canvasAreaLog) << "Creating Rectangle";
             m_currentItem = createRectangle(startPoint, endPoint);
             break;
         case ShapeType::Ellipse:
+            qCDebug(canvasAreaLog) << "Creating Ellipse";
             m_currentItem = createEllipse(startPoint, endPoint);
             break;
         case ShapeType::Pentagon: {
+            qCDebug(canvasAreaLog) << "Creating Pentagon";
             QPointF center = QPointF((startPoint.x() + endPoint.x()) / 2, (startPoint.y() + endPoint.y()) / 2);
             qreal radius = QLineF(center, endPoint).length();
+
+            // Ensure a minimum radius of 10 pixels
+            if (radius < 10.0) {
+                radius = 10.0;
+                qCDebug(canvasAreaLog) << "  Using minimum radius of 10.0";
+            }
+
+            qCDebug(canvasAreaLog) << "  Center:" << center << "Radius:" << radius;
             m_currentItem = createRegularPolygon(center, radius, 5);
             break;
         }
         case ShapeType::Star: {
+            qCDebug(canvasAreaLog) << "Creating Star";
             QPointF center = QPointF((startPoint.x() + endPoint.x()) / 2, (startPoint.y() + endPoint.y()) / 2);
             qreal outerRadius = QLineF(center, endPoint).length();
+
+            // Ensure a minimum outer radius of 20 pixels
+            if (outerRadius < 20.0) {
+                outerRadius = 20.0;
+                qCDebug(canvasAreaLog) << "  Using minimum outer radius of 20.0";
+            }
+
             qreal innerRadius = outerRadius * 0.4; // Inner radius is 40% of outer radius
+            qCDebug(canvasAreaLog) << "  Center:" << center << "Outer Radius:" << outerRadius << "Inner Radius:" << innerRadius;
             m_currentItem = createStar(center, outerRadius, innerRadius);
             break;
         }
         case ShapeType::Hexagon: {
+            qCDebug(canvasAreaLog) << "Creating Hexagon";
             QPointF center = QPointF((startPoint.x() + endPoint.x()) / 2, (startPoint.y() + endPoint.y()) / 2);
             qreal radius = QLineF(center, endPoint).length();
+
+            // Ensure a minimum radius of 10 pixels
+            if (radius < 10.0) {
+                radius = 10.0;
+                qCDebug(canvasAreaLog) << "  Using minimum radius of 10.0";
+            }
+
+            qCDebug(canvasAreaLog) << "  Center:" << center << "Radius:" << radius;
             m_currentItem = createRegularPolygon(center, radius, 6);
             break;
         }
         default:
+            qCWarning(canvasAreaLog) << "Unknown shape type:" << static_cast<int>(m_currentShapeType);
             break;
     }
 
     // Add the item to the scene
     if (m_currentItem) {
         m_scene->addItem(m_currentItem);
+        qCDebug(canvasAreaLog) << "Added item to scene:" << m_currentItem;
+    } else {
+        qCWarning(canvasAreaLog) << "Failed to create item for shape type:" << static_cast<int>(m_currentShapeType);
     }
 }
 
@@ -146,8 +184,11 @@ void CanvasArea::updateShape(const QPointF& endPoint)
 {
     // Update the current shape based on the new end point
     if (!m_currentItem) {
+        qCWarning(canvasAreaLog) << "Cannot update shape: current item is null";
         return;
     }
+
+    qCDebug(canvasAreaLog) << "Updating shape from" << m_startPoint << "to" << endPoint;
 
     // Remove the current item
     m_scene->removeItem(m_currentItem);
@@ -164,13 +205,18 @@ void CanvasArea::finalizeShape()
         return;
     }
 
+    qCDebug(canvasAreaLog) << "Finalizing shape of type" << static_cast<int>(m_currentShapeType);
+
     // Add the shape to the document
     addShapeToDocument(m_currentItem);
 
     // Mark the document as modified
     if (m_currentEngine && m_currentEngine->getCurrentDocument()) {
+        qCDebug(canvasAreaLog) << "Document marked as modified";
         // We need to notify the MainWindow that the document has been modified
         // This will be done through the shapeCreated signal
+    } else {
+        qCWarning(canvasAreaLog) << "Cannot mark document as modified: engine or document is null";
     }
 
     // Reset the current item pointer (ownership transferred to the document)
@@ -282,17 +328,20 @@ QGraphicsPolygonItem* CanvasArea::createRegularPolygon(const QPointF& center, qr
         return nullptr;
     }
 
+    qCDebug(canvasAreaLog) << "Creating regular polygon with" << sides << "sides at" << center << "with radius" << radius;
+
     QPolygonF polygon;
-    const qreal angleStep = 2 * M_PI / sides;
+    const qreal angleStep = 2.0 * M_PI / sides;
 
     // Start from the top (90 degrees or PI/2)
-    qreal startAngle = M_PI / 2;
+    qreal startAngle = M_PI / 2.0;
 
     for (int i = 0; i < sides; ++i) {
         qreal angle = startAngle - i * angleStep;
-        qreal x = center.x() + radius * cos(angle);
-        qreal y = center.y() - radius * sin(angle); // Correct for Qt's coordinate system (y-axis down)
+        qreal x = center.x() + radius * qCos(angle);
+        qreal y = center.y() - radius * qSin(angle); // Correct for Qt's coordinate system (y-axis down)
         polygon << QPointF(x, y);
+        qCDebug(canvasAreaLog) << "  Point" << i << ":" << QPointF(x, y);
     }
 
     QGraphicsPolygonItem* polygonItem = new QGraphicsPolygonItem(polygon);
@@ -301,7 +350,7 @@ QGraphicsPolygonItem* CanvasArea::createRegularPolygon(const QPointF& center, qr
     polygonItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
     polygonItem->setFlag(QGraphicsItem::ItemIsMovable, true);
 
-    qCDebug(canvasAreaLog) << "Created regular polygon with" << sides << "sides at" << center << "with radius" << radius;
+    qCDebug(canvasAreaLog) << "Created regular polygon with" << sides << "sides, polygon has" << polygon.size() << "points";
     return polygonItem;
 }
 
@@ -312,19 +361,22 @@ QGraphicsPolygonItem* CanvasArea::createStar(const QPointF& center, qreal outerR
         return nullptr;
     }
 
+    qCDebug(canvasAreaLog) << "Creating star at" << center << "with outer radius" << outerRadius << "and inner radius" << innerRadius;
+
     const int points = 5;
     QPolygonF star;
     const qreal angleStep = M_PI / points;
 
     // Start from the top (90 degrees or PI/2)
-    qreal startAngle = M_PI / 2;
+    qreal startAngle = M_PI / 2.0;
 
     for (int i = 0; i < 2 * points; ++i) {
         qreal radius = (i % 2 == 0) ? outerRadius : innerRadius;
         qreal angle = startAngle - i * angleStep;
-        qreal x = center.x() + radius * cos(angle);
-        qreal y = center.y() - radius * sin(angle); // Correct for Qt's coordinate system (y-axis down)
+        qreal x = center.x() + radius * qCos(angle);
+        qreal y = center.y() - radius * qSin(angle); // Correct for Qt's coordinate system (y-axis down)
         star << QPointF(x, y);
+        qCDebug(canvasAreaLog) << "  Point" << i << ":" << QPointF(x, y) << "(radius=" << radius << ")";
     }
 
     QGraphicsPolygonItem* starItem = new QGraphicsPolygonItem(star);
@@ -333,7 +385,7 @@ QGraphicsPolygonItem* CanvasArea::createStar(const QPointF& center, qreal outerR
     starItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
     starItem->setFlag(QGraphicsItem::ItemIsMovable, true);
 
-    qCDebug(canvasAreaLog) << "Created star at" << center << "with outer radius" << outerRadius << "and inner radius" << innerRadius;
+    qCDebug(canvasAreaLog) << "Created star with" << points << "points, polygon has" << star.size() << "vertices";
     return starItem;
 }
 
@@ -705,7 +757,18 @@ void CanvasArea::mousePressEvent(QMouseEvent *event)
         // Start drawing
         m_isDrawing = true;
         m_startPoint = mapToScene(event->pos());
-        m_endPoint = m_startPoint;
+
+        // For polygon shapes, add a small offset to ensure we don't have zero radius
+        // when the user just clicks without dragging
+        if (m_currentShapeType == ShapeType::Pentagon ||
+            m_currentShapeType == ShapeType::Star ||
+            m_currentShapeType == ShapeType::Hexagon) {
+            // Set end point slightly offset from start point
+            m_endPoint = QPointF(m_startPoint.x() + 5, m_startPoint.y() + 5);
+            qCDebug(canvasAreaLog) << "Using offset end point for polygon shape:" << m_endPoint;
+        } else {
+            m_endPoint = m_startPoint;
+        }
 
         if (m_currentShapeType == ShapeType::Freehand) {
             // For freehand drawing, start a new path
@@ -770,7 +833,87 @@ void CanvasArea::mouseReleaseEvent(QMouseEvent *event)
         event->accept();
     } else {
         QGraphicsView::mouseReleaseEvent(event);
+
+        // Check if an item was selected after the mouse release
+        if (event->button() == Qt::LeftButton && m_currentShapeType == ShapeType::None) {
+            QList<QGraphicsItem*> selectedItems = m_scene->selectedItems();
+            if (!selectedItems.isEmpty()) {
+                QGraphicsItem* selectedItem = selectedItems.first();
+                ShapeType itemType = ShapeType::None;
+
+                // Determine the type of the selected item
+                if (dynamic_cast<QGraphicsLineItem*>(selectedItem)) {
+                    itemType = ShapeType::Line;
+                } else if (dynamic_cast<QGraphicsRectItem*>(selectedItem) &&
+                           !dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
+                    itemType = ShapeType::Rectangle;
+                } else if (dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
+                    itemType = ShapeType::Ellipse;
+                } else if (dynamic_cast<QGraphicsPolygonItem*>(selectedItem)) {
+                    // For polygon items, we need to determine if it's a pentagon, hexagon, or star
+                    // This is a simplification - in a real app you might want to store this information
+                    // in the item's data or use a custom QGraphicsItem subclass
+                    QGraphicsPolygonItem* polygonItem = dynamic_cast<QGraphicsPolygonItem*>(selectedItem);
+                    int pointCount = polygonItem->polygon().size();
+                    if (pointCount == 5) {
+                        itemType = ShapeType::Pentagon;
+                    } else if (pointCount == 6) {
+                        itemType = ShapeType::Hexagon;
+                    } else if (pointCount == 10) {
+                        itemType = ShapeType::Star;
+                    }
+                } else if (dynamic_cast<QGraphicsPathItem*>(selectedItem)) {
+                    itemType = ShapeType::Freehand;
+                }
+
+                // Emit the selection signal
+                emit itemSelected(selectedItem, itemType);
+                qCDebug(canvasAreaLog) << "Item selected, type:" << static_cast<int>(itemType);
+            }
+        }
     }
+}
+
+QGraphicsItem* CanvasArea::getSelectedItem() const
+{
+    QList<QGraphicsItem*> selectedItems = m_scene->selectedItems();
+    if (!selectedItems.isEmpty()) {
+        return selectedItems.first();
+    }
+    return nullptr;
+}
+
+ShapeType CanvasArea::getSelectedItemType() const
+{
+    QGraphicsItem* selectedItem = getSelectedItem();
+    if (!selectedItem) {
+        return ShapeType::None;
+    }
+
+    // Determine the type of the selected item
+    if (dynamic_cast<QGraphicsLineItem*>(selectedItem)) {
+        return ShapeType::Line;
+    } else if (dynamic_cast<QGraphicsRectItem*>(selectedItem) &&
+               !dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
+        return ShapeType::Rectangle;
+    } else if (dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
+        return ShapeType::Ellipse;
+    } else if (dynamic_cast<QGraphicsPolygonItem*>(selectedItem)) {
+        // For polygon items, we need to determine if it's a pentagon, hexagon, or star
+        QGraphicsPolygonItem* polygonItem = dynamic_cast<QGraphicsPolygonItem*>(selectedItem);
+        int pointCount = polygonItem->polygon().size();
+        if (pointCount == 5) {
+            return ShapeType::Pentagon;
+        } else if (pointCount == 6) {
+            return ShapeType::Hexagon;
+        } else if (pointCount == 10) {
+            return ShapeType::Star;
+        }
+    } else if (dynamic_cast<QGraphicsPathItem*>(selectedItem)) {
+        return ShapeType::Freehand;
+    }
+
+    return ShapeType::None;
 }
 
 bool CanvasArea::openFileWithEngine(CoreSvgEngine* engine) {

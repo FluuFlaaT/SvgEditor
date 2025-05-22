@@ -48,6 +48,12 @@ private slots:
     void showStatusMessage(const QString& message, int timeout = 2000);
     void clearStatusMessage();
 
+    // Methods to update selected item properties
+    void updateSelectedItemBorderColor(const QColor& color);
+    void updateSelectedItemFillColor(const QColor& color);
+    void updateSelectedItemBorderWidth(int width);
+    void updateSelectedItemBorderStyle(Qt::PenStyle style);
+
 private:
     LeftSideBar* m_leftSideBar;
     RightAttrBar* m_rightAttrBar;
