@@ -10,6 +10,19 @@
 #include <memory> 
 #include <QLoggingCategory>
 #include <QString>
+#include <QPen>
+#include <QBrush>
+#include <QFont>
+#include <QColor>
+#include <QPointF>
+#include <QPolygonF>
+#include <QPainterPath>
+#include <QGraphicsLineItem>
+#include <QGraphicsRectItem>
+#include <QGraphicsEllipseItem>
+#include <QGraphicsPolygonItem>
+#include <QGraphicsPathItem>
+#include <QGraphicsSimpleTextItem>
 Q_DECLARE_LOGGING_CATEGORY(svgDocumentLog)
 Q_LOGGING_CATEGORY(svgDocumentLog, "SvgDocument")
 
@@ -64,6 +77,7 @@ bool SvgDocument::removeElement(const SvgElement* element_ptr) {
 void SvgDocument::clearElements() {
     qCInfo(svgDocumentLog) << "Clearing all elements from document, count: " + QString::fromStdString(std::to_string(m_elements.size()));
     m_elements.clear();
+    m_graphicsItems.clear();
 }
 
 std::string SvgDocument::generateSvgContent() const {
@@ -72,7 +86,7 @@ std::string SvgDocument::generateSvgContent() const {
     // Use simple \" for quotes in attributes, as tinyxml2 expects standard XML format.
     ss << "<svg width=\"" << m_width << "\" height=\"" << m_height << "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
     
-    // 如果背景色不是完全透明的白色，则添加背景矩形
+    // �������ɫ������ȫ͸���İ�ɫ�������ӱ�������
     if (m_backgroundColor.alpha > 0 && 
         !(m_backgroundColor.r == 255 && m_backgroundColor.g == 255 && 
           m_backgroundColor.b == 255 && m_backgroundColor.alpha == 255)) {
@@ -205,8 +219,20 @@ void SvgDocument::parseSvgLine(tinyxml2::XMLElement* element) {
     
     auto line = std::make_unique<SvgLine>(Point{x1, y1}, Point{x2, y2});
     parseCommonAttributes(element, line.get());
-    auto svgItem = new QGraphicsSvgItem(QString::fromStdString(line.get()->toSvgString()));
-    m_svgItems.push_back(svgItem);
+    
+    // ����QGraphicsLineItem
+    auto graphicsItem = new QGraphicsLineItem(x1, y1, x2, y2);
+    
+    // Ӧ����ʽ����
+    QPen pen;
+    pen.setWidth(line->getStrokeWidth());
+    Color strokeColor = line->getStrokeColor();
+    pen.setColor(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha));
+    graphicsItem->setPen(pen);
+    graphicsItem->setOpacity(line->getOpacity());
+    
+    // �洢��ͼ�����б�
+    m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(line));
 }
 
@@ -221,8 +247,27 @@ void SvgDocument::parseSvgRectangle(tinyxml2::XMLElement* element) {
     
     auto rect = std::make_unique<SvgRectangle>(Point{x, y}, width, height, rx, ry);
     parseCommonAttributes(element, rect.get());
-    auto svgItem = new QGraphicsSvgItem(QString::fromStdString(rect.get()->toSvgString()));
-    m_svgItems.push_back(svgItem);
+    
+    // ����QGraphicsRectItem
+    auto graphicsItem = new QGraphicsRectItem(x, y, width, height);
+    
+    // Ӧ����ʽ����
+    QPen pen;
+    pen.setWidth(rect->getStrokeWidth());
+    Color strokeColor = rect->getStrokeColor();
+    pen.setColor(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha));
+    graphicsItem->setPen(pen);
+    
+    // ���������ɫ
+    Color fillColor = rect->getFillColor();
+    graphicsItem->setBrush(QBrush(QColor(fillColor.r, fillColor.g, fillColor.b, fillColor.alpha)));
+    
+    // ����͸����
+    graphicsItem->setOpacity(rect->getOpacity());
+    
+    // QGraphicsRectItem��ֱ��֧��Բ�ǣ�����Բ�������QPainterPath���˴�����
+    
+    m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(rect));
 }
 
@@ -234,8 +279,26 @@ void SvgDocument::parseSvgCircle(tinyxml2::XMLElement* element) {
     
     auto circle = std::make_unique<SvgCircle>(Point{cx, cy}, r);
     parseCommonAttributes(element, circle.get());
-    auto svgItem = new QGraphicsSvgItem(QString::fromStdString(circle.get()->toSvgString()));
-    m_svgItems.push_back(svgItem);
+    
+    // ����QGraphicsEllipseItem����Բ����Ա�ʾԲ��
+    // ע�⣺��Բ�Ĳ��������Ͻ�����(cx-r, cy-r)�Ϳ���(2r, 2r)
+    auto graphicsItem = new QGraphicsEllipseItem(cx-r, cy-r, 2*r, 2*r);
+    
+    // Ӧ����ʽ����
+    QPen pen;
+    pen.setWidth(circle->getStrokeWidth());
+    Color strokeColor = circle->getStrokeColor();
+    pen.setColor(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha));
+    graphicsItem->setPen(pen);
+    
+    // ���������ɫ
+    Color fillColor = circle->getFillColor();
+    graphicsItem->setBrush(QBrush(QColor(fillColor.r, fillColor.g, fillColor.b, fillColor.alpha)));
+    
+    // ����͸����
+    graphicsItem->setOpacity(circle->getOpacity());
+    
+    m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(circle));
 }
 
@@ -248,8 +311,26 @@ void SvgDocument::parseSvgEllipse(tinyxml2::XMLElement* element) {
     
     auto ellipse = std::make_unique<SvgEllipse>(Point{cx, cy}, rx, ry);
     parseCommonAttributes(element, ellipse.get());
-    auto svgItem = new QGraphicsSvgItem(QString::fromStdString(ellipse.get()->toSvgString()));
-    m_svgItems.push_back(svgItem);
+    
+    // ����QGraphicsEllipseItem
+    // ע�⣺��Բ�Ĳ��������Ͻ�����(cx-rx, cy-ry)�Ϳ���(2rx, 2ry)
+    auto graphicsItem = new QGraphicsEllipseItem(cx-rx, cy-ry, 2*rx, 2*ry);
+    
+    // Ӧ����ʽ����
+    QPen pen;
+    pen.setWidth(ellipse->getStrokeWidth());
+    Color strokeColor = ellipse->getStrokeColor();
+    pen.setColor(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha));
+    graphicsItem->setPen(pen);
+    
+    // ���������ɫ
+    Color fillColor = ellipse->getFillColor();
+    graphicsItem->setBrush(QBrush(QColor(fillColor.r, fillColor.g, fillColor.b, fillColor.alpha)));
+    
+    // ����͸����
+    graphicsItem->setOpacity(ellipse->getOpacity());
+    
+    m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(ellipse));
 }
 
@@ -285,8 +366,30 @@ void SvgDocument::parseSvgPolygon(tinyxml2::XMLElement* element) {
     
     auto polygon = std::make_unique<SvgPolygon>(points);
     parseCommonAttributes(element, polygon.get());
-    auto svgItem = new QGraphicsSvgItem(QString::fromStdString(polygon.get()->toSvgString()));
-    m_svgItems.push_back(svgItem);
+    
+    // ����QGraphicsPolygonItem
+    QPolygonF qPolygon;
+    for (const auto& point : points) {
+        qPolygon << QPointF(point.x, point.y);
+    }
+    
+    auto graphicsItem = new QGraphicsPolygonItem(qPolygon);
+    
+    // Ӧ����ʽ����
+    QPen pen;
+    pen.setWidth(polygon->getStrokeWidth());
+    Color strokeColor = polygon->getStrokeColor();
+    pen.setColor(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha));
+    graphicsItem->setPen(pen);
+    
+    // ���������ɫ
+    Color fillColor = polygon->getFillColor();
+    graphicsItem->setBrush(QBrush(QColor(fillColor.r, fillColor.g, fillColor.b, fillColor.alpha)));
+    
+    // ����͸����
+    graphicsItem->setOpacity(polygon->getOpacity());
+    
+    m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(polygon));
 }
 
@@ -322,8 +425,35 @@ void SvgDocument::parseSvgPolyline(tinyxml2::XMLElement* element) {
     
     auto polyline = std::make_unique<SvgPolyline>(points);
     parseCommonAttributes(element, polyline.get());
-    auto svgItem = new QGraphicsSvgItem(QString::fromStdString(polyline.get()->toSvgString()));
-    m_svgItems.push_back(svgItem);
+    
+    // �����ʺ϶���ߵ�QGraphicsPathItem
+    QPainterPath path;
+    
+    if (!points.empty()) {
+        path.moveTo(points[0].x, points[0].y);
+        
+        for (size_t i = 1; i < points.size(); ++i) {
+            path.lineTo(points[i].x, points[i].y);
+        }
+    }
+    
+    auto graphicsItem = new QGraphicsPathItem(path);
+    
+    // Ӧ����ʽ����
+    QPen pen;
+    pen.setWidth(polyline->getStrokeWidth());
+    Color strokeColor = polyline->getStrokeColor();
+    pen.setColor(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha));
+    graphicsItem->setPen(pen);
+    
+    // PolylineĬ��ͨ������䣬�����������ɫ�Է���Ҫ
+    Color fillColor = polyline->getFillColor();
+    graphicsItem->setBrush(Qt::NoBrush); // Ĭ�������
+    
+    // ����͸����
+    graphicsItem->setOpacity(polyline->getOpacity());
+    
+    m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(polyline));
 }
 
@@ -348,8 +478,44 @@ void SvgDocument::parseSvgText(tinyxml2::XMLElement* element) {
     }
     
     parseCommonAttributes(element, textElement.get());
-    auto svgItem = new QGraphicsSvgItem(QString::fromStdString(textElement.get()->toSvgString()));
-    m_svgItems.push_back(svgItem);
+    
+    // ����QGraphicsSimpleTextItem����ʾ�ı�
+    auto graphicsItem = new QGraphicsSimpleTextItem(QString::fromStdString(text));
+    graphicsItem->setPos(x, y);
+    
+    // ��������
+    QFont font;
+    if (fontFamily) {
+        font.setFamily(QString::fromStdString(textElement->getFontFamily()));
+    }
+    font.setPointSizeF(textElement->getFontSize());
+    graphicsItem->setFont(font);
+    
+    // �����ı���ɫ (ʹ�����ɫ��Ϊ�ı���ɫ)
+    Color textColor = textElement->getFillColor();
+    if (textColor.alpha > 0) {
+        graphicsItem->setBrush(QBrush(QColor(textColor.r, textColor.g, textColor.b, textColor.alpha)));
+    } else {
+        // ������ɫ��͸���ģ�ʹ�������ɫ
+        Color strokeColor = textElement->getStrokeColor();
+        graphicsItem->setBrush(QBrush(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha)));
+    }
+    
+    // �����ı����� (��ѡ��ͨ���ı�����Ҫ����)
+    QPen pen;
+    Color strokeColor = textElement->getStrokeColor();
+    if (strokeColor.alpha > 0 && textElement->getStrokeWidth() > 0) {
+        pen.setWidth(textElement->getStrokeWidth());
+        pen.setColor(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha));
+        graphicsItem->setPen(pen);
+    } else {
+        graphicsItem->setPen(Qt::NoPen); // Ĭ��������
+    }
+    
+    // ����͸����
+    graphicsItem->setOpacity(textElement->getOpacity());
+    
+    m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(textElement));
 }
 

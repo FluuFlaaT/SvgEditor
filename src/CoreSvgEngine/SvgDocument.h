@@ -2,7 +2,12 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <QGraphicsSvgItem>
+#include <QGraphicsItem>
+#include <QGraphicsLineItem>
+#include <QGraphicsRectItem>
+#include <QGraphicsEllipseItem>
+#include <QGraphicsPolygonItem>
+#include <QGraphicsSimpleTextItem>
 #include "SvgElement.h"
 
 namespace tinyxml2 {
@@ -35,7 +40,7 @@ private:
     
     SvgDocument(const SvgDocument&) = delete;
     SvgDocument& operator=(const SvgDocument&) = delete;
-    QVector<QGraphicsSvgItem*> m_svgItems; 
+    QVector<QGraphicsItem*> m_graphicsItems; 
     
     SvgDocument(SvgDocument&&) = default;
     SvgDocument& operator=(SvgDocument&&) = default;

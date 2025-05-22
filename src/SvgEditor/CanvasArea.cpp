@@ -116,8 +116,11 @@ bool CanvasArea::openFile(const QString& fileName) {
 }
 
 bool CanvasArea::openFileWithEngine(CoreSvgEngine* engine) {
-    for(auto& item : engine->getCurrentDocument()->m_svgItems) {
-        m_scene->addItem(item);
+    qCDebug(canvasAreaLog) << "Opening SVG file with engine";
+    QGraphicsScene *s = scene();
+    s->clear();
+    for(auto& item : engine->getCurrentDocument()->m_graphicsItems) {
+        s->addItem(item);
     }
     return true;
 }

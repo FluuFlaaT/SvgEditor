@@ -25,6 +25,7 @@ void CoreSvgEngine::createNewDocument(double width, double height, Color bgColor
 
 bool CoreSvgEngine::loadSvgFile(const std::string& filePath) {
     qCDebug(coreSvgEngineLog) << "Loading SVG file:" << QString::fromStdString(filePath);
+    m_document.get()->clearElements();
     if (!m_document) {
         qCDebug(coreSvgEngineLog) << "No document instance, creating new document";
         m_document = std::make_unique<SvgDocument>(); // 如果没有文档则创建一个
