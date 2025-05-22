@@ -37,7 +37,6 @@ public:
 private slots:
     void newFile();
     void openFile();
-    bool loadFile(const QString&);
     bool loadFileWithEngine(const QString& fileName);
     void saveFile();
     void saveFileAs();

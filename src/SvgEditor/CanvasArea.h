@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <QGraphicsView>
 #include <QGraphicsSvgItem>
 #include <QGraphicsRectItem>
@@ -24,7 +24,6 @@
 #include <QApplication>
 #include <QInputDialog>
 #include <cmath>
-#include "XMLParser.h"
 #include "ShapeToolBar.h"
 #include "EditableTextItem.h"
 #include "Commands/CommandManager.h"
@@ -42,7 +41,6 @@ public:
     explicit CanvasArea(QWidget *parent = nullptr);
     ~CanvasArea();
 
-    bool openFile(const QString&);
     bool openFileWithEngine(CoreSvgEngine* engine);
 
     QGraphicsScene* scene() const { return m_scene; }

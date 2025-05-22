@@ -271,18 +271,7 @@ void MainWindow::openFile()
     }
 }
 
-bool MainWindow::loadFile(const QString& fileName) {
-    if (!QFileInfo::exists(fileName) || !m_canvasArea->openFile(fileName)) {
-        QMessageBox::critical(this, tr("Open SVG File"),
-                              tr("Could not open file '%1'.").arg(QDir::toNativeSeparators(fileName)));
-        return false;
-    }
 
-    m_currentFilePath = fileName;
-    m_documentModified = false;
-    updateTitle();
-    return true;
-}
 
 bool MainWindow::loadFileWithEngine(const QString& fileName) {
     if (!QFileInfo::exists(fileName) || !m_canvasArea->openFileWithEngine(m_svgEngine)) {

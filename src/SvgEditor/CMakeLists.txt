@@ -10,7 +10,6 @@ set(SOURCES
     LeftSideBar.cpp
     RightAttrBar.cpp
     CanvasArea.cpp
-    XMLParser.cpp
     ShapeToolBar.cpp
     EditableTextItem.cpp
     Commands/Command.cpp
@@ -24,7 +23,6 @@ set(HEADERS
     LeftSideBar.h
     RightAttrBar.h
     CanvasArea.h
-    XMLParser.h
     ShapeToolBar.h
     EditableTextItem.h
     Commands/Command.h
