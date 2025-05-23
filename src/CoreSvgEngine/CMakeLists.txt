@@ -25,6 +25,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     Qt5::Widgets
     Qt5::Svg
     Qt5::Xml
+    Settings
 )
 
 set_target_properties(${TARGET_NAME} PROPERTIES

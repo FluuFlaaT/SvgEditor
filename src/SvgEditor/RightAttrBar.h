@@ -19,6 +19,7 @@
 #include <QGraphicsSimpleTextItem>
 #include "editabletextitem.h"
 #include "shapetoolbar.h" // 包含ShapeType定义
+#include "../Settings/settingsmanager.h"
 
 Q_DECLARE_LOGGING_CATEGORY(rightAttrBarLog)
 class RightAttrBar : public QWidget

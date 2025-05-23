@@ -4,7 +4,7 @@ Q_LOGGING_CATEGORY(rightAttrBarLog, "RightAttrBar")
 
 RightAttrBar::RightAttrBar(QWidget *parent)
     : QWidget(parent),
-    m_canvasColor(Qt::white),
+    m_canvasColor(SettingsManager::instance()->getCanvasColor()),
     m_borderColor(Qt::black),
     m_fillColor(Qt::white),
     m_selectedItem(nullptr),
@@ -360,7 +360,7 @@ QWidget* RightAttrBar::createCommonAttributesWidget() {
     QLabel* widthLabel = new QLabel(tr("Canvas Width:"));
     m_canvasWidthSpinBox = new QSpinBox();
     m_canvasWidthSpinBox->setRange(1, 9999);
-    m_canvasWidthSpinBox->setValue(800); // Default value
+    m_canvasWidthSpinBox->setValue(SettingsManager::instance()->getCanvasWidth());
     m_canvasWidthSpinBox->setSuffix(" px");
     widthLayout->addWidget(widthLabel);
     widthLayout->addWidget(m_canvasWidthSpinBox);
@@ -370,7 +370,7 @@ QWidget* RightAttrBar::createCommonAttributesWidget() {
     QLabel* heightLabel = new QLabel(tr("Canvas Height:"));
     m_canvasHeightSpinBox = new QSpinBox();
     m_canvasHeightSpinBox->setRange(1, 9999);
-    m_canvasHeightSpinBox->setValue(600); // Default value
+    m_canvasHeightSpinBox->setValue(SettingsManager::instance()->getCanvasHeight());
     m_canvasHeightSpinBox->setSuffix(" px");
     heightLayout->addWidget(heightLabel);
     heightLayout->addWidget(m_canvasHeightSpinBox);

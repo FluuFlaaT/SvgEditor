@@ -70,8 +70,20 @@ MainWindow::MainWindow(QWidget *parent)
     m_documentModified = false;
     updateTitle();
 
-    // Initialize with an empty canvas ready for drawing
-    m_svgEngine->createNewDocument(800, 600);
+    // Initialize with an empty canvas using settings
+    SettingsManager* settings = SettingsManager::instance();
+    int canvasWidth = settings->getCanvasWidth();
+    int canvasHeight = settings->getCanvasHeight();
+    QColor canvasColor = settings->getCanvasColor();
+
+    // Convert QColor to Color struct
+    Color bgColor;
+    bgColor.r = canvasColor.red();
+    bgColor.g = canvasColor.green();
+    bgColor.b = canvasColor.blue();
+    bgColor.alpha = canvasColor.alpha();
+
+    m_svgEngine->createNewDocument(canvasWidth, canvasHeight, bgColor);
     m_canvasArea->openFileWithEngine(m_svgEngine);
 
     // Connect RightAttrBar signals to update canvas settings
@@ -182,6 +194,32 @@ MainWindow::~MainWindow()
     qCDebug(mainWindowLog) << "MainWindow destroyed.";
 }
 
+void MainWindow::openSettingsDialog()
+{
+    SettingsDialog dialog(this);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        // Apply the settings
+        applySettings();
+    }
+}
+
+void MainWindow::applySettings()
+{
+    // Get the settings
+    SettingsManager* settings = SettingsManager::instance();
+
+    // Update the right attribute bar with the new settings
+    m_rightAttrBar->updateCanvasSize(settings->getCanvasWidth(), settings->getCanvasHeight());
+    m_rightAttrBar->updateCanvasColor(settings->getCanvasColor());
+
+    // Show a status message
+    showStatusMessage(tr("Settings applied"), 2000);
+
+    qCDebug(mainWindowLog) << "Applied settings: Canvas size =" << settings->getCanvasWidth() << "x" << settings->getCanvasHeight()
+                          << ", Canvas color =" << settings->getCanvasColor().name();
+}
+
 void MainWindow::newFile()
 {
     if (m_documentModified && !maybeSave()) {
@@ -204,7 +242,20 @@ void MainWindow::newFile()
         if (!fileDialog.selectedFiles().isEmpty()) {
             QString fileName = fileDialog.selectedFiles().constFirst();
 
-            m_svgEngine->createNewDocument(800, 600);
+            // Get settings for new document
+            SettingsManager* settings = SettingsManager::instance();
+            int canvasWidth = settings->getCanvasWidth();
+            int canvasHeight = settings->getCanvasHeight();
+            QColor canvasColor = settings->getCanvasColor();
+
+            // Convert QColor to Color struct
+            Color bgColor;
+            bgColor.r = canvasColor.red();
+            bgColor.g = canvasColor.green();
+            bgColor.b = canvasColor.blue();
+            bgColor.alpha = canvasColor.alpha();
+
+            m_svgEngine->createNewDocument(canvasWidth, canvasHeight, bgColor);
 
             if (m_svgEngine->saveSvgFile(fileName.toStdString())) {
                 m_currentFilePath = fileName;
@@ -487,6 +538,13 @@ void MainWindow::setupMenus()
     QAction* exportAction = new QAction(tr("Export PNG..."), this);
     connect(exportAction, &QAction::triggered, this, &MainWindow::exportToPNG);
     fileMenu->addAction(exportAction);
+
+    fileMenu->addSeparator();
+
+    // Add Settings action
+    QAction* settingsAction = new QAction(tr("Settings..."), this);
+    connect(settingsAction, &QAction::triggered, this, &MainWindow::openSettingsDialog);
+    fileMenu->addAction(settingsAction);
 
     fileMenu->addSeparator();
 
