@@ -22,6 +22,7 @@
 #include "canvasarea.h"
 #include "shapetoolbar.h"
 #include "../CoreSvgEngine/coresvgengine.h"
+#include "../CoreSvgEngine/svgtext.h"
 #include "../Commands/CommandManager.h"
 
 Q_DECLARE_LOGGING_CATEGORY(mainWindowLog)
@@ -103,6 +104,7 @@ private:
     bool maybeSave();
     void updateRightAttrBarFromDocument();
     void updateUndoRedoActions();
+    void syncItemToSvgDocument(QGraphicsItem* item);
 
     // Undo/Redo actions
     QAction* m_undoAction;

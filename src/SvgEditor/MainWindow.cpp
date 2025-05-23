@@ -83,14 +83,42 @@ MainWindow::MainWindow(QWidget *parent)
                 doc->setWidth(width);
                 doc->setHeight(height);
 
-                // Update the canvas view to reflect the new size
-                if (m_canvasArea->openFileWithEngine(m_svgEngine)) {
-                    m_documentModified = true;
-                    updateTitle();
-                    showStatusMessage(tr("Canvas size changed to %1x%2").arg(width).arg(height), 2000);
-                } else {
-                    showStatusMessage(tr("Failed to update canvas size"), 2000);
+                // Create new background and outline items instead of reloading everything
+                QGraphicsScene* scene = m_canvasArea->scene();
+                if (scene) {
+                    // Update background item
+                    QRectF newRect(0, 0, width, height);
+                    
+                    // Find and update the background item
+                    QList<QGraphicsItem*> items = scene->items();
+                    for (QGraphicsItem* item : items) {
+                        if (QGraphicsRectItem* rectItem = dynamic_cast<QGraphicsRectItem*>(item)) {
+                            // Check if this is the background item (z-value -1)
+                            if (rectItem->zValue() == -1) {
+                                rectItem->setRect(newRect);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // Find and update the outline item
+                    for (QGraphicsItem* item : items) {
+                        if (QGraphicsRectItem* rectItem = dynamic_cast<QGraphicsRectItem*>(item)) {
+                            // Check if this is the outline item (z-value MAX_N)
+                            if (rectItem->zValue() == 25565) { // MAX_N value
+                                rectItem->setRect(newRect);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // Update scene rect with padding
+                    scene->setSceneRect(newRect.adjusted(-10, -10, 10, 10));
                 }
+
+                m_documentModified = true;
+                updateTitle();
+                showStatusMessage(tr("Canvas size changed to %1x%2").arg(width).arg(height), 2000);
             }
         } catch (const std::exception& e) {
             qCWarning(mainWindowLog) << "Exception during canvas size change:" << e.what();
@@ -107,8 +135,20 @@ MainWindow::MainWindow(QWidget *parent)
         bgColor.alpha = color.alpha();
         m_svgEngine->getCurrentDocument()->setBackgroundColor(bgColor);
 
-        // Update the canvas view to reflect the new background color
-        m_canvasArea->openFileWithEngine(m_svgEngine);
+        // Update the background item directly instead of reloading everything
+        QGraphicsScene* scene = m_canvasArea->scene();
+        if (scene) {
+            QList<QGraphicsItem*> items = scene->items();
+            for (QGraphicsItem* item : items) {
+                if (QGraphicsRectItem* rectItem = dynamic_cast<QGraphicsRectItem*>(item)) {
+                    // Check if this is the background item (z-value -1)
+                    if (rectItem->zValue() == -1) {
+                        rectItem->setBrush(QBrush(color));
+                        break;
+                    }
+                }
+            }
+        }
 
         m_documentModified = true;
         updateTitle();
@@ -841,6 +881,9 @@ void MainWindow::updateSelectedItemBorderColor(const QColor& color)
         pathItem->setPen(pen);
     }
 
+    // Synchronize changes to SVG document
+    syncItemToSvgDocument(selectedItem);
+
     // Mark document as modified
     m_documentModified = true;
     updateTitle();
@@ -868,6 +911,9 @@ void MainWindow::updateSelectedItemFillColor(const QColor& color)
     } else if (auto pathItem = dynamic_cast<QGraphicsPathItem*>(selectedItem)) {
         pathItem->setBrush(brush);
     }
+
+    // Synchronize changes to SVG document
+    syncItemToSvgDocument(selectedItem);
 
     // Mark document as modified
     m_documentModified = true;
@@ -909,6 +955,9 @@ void MainWindow::updateSelectedItemBorderWidth(int width)
         pathItem->setPen(pen);
     }
 
+    // Synchronize changes to SVG document
+    syncItemToSvgDocument(selectedItem);
+
     // Mark document as modified
     m_documentModified = true;
     updateTitle();
@@ -949,6 +998,9 @@ void MainWindow::updateSelectedItemBorderStyle(Qt::PenStyle style)
         pathItem->setPen(pen);
     }
 
+    // Synchronize changes to SVG document
+    syncItemToSvgDocument(selectedItem);
+
     // Mark document as modified
     m_documentModified = true;
     updateTitle();
@@ -967,6 +1019,8 @@ void MainWindow::updateSelectedItemTextContent(const QString& text)
     if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
         // For our new EditableTextItem
         textItem->setPlainText(text);
+        // Synchronize changes to SVG document
+        syncItemToSvgDocument(selectedItem);
         m_documentModified = true;
         updateTitle();
         qCDebug(mainWindowLog) << "Updated editable text content to:" << text;
@@ -974,6 +1028,8 @@ void MainWindow::updateSelectedItemTextContent(const QString& text)
     else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
         // For backward compatibility
         textItem->setText(text);
+        // Synchronize changes to SVG document
+        syncItemToSvgDocument(selectedItem);
         m_documentModified = true;
         updateTitle();
         qCDebug(mainWindowLog) << "Updated simple text content to:" << text;
@@ -993,6 +1049,8 @@ void MainWindow::updateSelectedItemFontFamily(const QString& family)
         QFont font = textItem->font();
         font.setFamily(family);
         textItem->setFont(font);
+        // Synchronize changes to SVG document
+        syncItemToSvgDocument(selectedItem);
         m_documentModified = true;
         updateTitle();
         qCDebug(mainWindowLog) << "Updated editable text font family to:" << family;
@@ -1002,6 +1060,8 @@ void MainWindow::updateSelectedItemFontFamily(const QString& family)
         QFont font = textItem->font();
         font.setFamily(family);
         textItem->setFont(font);
+        // Synchronize changes to SVG document
+        syncItemToSvgDocument(selectedItem);
         m_documentModified = true;
         updateTitle();
         qCDebug(mainWindowLog) << "Updated simple text font family to:" << family;
@@ -1021,6 +1081,8 @@ void MainWindow::updateSelectedItemFontSize(int size)
         QFont font = textItem->font();
         font.setPointSize(size);
         textItem->setFont(font);
+        // Synchronize changes to SVG document
+        syncItemToSvgDocument(selectedItem);
         m_documentModified = true;
         updateTitle();
         qCDebug(mainWindowLog) << "Updated editable text font size to:" << size;
@@ -1030,6 +1092,8 @@ void MainWindow::updateSelectedItemFontSize(int size)
         QFont font = textItem->font();
         font.setPointSize(size);
         textItem->setFont(font);
+        // Synchronize changes to SVG document
+        syncItemToSvgDocument(selectedItem);
         m_documentModified = true;
         updateTitle();
         qCDebug(mainWindowLog) << "Updated simple text font size to:" << size;
@@ -1047,6 +1111,8 @@ void MainWindow::updateSelectedItemFontBold(bool bold)
     if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
         // For our new EditableTextItem
         textItem->setBold(bold);
+        // Synchronize changes to SVG document
+        syncItemToSvgDocument(selectedItem);
         m_documentModified = true;
         updateTitle();
         qCDebug(mainWindowLog) << "Updated editable text font bold to:" << (bold ? "true" : "false");
@@ -1056,6 +1122,8 @@ void MainWindow::updateSelectedItemFontBold(bool bold)
         QFont font = textItem->font();
         font.setBold(bold);
         textItem->setFont(font);
+        // Synchronize changes to SVG document
+        syncItemToSvgDocument(selectedItem);
         m_documentModified = true;
         updateTitle();
         qCDebug(mainWindowLog) << "Updated simple text font bold to:" << (bold ? "true" : "false");
@@ -1073,6 +1141,8 @@ void MainWindow::updateSelectedItemFontItalic(bool italic)
     if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
         // For our new EditableTextItem
         textItem->setItalic(italic);
+        // Synchronize changes to SVG document
+        syncItemToSvgDocument(selectedItem);
         m_documentModified = true;
         updateTitle();
         qCDebug(mainWindowLog) << "Updated editable text font italic to:" << (italic ? "true" : "false");
@@ -1082,6 +1152,8 @@ void MainWindow::updateSelectedItemFontItalic(bool italic)
         QFont font = textItem->font();
         font.setItalic(italic);
         textItem->setFont(font);
+        // Synchronize changes to SVG document
+        syncItemToSvgDocument(selectedItem);
         m_documentModified = true;
         updateTitle();
         qCDebug(mainWindowLog) << "Updated simple text font italic to:" << (italic ? "true" : "false");
@@ -1106,6 +1178,8 @@ void MainWindow::updateSelectedItemTextAlignment(int alignment)
             default: textAlignment = Qt::AlignLeft; break;
         }
         textItem->setTextAlignment(textAlignment);
+        // Synchronize changes to SVG document
+        syncItemToSvgDocument(selectedItem);
         m_documentModified = true;
         updateTitle();
         qCDebug(mainWindowLog) << "Updated editable text alignment to:" << alignment;
@@ -1128,6 +1202,8 @@ void MainWindow::updateSelectedItemTextColor(const QColor& color)
     if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
         // For our new EditableTextItem
         textItem->setDefaultTextColor(color);
+        // Synchronize changes to SVG document
+        syncItemToSvgDocument(selectedItem);
         m_documentModified = true;
         updateTitle();
         qCDebug(mainWindowLog) << "Updated editable text color to:" << color.name();
@@ -1135,6 +1211,8 @@ void MainWindow::updateSelectedItemTextColor(const QColor& color)
     else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
         // For backward compatibility
         textItem->setBrush(QBrush(color));
+        // Synchronize changes to SVG document
+        syncItemToSvgDocument(selectedItem);
         m_documentModified = true;
         updateTitle();
         qCDebug(mainWindowLog) << "Updated simple text color to:" << color.name();
@@ -1162,4 +1240,117 @@ void MainWindow::updateRightAttrBarFromDocument()
 
     qCDebug(mainWindowLog) << "Updated RightAttrBar from document - Size:" << width << "x" << height
                           << "Color:" << QString::fromStdString(bgColor.toString());
+}
+
+void MainWindow::syncItemToSvgDocument(QGraphicsItem* item)
+{
+    if (!item || !m_svgEngine || !m_svgEngine->getCurrentDocument()) {
+        return;
+    }
+
+    SvgDocument* doc = m_svgEngine->getCurrentDocument();
+    const auto& elements = doc->getElements();
+    
+    // Find the corresponding graphics item index in the document
+    int itemIndex = -1;
+    for (int i = 0; i < doc->m_graphicsItems.size(); ++i) {
+        if (doc->m_graphicsItems[i] == item) {
+            itemIndex = i;
+            break;
+        }
+    }
+
+    if (itemIndex == -1 || itemIndex >= elements.size()) {
+        qCWarning(mainWindowLog) << "Could not find corresponding SVG element for graphics item";
+        return;
+    }
+
+    // Get the corresponding SVG element
+    SvgElement* svgElement = elements[itemIndex].get();
+    if (!svgElement) {
+        return;
+    }
+
+    // Update the SVG element properties based on the graphics item
+    if (auto lineItem = dynamic_cast<QGraphicsLineItem*>(item)) {
+        QPen pen = lineItem->pen();
+        Color strokeColor(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha());
+        svgElement->setStrokeColor(strokeColor);
+        svgElement->setStrokeWidth(pen.width());
+        svgElement->setOpacity(item->opacity());
+    }
+    else if (auto rectItem = dynamic_cast<QGraphicsRectItem*>(item)) {
+        QPen pen = rectItem->pen();
+        QBrush brush = rectItem->brush();
+        Color strokeColor(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha());
+        Color fillColor(brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha());
+        svgElement->setStrokeColor(strokeColor);
+        svgElement->setFillColor(fillColor);
+        svgElement->setStrokeWidth(pen.width());
+        svgElement->setOpacity(item->opacity());
+    }
+    else if (auto ellipseItem = dynamic_cast<QGraphicsEllipseItem*>(item)) {
+        QPen pen = ellipseItem->pen();
+        QBrush brush = ellipseItem->brush();
+        Color strokeColor(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha());
+        Color fillColor(brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha());
+        svgElement->setStrokeColor(strokeColor);
+        svgElement->setFillColor(fillColor);
+        svgElement->setStrokeWidth(pen.width());
+        svgElement->setOpacity(item->opacity());
+    }
+    else if (auto polygonItem = dynamic_cast<QGraphicsPolygonItem*>(item)) {
+        QPen pen = polygonItem->pen();
+        QBrush brush = polygonItem->brush();
+        Color strokeColor(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha());
+        Color fillColor(brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha());
+        svgElement->setStrokeColor(strokeColor);
+        svgElement->setFillColor(fillColor);
+        svgElement->setStrokeWidth(pen.width());
+        svgElement->setOpacity(item->opacity());
+    }
+    else if (auto pathItem = dynamic_cast<QGraphicsPathItem*>(item)) {
+        QPen pen = pathItem->pen();
+        QBrush brush = pathItem->brush();
+        Color strokeColor(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha());
+        svgElement->setStrokeColor(strokeColor);
+        svgElement->setStrokeWidth(pen.width());
+        svgElement->setOpacity(item->opacity());
+    }
+    else if (auto textItem = dynamic_cast<EditableTextItem*>(item)) {
+        // Handle editable text item properties
+        QColor color = textItem->defaultTextColor();
+        Color fillColor(color.red(), color.green(), color.blue(), color.alpha());
+        svgElement->setFillColor(fillColor);
+        svgElement->setOpacity(item->opacity());
+        
+        // Update text-specific properties if this is a text element
+        if (auto svgTextElement = dynamic_cast<SvgText*>(svgElement)) {
+            svgTextElement->setTextContent(textItem->toPlainString().toStdString());
+            QFont font = textItem->font();
+            svgTextElement->setFontFamily(font.family().toStdString());
+            svgTextElement->setFontSize(font.pointSizeF());
+            svgTextElement->setBold(textItem->isBold());
+            svgTextElement->setItalic(textItem->isItalic());
+        }
+    }
+    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(item)) {
+        // Handle simple text item properties
+        QColor color = textItem->brush().color();
+        Color fillColor(color.red(), color.green(), color.blue(), color.alpha());
+        svgElement->setFillColor(fillColor);
+        svgElement->setOpacity(item->opacity());
+        
+        // Update text-specific properties if this is a text element
+        if (auto svgTextElement = dynamic_cast<SvgText*>(svgElement)) {
+            svgTextElement->setTextContent(textItem->text().toStdString());
+            QFont font = textItem->font();
+            svgTextElement->setFontFamily(font.family().toStdString());
+            svgTextElement->setFontSize(font.pointSizeF());
+            svgTextElement->setBold(font.bold());
+            svgTextElement->setItalic(font.italic());
+        }
+    }
+
+    qCDebug(mainWindowLog) << "Synchronized graphics item properties to SVG element at index:" << itemIndex;
 }
