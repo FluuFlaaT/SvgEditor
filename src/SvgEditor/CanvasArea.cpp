@@ -2,7 +2,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <QtMath>
-#include "CanvasArea.h"
+#include "canvasarea.h"
 #include "../CoreSvgEngine/coresvgengine.h"
 #include "../CoreSvgEngine/svgdocument.h"
 #include "../CoreSvgEngine/svgshapes.h"

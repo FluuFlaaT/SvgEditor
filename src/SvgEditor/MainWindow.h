@@ -20,7 +20,7 @@
 #include "leftsidebar.h"
 #include "rightattrbar.h"
 #include "canvasarea.h"
-#include "ShapeToolBar.h"
+#include "shapetoolbar.h"
 #include "../CoreSvgEngine/coresvgengine.h"
 #include "../Commands/CommandManager.h"
 

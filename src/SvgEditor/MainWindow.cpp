@@ -1,4 +1,4 @@
-﻿#include "MainWindow.h"
+﻿#include "mainwindow.h"
 #include <QTimer>
 
 // Include the undo/redo implementation
