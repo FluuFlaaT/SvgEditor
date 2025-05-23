@@ -1,4 +1,5 @@
 ﻿#include "mainwindow.h"
+#include "../ConfigDialog/configdialog.h"
 #include <QTimer>
 
 // Include the undo/redo implementation
@@ -587,6 +588,14 @@ void MainWindow::setupMenus()
             this, &MainWindow::updateUndoRedoActions);
 
     QMenu* settingsMenu = menuBar()->addMenu(tr("Settings"));
+
+    // Add Preferences action
+    QAction* preferencesAction = new QAction(tr("Preferences..."), this);
+    preferencesAction->setShortcut(QKeySequence::Preferences);
+    connect(preferencesAction, &QAction::triggered, this, &MainWindow::showPreferences);
+    settingsMenu->addAction(preferencesAction);
+    
+    settingsMenu->addSeparator();
 
     m_languageMenu = settingsMenu->addMenu(tr("Language"));
 
@@ -1353,4 +1362,19 @@ void MainWindow::syncItemToSvgDocument(QGraphicsItem* item)
     }
 
     qCDebug(mainWindowLog) << "Synchronized graphics item properties to SVG element at index:" << itemIndex;
+}
+
+void MainWindow::showPreferences()
+{
+    qCDebug(mainWindowLog) << "Opening preferences dialog";
+    
+    ConfigDialog dialog(this);
+    int result = dialog.exec();
+    
+    if (result == QDialog::Accepted) {
+        qCDebug(mainWindowLog) << "Preferences saved";
+        showStatusMessage(tr("Preferences updated"), 2000);
+    } else {
+        qCDebug(mainWindowLog) << "Preferences cancelled";
+    }
 }

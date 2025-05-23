@@ -17,6 +17,7 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QLabel>
+#include <QTimer>
 #include "leftsidebar.h"
 #include "rightattrbar.h"
 #include "canvasarea.h"
@@ -48,6 +49,9 @@ private slots:
     void updateZoomStatus(qreal zoomFactor);
     void showStatusMessage(const QString& message, int timeout = 2000);
     void clearStatusMessage();
+    
+    // Settings menu
+    void showPreferences();
 
     // Methods to update selected item properties
     void updateSelectedItemBorderColor(const QColor& color);

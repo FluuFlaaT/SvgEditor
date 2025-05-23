@@ -50,5 +50,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     Qt5::Xml
     CoreSvgEngine
     Commands
+    ConfigManager
+    ConfigDialog
 )
 
