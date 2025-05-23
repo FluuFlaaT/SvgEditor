@@ -140,4 +140,5 @@ private:
     QGraphicsPolygonItem* createStar(const QPointF& center, qreal outerRadius, qreal innerRadius);
     QGraphicsPolygonItem* createRegularPolygon(const QPointF& center, qreal radius, int sides);
     EditableTextItem* createText(const QPointF& position, const QString& text = "");
+    EditableTextItem* createTextBox(const QRectF& textRect);
 };

@@ -2,6 +2,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <QtMath>
+#include <QTimer>
 #include "canvasarea.h"
 #include "../CoreSvgEngine/coresvgengine.h"
 #include "../CoreSvgEngine/svgdocument.h"
@@ -172,7 +173,17 @@ void CanvasArea::createShape(const QPointF& startPoint, const QPointF& endPoint)
         }
         case ShapeType::Text: {
             qCDebug(canvasAreaLog) << "Creating Text";
-            m_currentItem = createText(startPoint);
+            // Create text box based on dragged area
+            QRectF textRect(qMin(startPoint.x(), endPoint.x()),
+                           qMin(startPoint.y(), endPoint.y()),
+                           qAbs(endPoint.x() - startPoint.x()),
+                           qAbs(endPoint.y() - startPoint.y()));
+            
+            // Ensure minimum size for the text box
+            if (textRect.width() < 50) textRect.setWidth(50);
+            if (textRect.height() < 20) textRect.setHeight(20);
+            
+            m_currentItem = createTextBox(textRect);
             break;
         }
         default:
@@ -192,10 +203,6 @@ void CanvasArea::updateShape(const QPointF& endPoint)
 {
     if (!m_currentItem) {
         qCWarning(canvasAreaLog) << "Cannot update shape: current item is null";
-        return;
-    }
-
-    if (m_currentShapeType == ShapeType::Text) {
         return;
     }
 
@@ -757,8 +764,6 @@ void CanvasArea::addShapeToDocument(QGraphicsItem* item)
     qCDebug(canvasAreaLog) << "Shape added to document";
 }
 
-
-
 void CanvasArea::mousePressEvent(QMouseEvent *event)
 {
     if (m_currentShapeType == ShapeType::None) {
@@ -834,11 +839,10 @@ void CanvasArea::mouseMoveEvent(QMouseEvent *event)
 
             m_currentItem = createFreehandPath(m_freehandPoints);
             m_scene->addItem(m_currentItem);
-        } else if (m_currentShapeType != ShapeType::Text) {
-            // For other shapes (except Text), update the shape
+        } else {
+            // For all other shapes including Text, update the shape
             updateShape(m_endPoint);
         }
-        // For Text, we don't update during mouse movement to avoid dialog popup
 
         event->accept();
     } else {
@@ -929,22 +933,19 @@ ShapeType CanvasArea::getSelectedItemType() const
     return getItemType(selectedItem);
 }
 
-EditableTextItem* CanvasArea::createText(const QPointF& position, const QString& text) {
-    // If text is empty, prompt the user for text input
-    QString textContent = text;
-    if (textContent.isEmpty()) {
-        bool ok;
-        textContent = QInputDialog::getText(this, tr("Enter Text"),
-                                         tr("Text content:"), QLineEdit::Normal,
-                                         tr("Text"), &ok);
-        if (!ok || textContent.isEmpty()) {
-            textContent = tr("Text"); // Default text if user cancels or enters empty text
-        }
-    }
-
-    // Create the editable text item
-    EditableTextItem* textItem = new EditableTextItem(textContent);
-    textItem->setPos(position);
+EditableTextItem* CanvasArea::createTextBox(const QRectF& textRect) {
+    // Create the editable text item with placeholder text
+    EditableTextItem* textItem = new EditableTextItem(tr("Type here..."));
+    textItem->setPos(textRect.topLeft());
+    
+    // Set the text box size to match the dragged area
+    textItem->setTextWidth(textRect.width());
+    
+    // Set default font size based on the height of the text box
+    QFont font = textItem->font();
+    double fontSize = qMax(10.0, qMin(textRect.height() * 0.6, 72.0));
+    font.setPointSizeF(fontSize);
+    textItem->setFont(font);
 
     // Connect signals
     connect(textItem, &EditableTextItem::textChanged, this, [this, textItem](const QString& newText) {
@@ -955,7 +956,18 @@ EditableTextItem* CanvasArea::createText(const QPointF& position, const QString&
         }
     });
 
+    // Start editing immediately when created
+    QTimer::singleShot(0, [textItem]() {
+        textItem->startEditing();
+    });
+
     return textItem;
+}
+
+EditableTextItem* CanvasArea::createText(const QPointF& position, const QString& text) {
+    // Create a default sized text box at the clicked position for backward compatibility
+    QRectF defaultRect(position.x(), position.y(), 100, 30);
+    return createTextBox(defaultRect);
 }
 
 void CanvasArea::keyPressEvent(QKeyEvent *event)

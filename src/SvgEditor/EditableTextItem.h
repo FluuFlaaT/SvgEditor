@@ -72,6 +72,11 @@ public:
      */
     bool isItalic() const;
 
+    /**
+     * @brief Start editing the text
+     */
+    void startEditing();
+
 signals:
     /**
      * @brief Signal emitted when the text content changes
@@ -104,11 +109,6 @@ protected:
     void keyPressEvent(QKeyEvent* event) override;
 
 private:
-    /**
-     * @brief Start editing the text
-     */
-    void startEditing();
-
     /**
      * @brief Finish editing the text
      */
