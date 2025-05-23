@@ -5,4 +5,4 @@
 class CanvasArea;
 
 // Include ShapeType enum from ShapeToolBar
-#include "SvgEditor/ShapeToolBar.h"
+#include "SvgEditor/shapetoolbar.h"

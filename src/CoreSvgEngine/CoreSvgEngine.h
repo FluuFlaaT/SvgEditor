@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "SvgDocument.h"
+#include "svgdocument.h"
 #include <memory>
 
 #if defined(_MSC_VER) || defined(WIN64) || defined(_WIN64) || defined(__WIN64__) || defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)

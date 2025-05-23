@@ -3,8 +3,8 @@
 #include <QGraphicsItem>
 #include <memory>
 #include "SvgEditorForwards.h"
-#include "CoreSvgEngine/SvgElement.h"
-#include "CoreSvgEngine/CoreSvgEngine.h"
+#include "CoreSvgEngine/svgelement.h"
+#include "CoreSvgEngine/coresvgengine.h"
 
 class AddShapeCommand : public Command {
 public:

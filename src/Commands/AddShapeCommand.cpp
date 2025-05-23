@@ -1,8 +1,8 @@
 #include "AddShapeCommand.h"
 #include <QLoggingCategory>
-#include "CoreSvgEngine/SvgDocument.h"
+#include "CoreSvgEngine/svgdocument.h"
 #include "CommandUtils.h"
-#include "SvgEditor/CanvasArea.h"
+#include "SvgEditor/canvasarea.h"
 
 Q_LOGGING_CATEGORY(addShapeCommandLog, "AddShapeCommand")
 

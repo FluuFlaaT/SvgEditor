@@ -2,7 +2,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <vector>
-#include "SvgElement.h"
+#include "svgelement.h"
 
 class SvgLine : public SvgElement {
 private: 

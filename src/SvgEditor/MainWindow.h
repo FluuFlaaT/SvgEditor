@@ -17,11 +17,11 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QLabel>
-#include "LeftSideBar.h"
-#include "RightAttrBar.h"
-#include "CanvasArea.h"
+#include "leftsidebar.h"
+#include "rightattrbar.h"
+#include "canvasarea.h"
 #include "ShapeToolBar.h"
-#include "../CoreSvgEngine/CoreSvgEngine.h"
+#include "../CoreSvgEngine/coresvgengine.h"
 #include "../Commands/CommandManager.h"
 
 Q_DECLARE_LOGGING_CATEGORY(mainWindowLog)

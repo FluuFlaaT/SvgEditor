@@ -1,4 +1,4 @@
-#include "EditableTextItem.h"
+#include "editabletextitem.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QTextDocument>
 #include <QTextCursor>

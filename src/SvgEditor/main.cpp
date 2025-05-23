@@ -5,7 +5,7 @@
 #include <QDir>
 #include <QString>
 #include <QLoggingCategory>
-#include "MainWindow.h"
+#include "mainwindow.h"
 
 Q_DECLARE_LOGGING_CATEGORY(svgEditorLog)
 Q_LOGGING_CATEGORY(svgEditorLog, "SvgEditor")

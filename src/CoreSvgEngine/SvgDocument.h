@@ -8,7 +8,7 @@
 #include <QGraphicsEllipseItem>
 #include <QGraphicsPolygonItem>
 #include <QGraphicsSimpleTextItem>
-#include "SvgElement.h"
+#include "svgelement.h"
 
 namespace tinyxml2 {
     class XMLElement;

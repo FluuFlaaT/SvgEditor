@@ -1,7 +1,7 @@
-﻿#include "SvgDocument.h"
-#include "SvgElement.h"
-#include "SvgShapes.h"
-#include "SvgText.h"
+﻿#include "svgdocument.h"
+#include "svgelement.h"
+#include "svgshapes.h"
+#include "svgtext.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>

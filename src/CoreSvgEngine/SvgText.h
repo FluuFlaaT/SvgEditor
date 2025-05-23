@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "SvgElement.h"
+#include "svgelement.h"
 
 // Text anchor enumeration
 enum class TextAnchor {

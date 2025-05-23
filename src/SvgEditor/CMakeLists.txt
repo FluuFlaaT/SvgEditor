@@ -15,12 +15,12 @@ set(SOURCES
 )
 
 set(HEADERS
-    MainWindow.h
-    LeftSideBar.h
-    RightAttrBar.h
-    CanvasArea.h
-    ShapeToolBar.h
-    EditableTextItem.h
+    mainwindow.h
+    leftsidebar.h
+    rightattrbar.h
+    canvasarea.h
+    shapetoolbar.h
+    editabletextitem.h
 )
 
 file(GLOB UI_FILES *.ui)

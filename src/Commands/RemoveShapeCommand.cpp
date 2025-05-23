@@ -1,10 +1,10 @@
 #include "RemoveShapeCommand.h"
 #include <QLoggingCategory>
 #include <algorithm> // For std::find
-#include "CoreSvgEngine/SvgDocument.h"
-#include "CoreSvgEngine/SvgShapes.h"
+#include "CoreSvgEngine/svgdocument.h"
+#include "CoreSvgEngine/svgshapes.h"
 #include "CommandUtils.h"
-#include "SvgEditor/CanvasArea.h"
+#include "SvgEditor/canvasarea.h"
 
 Q_LOGGING_CATEGORY(removeShapeCommandLog, "RemoveShapeCommand")
 

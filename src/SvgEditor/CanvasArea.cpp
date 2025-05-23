@@ -3,10 +3,10 @@
 #include <cmath>
 #include <QtMath>
 #include "CanvasArea.h"
-#include "../CoreSvgEngine/CoreSvgEngine.h"
-#include "../CoreSvgEngine/SvgDocument.h"
-#include "../CoreSvgEngine/SvgShapes.h"
-#include "../CoreSvgEngine/SvgText.h"
+#include "../CoreSvgEngine/coresvgengine.h"
+#include "../CoreSvgEngine/svgdocument.h"
+#include "../CoreSvgEngine/svgshapes.h"
+#include "../CoreSvgEngine/svgtext.h"
 #include "../Commands/AddShapeCommand.h"
 #include "../Commands/RemoveShapeCommand.h"
 

@@ -1,4 +1,4 @@
-#include "ShapeToolBar.h"
+#include "shapetoolbar.h"
 
 Q_LOGGING_CATEGORY(shapeToolBarLog, "ShapeToolBar")
 

@@ -1,4 +1,4 @@
-#include "LeftSideBar.h"
+#include "leftsidebar.h"
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QLabel>

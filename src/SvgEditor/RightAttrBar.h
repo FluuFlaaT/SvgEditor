@@ -17,8 +17,8 @@
 #include <QFontDatabase>
 #include <QCheckBox>
 #include <QGraphicsSimpleTextItem>
-#include "EditableTextItem.h"
-#include "ShapeToolBar.h" // 包含ShapeType定义
+#include "editabletextitem.h"
+#include "shapetoolbar.h" // 包含ShapeType定义
 
 Q_DECLARE_LOGGING_CATEGORY(rightAttrBarLog)
 class RightAttrBar : public QWidget

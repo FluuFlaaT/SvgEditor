@@ -1,6 +1,6 @@
 ﻿#include <string>
 #include <sstream>
-#include "SvgElement.h"
+#include "svgelement.h"
 // #include "../LoggingService/LoggingService.h"
 #include <QLoggingCategory>
 #include <QString>

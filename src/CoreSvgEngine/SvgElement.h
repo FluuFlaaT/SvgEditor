@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "CoreSvgStructs.h"
+#include "coresvgstructs.h"
 #include <string>
 #include <map>
 #include <variant>

@@ -1,4 +1,4 @@
-﻿#include "SvgText.h"
+﻿#include "svgtext.h"
 #include <sstream>
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(svgTextLog)

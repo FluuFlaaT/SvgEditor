@@ -1,6 +1,6 @@
 #pragma once
 #include <QString>
-#include "SvgEditor/ShapeToolBar.h"
+#include "SvgEditor/shapetoolbar.h"
 
 inline QString getShapeTypeName(ShapeType type)
 {

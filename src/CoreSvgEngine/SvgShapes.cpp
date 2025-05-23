@@ -1,4 +1,4 @@
-﻿#include "SvgShapes.h"
+﻿#include "svgshapes.h"
 #include <sstream>
 // #include "../LoggingService/LoggingService.h"
 #include <QLoggingCategory>

@@ -1,4 +1,4 @@
-﻿#include "RightAttrBar.h"
+﻿#include "rightattrbar.h"
 
 Q_LOGGING_CATEGORY(rightAttrBarLog, "RightAttrBar")
 

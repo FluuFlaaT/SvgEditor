@@ -27,8 +27,8 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <cmath>
-#include "ShapeToolBar.h"
-#include "EditableTextItem.h"
+#include "shapetoolbar.h"
+#include "editabletextitem.h"
 #include "../Commands/CommandManager.h"
 
 // 前向声明CoreSvgEngine类
