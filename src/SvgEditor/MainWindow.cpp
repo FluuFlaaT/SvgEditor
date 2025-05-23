@@ -1,5 +1,6 @@
 ﻿#include "mainwindow.h"
 #include "../ConfigDialog/configdialog.h"
+#include "../ConfigManager/configmanager.h"
 #include <QTimer>
 
 // Include the undo/redo implementation
@@ -71,8 +72,20 @@ MainWindow::MainWindow(QWidget *parent)
     m_documentModified = false;
     updateTitle();
 
-    // Initialize with an empty canvas ready for drawing
-    m_svgEngine->createNewDocument(800, 600);
+    // Initialize with an empty canvas ready for drawing using default settings
+    ConfigManager* configManager = ConfigManager::instance();
+    QSize defaultCanvasSize = configManager->getDefaultCanvasSize();
+    m_svgEngine->createNewDocument(defaultCanvasSize.width(), defaultCanvasSize.height());
+    
+    // Set default background color
+    QColor defaultBgColor = configManager->getDefaultCanvasBackgroundColor();
+    Color bgColor;
+    bgColor.r = defaultBgColor.red();
+    bgColor.g = defaultBgColor.green();
+    bgColor.b = defaultBgColor.blue();
+    bgColor.alpha = defaultBgColor.alpha();
+    m_svgEngine->getCurrentDocument()->setBackgroundColor(bgColor);
+    
     m_canvasArea->openFileWithEngine(m_svgEngine);
 
     // Connect RightAttrBar signals to update canvas settings
@@ -245,7 +258,19 @@ void MainWindow::newFile()
         if (!fileDialog.selectedFiles().isEmpty()) {
             QString fileName = fileDialog.selectedFiles().constFirst();
 
-            m_svgEngine->createNewDocument(800, 600);
+            // Use default settings from ConfigManager
+            ConfigManager* configManager = ConfigManager::instance();
+            QSize defaultCanvasSize = configManager->getDefaultCanvasSize();
+            m_svgEngine->createNewDocument(defaultCanvasSize.width(), defaultCanvasSize.height());
+            
+            // Set default background color
+            QColor defaultBgColor = configManager->getDefaultCanvasBackgroundColor();
+            Color bgColor;
+            bgColor.r = defaultBgColor.red();
+            bgColor.g = defaultBgColor.green();
+            bgColor.b = defaultBgColor.blue();
+            bgColor.alpha = defaultBgColor.alpha();
+            m_svgEngine->getCurrentDocument()->setBackgroundColor(bgColor);
 
             if (m_svgEngine->saveSvgFile(fileName.toStdString())) {
                 m_currentFilePath = fileName;
