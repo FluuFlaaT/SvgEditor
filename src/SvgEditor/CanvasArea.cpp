@@ -1059,23 +1059,9 @@ bool CanvasArea::openFileWithEngine(CoreSvgEngine* engine) {
     m_backgroundItem->setZValue(-1); // Ensure it's behind all other items
     s->addItem(m_backgroundItem);
 
-    // Add all graphics items from the document
-    // Make sure we're not adding invalid items
-    for(auto it = doc->m_graphicsItems.begin(); it != doc->m_graphicsItems.end(); ) {
-        QGraphicsItem* item = *it;
-        if (item) {
-            // Set the item to be selectable
-            item->setFlag(QGraphicsItem::ItemIsSelectable, true);
-            // Also make it movable when selected
-            item->setFlag(QGraphicsItem::ItemIsMovable, true);
-            s->addItem(item);
-            ++it;
-        } else {
-            // Remove invalid items from the vector
-            it = doc->m_graphicsItems.erase(it);
-            qCWarning(canvasAreaLog) << "Removed invalid graphics item from document";
-        }
-    }
+    // 清理 SvgDocument 里的 graphicsItems，防止悬挂指针
+    // scene()->clear() 会自动处理所有 items 的删除，我们只需要清空向量
+    doc->m_graphicsItems.clear();
 
     // Create outline rectangle
     m_outlineItem = new QGraphicsRectItem(docRect);

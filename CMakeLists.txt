@@ -16,5 +16,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 add_subdirectory(src/Commands)
+add_subdirectory(src/Settings)
 add_subdirectory(src/SvgEditor)
 add_subdirectory(src/CoreSvgEngine)

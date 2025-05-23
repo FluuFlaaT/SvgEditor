@@ -24,6 +24,8 @@
 #include "../CoreSvgEngine/coresvgengine.h"
 #include "../CoreSvgEngine/svgtext.h"
 #include "../Commands/CommandManager.h"
+#include "../Settings/settingsmanager.h"
+#include "../Settings/settingsdialog.h"
 
 Q_DECLARE_LOGGING_CATEGORY(mainWindowLog)
 
@@ -42,6 +44,10 @@ private slots:
     void saveFile();
     void saveFileAs();
     void exportToPNG();
+
+    // Settings dialog
+    void openSettingsDialog();
+    void applySettings();
 
     void handleToolSelected(int toolId);
     void handleShapeToolSelected(ShapeType type);

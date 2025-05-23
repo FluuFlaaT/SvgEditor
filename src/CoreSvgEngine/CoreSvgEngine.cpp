@@ -9,7 +9,7 @@ Q_LOGGING_CATEGORY(coreSvgEngineLog, "CoreSvgEngine")
 
 CoreSvgEngine::CoreSvgEngine() : m_document(new SvgDocument()) {
     qCDebug(coreSvgEngineLog) << "Creating CoreSvgEngine instance with default document";
-    createNewDocument(600, 800);
+    // Default values will be set by the caller
 }
 
 CoreSvgEngine::~CoreSvgEngine() {
@@ -36,7 +36,7 @@ bool CoreSvgEngine::loadSvgFile(const std::string& filePath) {
         qCWarning(coreSvgEngineLog) << "Failed to open file:" << QString::fromStdString(filePath);
         std::cerr << "Error: Could not open file " << filePath << std::endl;
         return false;
-    }    
+    }
     std::stringstream buffer;
     buffer << file.rdbuf();
     file.close();
