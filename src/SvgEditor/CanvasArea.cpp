@@ -229,7 +229,7 @@ void CanvasArea::finalizeShape()
     auto command = std::make_unique<AddShapeCommand>(this, m_currentItem, m_currentShapeType);
     CommandManager::instance()->executeCommand(std::move(command));
 
-    // For text items, ensure they're selected so the properties panel updates
+    // For text items, ensure they're selected and start editing
     if (m_currentShapeType == ShapeType::Text) {
         // Clear any existing selection
         m_scene->clearSelection();
@@ -237,7 +237,15 @@ void CanvasArea::finalizeShape()
         finalizedItem->setSelected(true);
         // Emit the selection signal
         emit itemSelected(finalizedItem, ShapeType::Text);
-        qCDebug(canvasAreaLog) << "Text item selected after creation";
+        
+        // Start editing immediately after creation
+        if (auto textItem = dynamic_cast<EditableTextItem*>(finalizedItem)) {
+            QTimer::singleShot(50, [textItem]() {
+                textItem->startEditing();
+            });
+        }
+        
+        qCDebug(canvasAreaLog) << "Text item selected and editing started after creation";
     }
 
     // Reset the current item pointer (ownership transferred to the command)
@@ -954,11 +962,6 @@ EditableTextItem* CanvasArea::createTextBox(const QRectF& textRect) {
             // The document will be marked as modified when the text is finalized
             qCDebug(canvasAreaLog) << "Text changed to:" << newText;
         }
-    });
-
-    // Start editing immediately when created
-    QTimer::singleShot(0, [textItem]() {
-        textItem->startEditing();
     });
 
     return textItem;
