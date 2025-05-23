@@ -72,13 +72,11 @@ MainWindow::MainWindow(QWidget *parent)
     setupStatusBar();
     setupLanguageMenu();
 
-    // Connect LeftSideBar buttons to handleToolSelected
-    connect(m_leftSideBar->selectBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(0); });
-    connect(m_leftSideBar->drawBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(1); });
-    connect(m_leftSideBar->shapeBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(2); });
-    connect(m_leftSideBar->textBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(3); });
-    connect(m_leftSideBar->dragBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(4); });
-    connect(m_leftSideBar->zoomBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(5); });
+    // Connect LeftSideBar buttons to handleToolSelected (updated for new layout)
+    connect(m_leftSideBar->dragBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(0); });
+    connect(m_leftSideBar->shapeBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(1); });
+    connect(m_leftSideBar->textBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(2); });
+    connect(m_leftSideBar->zoomBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(3); });
 
     resize(1280, 800);
     setWindowTitle(tr("SVG Editor"));
@@ -199,11 +197,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_leftSideBar, &LeftSideBar::fitToWindowRequested, m_canvasArea, &CanvasArea::fitToView);
 
     // Connect tool signals
-    connect(m_leftSideBar, &LeftSideBar::dragToolRequested, this, [this]() { handleToolSelected(4); });
-    connect(m_leftSideBar, &LeftSideBar::zoomToolRequested, this, [this]() { handleToolSelected(5); });
+    connect(m_leftSideBar, &LeftSideBar::dragToolRequested, this, [this]() { handleToolSelected(0); });
+    connect(m_leftSideBar, &LeftSideBar::shapeGroupRequested, this, [this]() { handleToolSelected(1); });
+    connect(m_leftSideBar, &LeftSideBar::textToolRequested, this, [this]() { handleToolSelected(2); });
+    connect(m_leftSideBar, &LeftSideBar::zoomToolRequested, this, [this]() { handleToolSelected(3); });
 
-    // Connect shape toolbar signals
-    connect(m_shapeToolBar, &ShapeToolBar::shapeToolSelected, this, &MainWindow::handleShapeToolSelected);
+    // Connect shape signals from LeftSideBar (replaces ShapeToolBar connections)
+    connect(m_leftSideBar, &LeftSideBar::shapeToolSelected, this, &MainWindow::handleShapeToolSelected);
 
     // Connect shape created signal to mark document as modified
     connect(m_canvasArea, &CanvasArea::shapeCreated, this, [this](QGraphicsItem*) {
@@ -481,41 +481,29 @@ void MainWindow::handleToolSelected(int toolId)
     // Reset drag mode by default
     m_canvasArea->setDragMode(QGraphicsView::RubberBandDrag);
 
-    // Hide shape toolbar by default
+    // Hide shape toolbar by default (not needed anymore)
     m_shapeToolBar->hide();
 
     switch (toolId) {
         case 0:
-            toolName = tr("Select Tool");
-            attrWidgetType = RightAttrBar::CommonAttributes;
-            m_canvasArea->setSelectMode();
-            break;
-        case 1:
-            toolName = tr("Draw Tool");
-            attrWidgetType = RightAttrBar::CommonAttributes;
-            // Set freehand drawing mode
-            m_canvasArea->setShapeCreationMode(ShapeType::Freehand);
-            break;
-        case 2:
-            toolName = tr("Shape Tool");
-            attrWidgetType = RightAttrBar::CircleAttributes;
-            // Show the shape toolbar
-            m_shapeToolBar->show();
-            m_shapeToolBar->setSelectedShapeType(ShapeType::Rectangle); // Default to rectangle
-            m_canvasArea->setShapeCreationMode(ShapeType::Rectangle);
-            break;
-        case 3:
-            toolName = tr("Text Tool");
-            attrWidgetType = RightAttrBar::TextAttributes;
-            m_canvasArea->setShapeCreationMode(ShapeType::Text);
-            break;
-        case 4:
             toolName = tr("Drag Tool");
             attrWidgetType = RightAttrBar::CommonAttributes;
             // Enable drag mode for the canvas
             m_canvasArea->setDragMode(QGraphicsView::ScrollHandDrag);
             break;
-        case 5:
+        case 1:
+            toolName = tr("Shapes Tool");
+            attrWidgetType = RightAttrBar::CircleAttributes;
+            // Shape tools are now shown directly in the left sidebar
+            // Default to ellipse as specified in the requirements
+            m_canvasArea->setShapeCreationMode(ShapeType::Ellipse);
+            break;
+        case 2:
+            toolName = tr("Text Tool");
+            attrWidgetType = RightAttrBar::TextAttributes;
+            m_canvasArea->setShapeCreationMode(ShapeType::Text);
+            break;
+        case 3:
             toolName = tr("Zoom Tool");
             attrWidgetType = RightAttrBar::CommonAttributes;
             // No specific canvas mode for zoom, just show the zoom tools
@@ -608,16 +596,18 @@ void MainWindow::setupMenus()
     // Create undo action
     m_undoAction = new QAction(tr("Undo"), this);
     m_undoAction->setShortcut(QKeySequence::Undo);
-    m_undoAction->setIcon(QIcon::fromTheme("edit-undo", QIcon(":/icons/undo.png")));
+    m_undoAction->setIcon(QIcon(":/icon/images/undo.svg"));
     m_undoAction->setEnabled(false);
+    m_undoAction->setToolTip(tr("Undo last action"));
     connect(m_undoAction, &QAction::triggered, this, &MainWindow::undo);
     editMenu->addAction(m_undoAction);
 
     // Create redo action
     m_redoAction = new QAction(tr("Redo"), this);
     m_redoAction->setShortcut(QKeySequence::Redo);
-    m_redoAction->setIcon(QIcon::fromTheme("edit-redo", QIcon(":/icons/redo.png")));
+    m_redoAction->setIcon(QIcon(":/icon/images/redo.svg"));
     m_redoAction->setEnabled(false);
+    m_redoAction->setToolTip(tr("Redo last action"));
     connect(m_redoAction, &QAction::triggered, this, &MainWindow::redo);
     editMenu->addAction(m_redoAction);
 
@@ -650,17 +640,20 @@ void MainWindow::setupToolBar()
 
     // Add file operations to toolbar
     QAction* newAction = new QAction(tr("New"), this);
-    newAction->setIcon(QIcon::fromTheme("document-new", QIcon(":/icons/new.png")));
+    newAction->setIcon(QIcon(":/icon/images/new.svg"));
+    newAction->setToolTip(tr("Create a new document"));
     connect(newAction, &QAction::triggered, this, &MainWindow::newFile);
     m_mainToolBar->addAction(newAction);
 
     QAction* openAction = new QAction(tr("Open"), this);
-    openAction->setIcon(QIcon::fromTheme("document-open", QIcon(":/icons/open.png")));
+    openAction->setIcon(QIcon(":/icon/images/open.svg"));
+    openAction->setToolTip(tr("Open an existing document"));
     connect(openAction, &QAction::triggered, this, &MainWindow::openFile);
     m_mainToolBar->addAction(openAction);
 
     QAction* saveAction = new QAction(tr("Save"), this);
-    saveAction->setIcon(QIcon::fromTheme("document-save", QIcon(":/icons/save.png")));
+    saveAction->setIcon(QIcon(":/icon/images/save.svg"));
+    saveAction->setToolTip(tr("Save the current document"));
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
     m_mainToolBar->addAction(saveAction);
 
@@ -674,22 +667,26 @@ void MainWindow::setupToolBar()
 
     // Add zoom controls
     QAction* zoomInAction = new QAction(tr("Zoom In"), this);
-    zoomInAction->setIcon(QIcon::fromTheme("zoom-in", QIcon(":/icons/zoom-in.png")));
+    zoomInAction->setIcon(QIcon(":/icon/images/zoomin.svg"));
+    zoomInAction->setToolTip(tr("Zoom in"));
     connect(zoomInAction, &QAction::triggered, m_canvasArea, &CanvasArea::zoomIn);
     m_mainToolBar->addAction(zoomInAction);
 
     QAction* zoomOutAction = new QAction(tr("Zoom Out"), this);
-    zoomOutAction->setIcon(QIcon::fromTheme("zoom-out", QIcon(":/icons/zoom-out.png")));
+    zoomOutAction->setIcon(QIcon(":/icon/images/zoomout.svg"));
+    zoomOutAction->setToolTip(tr("Zoom out"));
     connect(zoomOutAction, &QAction::triggered, m_canvasArea, &CanvasArea::zoomOut);
     m_mainToolBar->addAction(zoomOutAction);
 
     QAction* zoomResetAction = new QAction(tr("Reset Zoom"), this);
-    zoomResetAction->setIcon(QIcon::fromTheme("zoom-original", QIcon(":/icons/zoom-reset.png")));
+    zoomResetAction->setIcon(QIcon(":/icon/images/reset-zoom.svg"));
+    zoomResetAction->setToolTip(tr("Reset zoom to 100%"));
     connect(zoomResetAction, &QAction::triggered, m_canvasArea, &CanvasArea::resetZoom);
     m_mainToolBar->addAction(zoomResetAction);
 
     QAction* zoomFitAction = new QAction(tr("Fit to View"), this);
-    zoomFitAction->setIcon(QIcon::fromTheme("zoom-fit-best", QIcon(":/icons/zoom-fit.png")));
+    zoomFitAction->setIcon(QIcon(":/icon/images/fit-screen.svg"));
+    zoomFitAction->setToolTip(tr("Fit content to view"));
     connect(zoomFitAction, &QAction::triggered, m_canvasArea, &CanvasArea::fitToView);
     m_mainToolBar->addAction(zoomFitAction);
 

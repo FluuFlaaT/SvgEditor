@@ -10,44 +10,39 @@
 Q_LOGGING_CATEGORY(leftSideBarLog, "LeftSideBar")
 
 LeftSideBar::LeftSideBar(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent), m_selectedShapeType(ShapeType::None)
 {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     setLayout(mainLayout);
 
-    selectBtn = new QPushButton("Select", this);
-    drawBtn = new QPushButton("Draw", this);
+    // Create main tool buttons in the new order: Drag, Shapes, Text, Zoom
+    dragBtn = new QPushButton("Drag", this);
     shapeBtn = new QPushButton("Shapes", this);
     textBtn = new QPushButton("Text", this);
-    dragBtn = new QPushButton("Drag", this);
     zoomBtn = new QPushButton("Zoom", this);
 
-    selectBtn->setCheckable(true);
-    drawBtn->setCheckable(true);
+    dragBtn->setCheckable(true);
     shapeBtn->setCheckable(true);
     textBtn->setCheckable(true);
-    dragBtn->setCheckable(true);
     zoomBtn->setCheckable(true);
 
-    selectBtn->setToolTip(tr("Select and manipulate objects"));
-    drawBtn->setToolTip(tr("Draw freehand lines"));
+    dragBtn->setToolTip(tr("Pan/scroll the canvas view"));
     shapeBtn->setToolTip(tr("Create shapes"));
     textBtn->setToolTip(tr("Add text"));
-    dragBtn->setToolTip(tr("Pan/scroll the canvas view"));
     zoomBtn->setToolTip(tr("Zoom controls"));
 
     dragBtn->setCursor(Qt::OpenHandCursor);
 
     m_toolButtonGroup = new QButtonGroup(this);
-    m_toolButtonGroup->addButton(selectBtn, 0);
-    m_toolButtonGroup->addButton(drawBtn, 1);
-    m_toolButtonGroup->addButton(shapeBtn, 2);
-    m_toolButtonGroup->addButton(textBtn, 3);
-    m_toolButtonGroup->addButton(dragBtn, 4);
-    m_toolButtonGroup->addButton(zoomBtn, 5);
+    m_toolButtonGroup->addButton(dragBtn, 0);
+    m_toolButtonGroup->addButton(shapeBtn, 1);
+    m_toolButtonGroup->addButton(textBtn, 2);
+    m_toolButtonGroup->addButton(zoomBtn, 3);
     m_toolButtonGroup->setExclusive(true);
 
     connect(dragBtn, &QPushButton::clicked, this, &LeftSideBar::dragToolRequested);
+    connect(shapeBtn, &QPushButton::clicked, this, &LeftSideBar::shapeGroupRequested);
+    connect(textBtn, &QPushButton::clicked, this, &LeftSideBar::textToolRequested);
     connect(zoomBtn, &QPushButton::clicked, this, &LeftSideBar::zoomToolRequested);
 
     QLabel* toolsLabel = new QLabel("Tools", this);
@@ -55,10 +50,92 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     toolsLabel->setStyleSheet("font-weight: bold;");
     mainLayout->addWidget(toolsLabel);
 
-    for(auto btn : btnGroup) {
-        mainLayout->addWidget(*btn);
-    }
+    // Add main tool buttons
+    mainLayout->addWidget(dragBtn);
+    mainLayout->addWidget(shapeBtn);
 
+    // Create shape tools widget
+    shapeToolsWidget = new QWidget(this);
+    QVBoxLayout* shapeLayout = new QVBoxLayout(shapeToolsWidget);
+    shapeLayout->setContentsMargins(5, 5, 5, 5);
+    shapeLayout->setSpacing(5);
+
+    QLabel* shapeToolsLabel = new QLabel("Shape Tools", shapeToolsWidget);
+    shapeToolsLabel->setAlignment(Qt::AlignCenter);
+    shapeToolsLabel->setStyleSheet("font-weight: bold;");
+    shapeLayout->addWidget(shapeToolsLabel);
+
+    lineBtn = new QPushButton(tr("Line"), shapeToolsWidget);
+    freehandBtn = new QPushButton(tr("Freehand"), shapeToolsWidget);
+    ellipseBtn = new QPushButton(tr("Ellipse"), shapeToolsWidget);
+    pentagonBtn = new QPushButton(tr("Pentagon"), shapeToolsWidget);
+    starBtn = new QPushButton(tr("Star"), shapeToolsWidget);
+    hexagonBtn = new QPushButton(tr("Hexagon"), shapeToolsWidget);
+
+    // Set tooltips for shape buttons
+    lineBtn->setToolTip(tr("Create straight lines"));
+    freehandBtn->setToolTip(tr("Draw freehand paths"));
+    ellipseBtn->setToolTip(tr("Create circles and ellipses"));
+    pentagonBtn->setToolTip(tr("Create regular pentagons"));
+    starBtn->setToolTip(tr("Create five-pointed stars"));
+    hexagonBtn->setToolTip(tr("Create regular hexagons"));
+
+    shapeBtnGroup = {lineBtn, freehandBtn, ellipseBtn, pentagonBtn, starBtn, hexagonBtn};
+
+    shapeLayout->addWidget(lineBtn);
+    shapeLayout->addWidget(freehandBtn);
+    shapeLayout->addWidget(ellipseBtn);
+    shapeLayout->addWidget(pentagonBtn);
+    shapeLayout->addWidget(starBtn);
+    shapeLayout->addWidget(hexagonBtn);
+
+    mainLayout->addWidget(shapeToolsWidget);
+    shapeToolsWidget->hide();
+
+    // Connect shape button signals
+    connect(lineBtn, &QPushButton::clicked, this, [this]() {
+        setSelectedShapeType(ShapeType::Line);
+        highlightShapeButton(0);
+        emit shapeToolSelected(ShapeType::Line);
+    });
+    
+    connect(freehandBtn, &QPushButton::clicked, this, [this]() {
+        setSelectedShapeType(ShapeType::Freehand);
+        highlightShapeButton(1);
+        emit shapeToolSelected(ShapeType::Freehand);
+    });
+    
+    connect(ellipseBtn, &QPushButton::clicked, this, [this]() {
+        setSelectedShapeType(ShapeType::Ellipse);
+        highlightShapeButton(2);
+        emit shapeToolSelected(ShapeType::Ellipse);
+    });
+    
+    connect(pentagonBtn, &QPushButton::clicked, this, [this]() {
+        setSelectedShapeType(ShapeType::Pentagon);
+        highlightShapeButton(3);
+        emit shapeToolSelected(ShapeType::Pentagon);
+    });
+    
+    connect(starBtn, &QPushButton::clicked, this, [this]() {
+        setSelectedShapeType(ShapeType::Star);
+        highlightShapeButton(4);
+        emit shapeToolSelected(ShapeType::Star);
+    });
+    
+    connect(hexagonBtn, &QPushButton::clicked, this, [this]() {
+        setSelectedShapeType(ShapeType::Hexagon);
+        highlightShapeButton(5);
+        emit shapeToolSelected(ShapeType::Hexagon);
+    });
+
+    // Add text button
+    mainLayout->addWidget(textBtn);
+
+    // Add zoom button
+    mainLayout->addWidget(zoomBtn);
+
+    // Create zoom tools widget
     zoomToolsWidget = new QWidget(this);
     QVBoxLayout* zoomLayout = new QVBoxLayout(zoomToolsWidget);
     zoomLayout->setContentsMargins(5, 5, 5, 5);
@@ -109,7 +186,7 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     setFixedWidth(200);
     setMinimumHeight(400);
 
-    qCDebug(leftSideBarLog) << "LeftSideBar constructed with mutually exclusive tool buttons";
+    qCDebug(leftSideBarLog) << "LeftSideBar constructed with new layout: Drag, Shapes, Text, Zoom";
 }
 
 LeftSideBar::~LeftSideBar()
@@ -123,11 +200,31 @@ void LeftSideBar::highlightButton(int toolId)
     if (toolId >= 0 && toolId < btnGroup.size()) {
         m_toolButtonGroup->button(toolId)->setChecked(true);
 
-        // Show/hide zoom tools widget based on selection
-        zoomToolsWidget->setVisible(toolId == 5); // 5 is the index for zoom button
-        zoomExpanded = (toolId == 5);
+        // Show/hide sub-tools widgets based on selection
+        shapeToolsWidget->setVisible(toolId == 1); // 1 is the index for shape button
+        zoomToolsWidget->setVisible(toolId == 3);  // 3 is the index for zoom button
+        shapeExpanded = (toolId == 1);
+        zoomExpanded = (toolId == 3);
 
         qCDebug(leftSideBarLog) << "Tool button highlighted:" << toolId;
+    }
+}
+
+void LeftSideBar::highlightShapeButton(int btnIndex)
+{
+    // Reset all shape buttons
+    for (int i = 0; i < shapeBtnGroup.size(); ++i) {
+        if (shapeBtnGroup[i]) {
+            shapeBtnGroup[i]->setStyleSheet("");
+        }
+    }
+
+    // Highlight the selected shape button
+    if (btnIndex >= 0 && btnIndex < shapeBtnGroup.size() && shapeBtnGroup[btnIndex]) {
+        shapeBtnGroup[btnIndex]->setStyleSheet("background-color: #AED6F1; font-weight: bold;");
+        lastSelectedShapeBtn = btnIndex;
+
+        qCDebug(leftSideBarLog) << "Shape button highlighted:" << btnIndex;
     }
 }
 
@@ -147,4 +244,10 @@ void LeftSideBar::highlightZoomButton(int btnIndex)
 
         qCDebug(leftSideBarLog) << "Zoom button highlighted:" << btnIndex;
     }
+}
+
+void LeftSideBar::setSelectedShapeType(ShapeType type)
+{
+    m_selectedShapeType = type;
+    qCDebug(leftSideBarLog) << "Selected shape type:" << static_cast<int>(type);
 }

@@ -25,7 +25,7 @@ set(HEADERS
 
 file(GLOB UI_FILES *.ui)
 
-add_executable(${TARGET_NAME}
+add_executable(${TARGET_NAME} WIN32
     ${SOURCES}
     ${HEADERS}
     ${UI_FILES}

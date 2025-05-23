@@ -2,5 +2,14 @@
     <qresource prefix="/i18n"/>
     <qresource prefix="/icon">
         <file>images/icon.svg</file>
+        <file>images/fit-screen.svg</file>
+        <file>images/new.svg</file>
+        <file>images/open.svg</file>
+        <file>images/redo.svg</file>
+        <file>images/reset-zoom.svg</file>
+        <file>images/save.svg</file>
+        <file>images/undo.svg</file>
+        <file>images/zoomin.svg</file>
+        <file>images/zoomout.svg</file>
     </qresource>
 </RCC>
