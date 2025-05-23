@@ -148,6 +148,7 @@ void EditableTextItem::keyPressEvent(QKeyEvent* event)
 void EditableTextItem::startEditing()
 {
     m_isEditing = true;
+    m_originalText = toPlainText(); // Store original text
     setTextInteractionFlags(Qt::TextEditorInteraction);
     setFocus();
 
@@ -156,7 +157,7 @@ void EditableTextItem::startEditing()
     cursor.select(QTextCursor::Document);
     setTextCursor(cursor);
 
-    qCDebug(editableTextItemLog) << "Started editing text:" << toPlainText();
+    qCDebug(editableTextItemLog) << "Started editing text:" << m_originalText;
 }
 
 void EditableTextItem::finishEditing()
@@ -165,9 +166,16 @@ void EditableTextItem::finishEditing()
     setTextInteractionFlags(Qt::NoTextInteraction);
     clearFocus();
 
-    // Emit signal that text has changed
-    emit textChanged(toPlainText());
+    QString newText = toPlainText();
+    
+    // Only emit signals if text actually changed
+    if (m_originalText != newText) {
+        emit textChangedWithHistory(m_originalText, newText);
+    }
+    
+    // Always emit the simple textChanged signal for backward compatibility
+    emit textChanged(newText);
     emit editingFinished();
 
-    qCDebug(editableTextItemLog) << "Finished editing text:" << toPlainText();
+    qCDebug(editableTextItemLog) << "Finished editing text:" << newText;
 }

@@ -5,6 +5,7 @@ set(SOURCES
     CommandManager.cpp
     AddShapeCommand.cpp
     RemoveShapeCommand.cpp
+    ModifyTextCommand.cpp
 )
 
 set(HEADERS
@@ -13,6 +14,7 @@ set(HEADERS
     CommandUtils.h
     AddShapeCommand.h
     RemoveShapeCommand.h
+    ModifyTextCommand.h
     SvgEditorForwards.h
 )
 

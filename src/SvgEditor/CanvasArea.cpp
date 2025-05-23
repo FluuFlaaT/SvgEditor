@@ -10,6 +10,7 @@
 #include "../CoreSvgEngine/svgtext.h"
 #include "../Commands/AddShapeCommand.h"
 #include "../Commands/RemoveShapeCommand.h"
+#include "../Commands/ModifyTextCommand.h"
 
 Q_LOGGING_CATEGORY(canvasAreaLog, "CanvasArea")
 
@@ -966,7 +967,7 @@ ShapeType CanvasArea::getSelectedItemType() const
 
 EditableTextItem* CanvasArea::createTextBox(const QRectF& textRect) {
     // Create the editable text item with placeholder text
-    EditableTextItem* textItem = new EditableTextItem(tr("Type here..."));
+    EditableTextItem* textItem = new EditableTextItem(tr("Type"));
     textItem->setPos(textRect.topLeft());
     
     // Set the text box size to match the dragged area
@@ -984,6 +985,17 @@ EditableTextItem* CanvasArea::createTextBox(const QRectF& textRect) {
         if (m_currentEngine && m_currentEngine->getCurrentDocument()) {
             // The document will be marked as modified when the text is finalized
             qCDebug(canvasAreaLog) << "Text changed to:" << newText;
+        }
+    });
+    
+    // Connect the history signal to create undo/redo commands
+    connect(textItem, &EditableTextItem::textChangedWithHistory, this, [this](const QString& oldText, const QString& newText) {
+        if (EditableTextItem* textItem = qobject_cast<EditableTextItem*>(sender())) {
+            // Create and execute the command for text content change
+            auto command = std::make_unique<ModifyTextCommand>(textItem, oldText, newText);
+            CommandManager::instance()->executeCommand(std::move(command));
+            
+            qCDebug(canvasAreaLog) << "Created ModifyTextCommand for text change:" << oldText << "->" << newText;
         }
     });
 

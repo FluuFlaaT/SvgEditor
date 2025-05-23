@@ -1,5 +1,21 @@
 ﻿#include "mainwindow.h"
+#include <QApplication>
+#include <QMessageBox>
+#include <QSplitter>
+#include <QFileDialog>
+#include <QStandardPaths>
+#include <QPixmap>
+#include <QLoggingCategory>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QStatusBar>
+#include <QMenuBar>
+#include <QToolBar>
+#include <QLabel>
+#include <QPushButton>
+#include <QGraphicsSimpleTextItem>
 #include "../ConfigDialog/configdialog.h"
+#include "../Commands/ModifyTextCommand.h"
 #include "../ConfigManager/configmanager.h"
 #include <QTimer>
 
@@ -337,8 +353,6 @@ void MainWindow::openFile()
     }
 }
 
-
-
 bool MainWindow::loadFileWithEngine(const QString& fileName) {
     if (!QFileInfo::exists(fileName) || !m_canvasArea->openFileWithEngine(m_svgEngine)) {
         QMessageBox::critical(this, tr("Open SVG File"),
@@ -524,7 +538,6 @@ void MainWindow::handleToolSelected(int toolId)
 void MainWindow::setupMenus()
 {
     QMenu* fileMenu = menuBar()->addMenu(tr("File"));
-
 
     QAction* newAction = new QAction(tr("New"), this);
     newAction->setShortcut(QKeySequence::New);
@@ -1052,21 +1065,30 @@ void MainWindow::updateSelectedItemTextContent(const QString& text)
 
     if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
         // For our new EditableTextItem
-        textItem->setPlainText(text);
-        // Synchronize changes to SVG document
-        syncItemToSvgDocument(selectedItem);
-        m_documentModified = true;
-        updateTitle();
-        qCDebug(mainWindowLog) << "Updated editable text content to:" << text;
+        QString oldText = textItem->toPlainString();
+        if (oldText != text) {
+            // Create and execute the command
+            auto command = std::make_unique<ModifyTextCommand>(textItem, oldText, text);
+            CommandManager::instance()->executeCommand(std::move(command));
+            
+            // Synchronize changes to SVG document
+            syncItemToSvgDocument(selectedItem);
+            m_documentModified = true;
+            updateTitle();
+            qCDebug(mainWindowLog) << "Updated editable text content to:" << text;
+        }
     }
     else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
         // For backward compatibility
-        textItem->setText(text);
-        // Synchronize changes to SVG document
-        syncItemToSvgDocument(selectedItem);
-        m_documentModified = true;
-        updateTitle();
-        qCDebug(mainWindowLog) << "Updated simple text content to:" << text;
+        QString oldText = textItem->text();
+        if (oldText != text) {
+            textItem->setText(text);
+            // Synchronize changes to SVG document
+            syncItemToSvgDocument(selectedItem);
+            m_documentModified = true;
+            updateTitle();
+            qCDebug(mainWindowLog) << "Updated simple text content to:" << text;
+        }
     }
 }
 
@@ -1080,25 +1102,32 @@ void MainWindow::updateSelectedItemFontFamily(const QString& family)
 
     if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
         // For our new EditableTextItem
-        QFont font = textItem->font();
-        font.setFamily(family);
-        textItem->setFont(font);
-        // Synchronize changes to SVG document
-        syncItemToSvgDocument(selectedItem);
-        m_documentModified = true;
-        updateTitle();
-        qCDebug(mainWindowLog) << "Updated editable text font family to:" << family;
+        QString oldFamily = textItem->font().family();
+        if (oldFamily != family) {
+            // Create and execute the command
+            auto command = std::make_unique<ModifyTextCommand>(textItem, oldFamily, family, TextModificationType::FontFamily);
+            CommandManager::instance()->executeCommand(std::move(command));
+            
+            // Synchronize changes to SVG document
+            syncItemToSvgDocument(selectedItem);
+            m_documentModified = true;
+            updateTitle();
+            qCDebug(mainWindowLog) << "Updated editable text font family to:" << family;
+        }
     }
     else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
         // For backward compatibility
         QFont font = textItem->font();
-        font.setFamily(family);
-        textItem->setFont(font);
-        // Synchronize changes to SVG document
-        syncItemToSvgDocument(selectedItem);
-        m_documentModified = true;
-        updateTitle();
-        qCDebug(mainWindowLog) << "Updated simple text font family to:" << family;
+        QString oldFamily = font.family();
+        if (oldFamily != family) {
+            font.setFamily(family);
+            textItem->setFont(font);
+            // Synchronize changes to SVG document
+            syncItemToSvgDocument(selectedItem);
+            m_documentModified = true;
+            updateTitle();
+            qCDebug(mainWindowLog) << "Updated simple text font family to:" << family;
+        }
     }
 }
 
@@ -1112,25 +1141,32 @@ void MainWindow::updateSelectedItemFontSize(int size)
 
     if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
         // For our new EditableTextItem
-        QFont font = textItem->font();
-        font.setPointSize(size);
-        textItem->setFont(font);
-        // Synchronize changes to SVG document
-        syncItemToSvgDocument(selectedItem);
-        m_documentModified = true;
-        updateTitle();
-        qCDebug(mainWindowLog) << "Updated editable text font size to:" << size;
+        int oldSize = textItem->font().pointSize();
+        if (oldSize != size) {
+            // Create and execute the command
+            auto command = std::make_unique<ModifyTextCommand>(textItem, oldSize, size);
+            CommandManager::instance()->executeCommand(std::move(command));
+            
+            // Synchronize changes to SVG document
+            syncItemToSvgDocument(selectedItem);
+            m_documentModified = true;
+            updateTitle();
+            qCDebug(mainWindowLog) << "Updated editable text font size to:" << size;
+        }
     }
     else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
         // For backward compatibility
         QFont font = textItem->font();
-        font.setPointSize(size);
-        textItem->setFont(font);
-        // Synchronize changes to SVG document
-        syncItemToSvgDocument(selectedItem);
-        m_documentModified = true;
-        updateTitle();
-        qCDebug(mainWindowLog) << "Updated simple text font size to:" << size;
+        int oldSize = font.pointSize();
+        if (oldSize != size) {
+            font.setPointSize(size);
+            textItem->setFont(font);
+            // Synchronize changes to SVG document
+            syncItemToSvgDocument(selectedItem);
+            m_documentModified = true;
+            updateTitle();
+            qCDebug(mainWindowLog) << "Updated simple text font size to:" << size;
+        }
     }
 }
 
@@ -1144,23 +1180,32 @@ void MainWindow::updateSelectedItemFontBold(bool bold)
 
     if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
         // For our new EditableTextItem
-        textItem->setBold(bold);
-        // Synchronize changes to SVG document
-        syncItemToSvgDocument(selectedItem);
-        m_documentModified = true;
-        updateTitle();
-        qCDebug(mainWindowLog) << "Updated editable text font bold to:" << (bold ? "true" : "false");
+        bool oldBold = textItem->isBold();
+        if (oldBold != bold) {
+            // Create and execute the command
+            auto command = std::make_unique<ModifyTextCommand>(textItem, oldBold, bold, TextModificationType::FontBold);
+            CommandManager::instance()->executeCommand(std::move(command));
+            
+            // Synchronize changes to SVG document
+            syncItemToSvgDocument(selectedItem);
+            m_documentModified = true;
+            updateTitle();
+            qCDebug(mainWindowLog) << "Updated editable text font bold to:" << (bold ? "true" : "false");
+        }
     }
     else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
         // For backward compatibility
         QFont font = textItem->font();
-        font.setBold(bold);
-        textItem->setFont(font);
-        // Synchronize changes to SVG document
-        syncItemToSvgDocument(selectedItem);
-        m_documentModified = true;
-        updateTitle();
-        qCDebug(mainWindowLog) << "Updated simple text font bold to:" << (bold ? "true" : "false");
+        bool oldBold = font.bold();
+        if (oldBold != bold) {
+            font.setBold(bold);
+            textItem->setFont(font);
+            // Synchronize changes to SVG document
+            syncItemToSvgDocument(selectedItem);
+            m_documentModified = true;
+            updateTitle();
+            qCDebug(mainWindowLog) << "Updated simple text font bold to:" << (bold ? "true" : "false");
+        }
     }
 }
 
@@ -1174,23 +1219,32 @@ void MainWindow::updateSelectedItemFontItalic(bool italic)
 
     if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
         // For our new EditableTextItem
-        textItem->setItalic(italic);
-        // Synchronize changes to SVG document
-        syncItemToSvgDocument(selectedItem);
-        m_documentModified = true;
-        updateTitle();
-        qCDebug(mainWindowLog) << "Updated editable text font italic to:" << (italic ? "true" : "false");
+        bool oldItalic = textItem->isItalic();
+        if (oldItalic != italic) {
+            // Create and execute the command
+            auto command = std::make_unique<ModifyTextCommand>(textItem, oldItalic, italic, TextModificationType::FontItalic);
+            CommandManager::instance()->executeCommand(std::move(command));
+            
+            // Synchronize changes to SVG document
+            syncItemToSvgDocument(selectedItem);
+            m_documentModified = true;
+            updateTitle();
+            qCDebug(mainWindowLog) << "Updated editable text font italic to:" << (italic ? "true" : "false");
+        }
     }
     else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
         // For backward compatibility
         QFont font = textItem->font();
-        font.setItalic(italic);
-        textItem->setFont(font);
-        // Synchronize changes to SVG document
-        syncItemToSvgDocument(selectedItem);
-        m_documentModified = true;
-        updateTitle();
-        qCDebug(mainWindowLog) << "Updated simple text font italic to:" << (italic ? "true" : "false");
+        bool oldItalic = font.italic();
+        if (oldItalic != italic) {
+            font.setItalic(italic);
+            textItem->setFont(font);
+            // Synchronize changes to SVG document
+            syncItemToSvgDocument(selectedItem);
+            m_documentModified = true;
+            updateTitle();
+            qCDebug(mainWindowLog) << "Updated simple text font italic to:" << (italic ? "true" : "false");
+        }
     }
 }
 
@@ -1204,6 +1258,7 @@ void MainWindow::updateSelectedItemTextAlignment(int alignment)
 
     if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
         // For our new EditableTextItem
+        Qt::Alignment oldAlignment = textItem->textAlignment();
         Qt::Alignment textAlignment = Qt::AlignLeft;
         switch (alignment) {
             case 0: textAlignment = Qt::AlignLeft; break;
@@ -1211,12 +1266,18 @@ void MainWindow::updateSelectedItemTextAlignment(int alignment)
             case 2: textAlignment = Qt::AlignRight; break;
             default: textAlignment = Qt::AlignLeft; break;
         }
-        textItem->setTextAlignment(textAlignment);
-        // Synchronize changes to SVG document
-        syncItemToSvgDocument(selectedItem);
-        m_documentModified = true;
-        updateTitle();
-        qCDebug(mainWindowLog) << "Updated editable text alignment to:" << alignment;
+        
+        if (oldAlignment != textAlignment) {
+            // Create and execute the command
+            auto command = std::make_unique<ModifyTextCommand>(textItem, oldAlignment, textAlignment);
+            CommandManager::instance()->executeCommand(std::move(command));
+            
+            // Synchronize changes to SVG document
+            syncItemToSvgDocument(selectedItem);
+            m_documentModified = true;
+            updateTitle();
+            qCDebug(mainWindowLog) << "Updated editable text alignment to:" << alignment;
+        }
     }
     else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
         // QGraphicsSimpleTextItem doesn't support alignment directly
@@ -1235,21 +1296,30 @@ void MainWindow::updateSelectedItemTextColor(const QColor& color)
 
     if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
         // For our new EditableTextItem
-        textItem->setDefaultTextColor(color);
-        // Synchronize changes to SVG document
-        syncItemToSvgDocument(selectedItem);
-        m_documentModified = true;
-        updateTitle();
-        qCDebug(mainWindowLog) << "Updated editable text color to:" << color.name();
+        QColor oldColor = textItem->defaultTextColor();
+        if (oldColor != color) {
+            // Create and execute the command
+            auto command = std::make_unique<ModifyTextCommand>(textItem, oldColor, color);
+            CommandManager::instance()->executeCommand(std::move(command));
+            
+            // Synchronize changes to SVG document
+            syncItemToSvgDocument(selectedItem);
+            m_documentModified = true;
+            updateTitle();
+            qCDebug(mainWindowLog) << "Updated editable text color to:" << color.name();
+        }
     }
     else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
         // For backward compatibility
-        textItem->setBrush(QBrush(color));
-        // Synchronize changes to SVG document
-        syncItemToSvgDocument(selectedItem);
-        m_documentModified = true;
-        updateTitle();
-        qCDebug(mainWindowLog) << "Updated simple text color to:" << color.name();
+        QColor oldColor = textItem->brush().color();
+        if (oldColor != color) {
+            textItem->setBrush(QBrush(color));
+            // Synchronize changes to SVG document
+            syncItemToSvgDocument(selectedItem);
+            m_documentModified = true;
+            updateTitle();
+            qCDebug(mainWindowLog) << "Updated simple text color to:" << color.name();
+        }
     }
 }
 
