@@ -120,6 +120,7 @@ private:
     QGraphicsItem* m_currentItem;
     QList<QPointF> m_freehandPoints;
     CoreSvgEngine* m_currentEngine;
+    QRectF m_textPreviewRect;  // Store text preview rectangle for finalization
 
     // Default style properties
     QPen m_defaultPen;

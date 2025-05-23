@@ -173,7 +173,7 @@ void CanvasArea::createShape(const QPointF& startPoint, const QPointF& endPoint)
         }
         case ShapeType::Text: {
             qCDebug(canvasAreaLog) << "Creating Text";
-            // Create text box based on dragged area
+            // Create a preview rectangle with dashed border during dragging
             QRectF textRect(qMin(startPoint.x(), endPoint.x()),
                            qMin(startPoint.y(), endPoint.y()),
                            qAbs(endPoint.x() - startPoint.x()),
@@ -183,7 +183,16 @@ void CanvasArea::createShape(const QPointF& startPoint, const QPointF& endPoint)
             if (textRect.width() < 50) textRect.setWidth(50);
             if (textRect.height() < 20) textRect.setHeight(20);
             
-            m_currentItem = createTextBox(textRect);
+            // Store the text rect for later use when finalizing
+            m_textPreviewRect = textRect;
+            
+            // Create a dashed rectangle for preview
+            QGraphicsRectItem* previewRect = new QGraphicsRectItem(textRect);
+            QPen dashedPen(Qt::gray, 2, Qt::DashLine);
+            previewRect->setPen(dashedPen);
+            previewRect->setBrush(Qt::NoBrush); // No fill, just outline
+            
+            m_currentItem = previewRect;
             break;
         }
         default:
@@ -221,6 +230,20 @@ void CanvasArea::finalizeShape()
     }
 
     qCDebug(canvasAreaLog) << "Finalizing shape of type" << static_cast<int>(m_currentShapeType);
+
+    // For text items, we need special handling: replace preview with actual text item
+    if (m_currentShapeType == ShapeType::Text) {
+        // Remove the preview rectangle from scene
+        m_scene->removeItem(m_currentItem);
+        delete m_currentItem;
+        
+        // Create the actual text item using the stored preview rect
+        EditableTextItem* textItem = createTextBox(m_textPreviewRect);
+        m_currentItem = textItem;
+        m_scene->addItem(m_currentItem);
+        
+        qCDebug(canvasAreaLog) << "Replaced preview rectangle with text item";
+    }
 
     // Store a reference to the current item
     QGraphicsItem* finalizedItem = m_currentItem;
