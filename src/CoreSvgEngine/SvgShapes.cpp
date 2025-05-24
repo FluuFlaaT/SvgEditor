@@ -199,10 +199,11 @@ SvgPentagon::SvgPentagon(Point center, double radius) {
     
     m_points.resize(5);
     for (int i = 0; i < 5; ++i) {
-        // 起始角度调整为使一个顶点朝上或一个边水平，这里假设顶点朝上
-        double angle_deg = 90 + i * (360.0 / 5.0); // 90度是顶部开始
+        // Start from top vertex (-90°) for consistent orientation
+        double angle_deg = -90 + i * (360.0 / 5.0);
         double angle_rad = angle_deg * M_PI / 180.0;
-        m_points[i] = {center.x + radius * std::cos(angle_rad), center.y - radius * std::sin(angle_rad)}; // y轴向下为正，sin取负
+        // Y-axis is inverted in SVG coordinate system
+        m_points[i] = {center.x + radius * std::cos(angle_rad), center.y + radius * std::sin(angle_rad)};
     }
 }
 
@@ -212,10 +213,10 @@ SvgHexagon::SvgHexagon(Point center, double radius) {
         
     m_points.resize(6);
     for (int i = 0; i < 6; ++i) {
-        // 起始角度调整为使一个顶点朝上或一个边水平，这里假设顶点朝右
-        double angle_deg = 0 + i * (360.0 / 6.0); // 0度是右侧开始
+        // Start from right vertex (0°) for flat-topped hexagon
+        double angle_deg = 0 + i * (360.0 / 6.0);
         double angle_rad = angle_deg * M_PI / 180.0;
-        m_points[i] = {center.x + radius * std::cos(angle_rad), center.y - radius * std::sin(angle_rad)};
+        m_points[i] = {center.x + radius * std::cos(angle_rad), center.y + radius * std::sin(angle_rad)};
     }
 }
 
@@ -226,14 +227,17 @@ SvgStar::SvgStar(Point center, double outerRadius, double innerRadius, int numPo
         ", innerRadius=" + QString::fromStdString(std::to_string(innerRadius)) + 
         ", points=" + QString::fromStdString(std::to_string(numPoints));
         
-    if (numPoints < 2) return; // 至少需要两个顶点才能形成星形
+    // Minimum 2 points required for star geometry
+    if (numPoints < 2) return;
     m_points.resize(numPoints * 2);
-    double angleStep = M_PI / numPoints; // 每次前进的角度是 PI/numPoints
-    double currentAngle = startAngleDeg * M_PI / 180.0; // 转换为弧度
+    // Each star point consists of outer and inner vertices
+    double angleStep = M_PI / numPoints;
+    double currentAngle = startAngleDeg * M_PI / 180.0;
 
     for (int i = 0; i < numPoints * 2; ++i) {
-        double r = (i % 2 == 0) ? outerRadius : innerRadius; // 交替使用内外半径
-        m_points[i] = {center.x + r * std::cos(currentAngle), center.y + r * std::sin(currentAngle)}; // SVG y轴向下，但通常几何计算y向上为正，sin结果可能需要反转，取决于坐标系
+        // Alternate between outer and inner radius for star shape
+        double r = (i % 2 == 0) ? outerRadius : innerRadius;
+        m_points[i] = {center.x + r * std::cos(currentAngle), center.y + r * std::sin(currentAngle)};
         currentAngle += angleStep;
     }
 }

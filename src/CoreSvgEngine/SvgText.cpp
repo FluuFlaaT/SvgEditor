@@ -4,7 +4,7 @@
 Q_DECLARE_LOGGING_CATEGORY(svgTextLog)
 Q_LOGGING_CATEGORY(svgTextLog, "SvgText")
 
-// 转义XML特殊字符
+// XML character escaping required for proper SVG text content
 std::string escapeXmlChars(const std::string& input) {
     std::string result;
     result.reserve(input.size());
@@ -38,9 +38,9 @@ SvgText::SvgText(Point pos, const std::string& text) :
         QString::fromStdString(std::to_string(pos.y)) +
         "), content=\"" + QString::fromStdString(text) +
         "\", font-family=\"Arial\", font-size=12.0";
-    // 文本通常有填充无边框
-    setFillColor({0,0,0,255}); // 黑色填充
-    setStrokeColor({0,0,0,0}); // 无边框
+    // Text elements typically have fill but no stroke for better readability
+    setFillColor({0,0,0,255});
+    setStrokeColor({0,0,0,0});
     setStrokeWidth(0);
 }
 
@@ -50,23 +50,21 @@ std::string SvgText::toSvgString() const {
     ss << " font-family=\"" << m_fontFamily << "\"";
     ss << " font-size=\"" << m_fontSize << "\"";
 
-    // Add font weight if bold
     if (m_fontBold) {
         ss << " font-weight=\"bold\"";
     }
 
-    // Add font style if italic
     if (m_fontItalic) {
         ss << " font-style=\"italic\"";
     }
 
-    // Add text anchor if not default
+    // Only output text-anchor when different from SVG default
     if (m_textAnchor != TextAnchor::Start) {
         ss << " text-anchor=\"" << textAnchorToString(m_textAnchor) << "\"";
     }
 
     ss << getCommonAttributesString();
-    // 转义文本内容中的特殊字符
+    // Escape special characters to prevent XML parsing errors
     ss << ">" << escapeXmlChars(m_textContent) << "</text>";
     return ss.str();
 }
@@ -95,6 +93,7 @@ void SvgText::setFontFamily(const std::string& family) {
 }
 
 void SvgText::setFontSize(double size) {
+    // Minimum font size prevents invisible text
     double newSize = (size > 0 ? size : 1.0);
     qCInfo(svgTextLog) << "Setting Text font-size: " +
         QString::fromStdString(std::to_string(m_fontSize)) + " to " +

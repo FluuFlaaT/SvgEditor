@@ -142,6 +142,8 @@ bool SvgDocument::parseSvgContent(const std::string& content) {
 
     tinyxml2::XMLElement* childElementToParse = svgRootElement->FirstChildElement();
 
+    // Detect if first rect element represents document background
+    // This heuristic identifies background rects by checking for full-size dimensions
     if (childElementToParse && strcmp(childElementToParse->Name(), "rect") == 0) {
         const char* rectWidthAttr = childElementToParse->Attribute("width");
         const char* rectHeightAttr = childElementToParse->Attribute("height");
@@ -151,11 +153,13 @@ bool SvgDocument::parseSvgContent(const std::string& content) {
             std::string widthVal(rectWidthAttr);
             std::string heightVal(rectHeightAttr);
             bool isFullWidth = (widthVal == "100%");
+            // Fallback to numeric comparison for absolute values
             if (!isFullWidth) try { isFullWidth = (std::stod(widthVal) >= m_width); } catch (...) {}
 
             bool isFullHeight = (heightVal == "100%");
             if (!isFullHeight) try { isFullHeight = (std::stod(heightVal) >= m_height); } catch (...) {}
 
+            // Full-size rect is treated as background, not content element
             if (isFullWidth && isFullHeight) {
                 setBackgroundColor(Color::fromString(rectFillAttr));
                 childElementToParse = childElementToParse->NextSiblingElement();
@@ -238,10 +242,9 @@ void SvgDocument::parseSvgLine(tinyxml2::XMLElement* element) {
     graphicsItem->setPen(pen);
     graphicsItem->setOpacity(line->getOpacity());
 
-    // Set the item flags
     setGraphicsItemFlags(graphicsItem);
 
-    // �洢��ͼ�����б�
+    // Store graphics item for Qt rendering system
     m_graphicsItems.push_back(graphicsItem);
     addElement(std::move(line));
 }

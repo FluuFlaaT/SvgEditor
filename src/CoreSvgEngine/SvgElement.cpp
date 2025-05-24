@@ -14,8 +14,10 @@ std::string SvgElement::getCommonAttributesString() const {
     }
     ss << " stroke=\"" << getStrokeColor().toString() << "\"";
     ss << " stroke-width=\"" << getStrokeWidth() << "\"";
-    ss << " fill=\"" << (getFillColor().alpha == 0 ? "none" : getFillColor().toString()) << "\""; // "none" 表示透明填充
-    if (getOpacity() < 1.0) { // opacity 默认是1，小于1才需要写出
+    // SVG specification requires "none" for transparent fill
+    ss << " fill=\"" << (getFillColor().alpha == 0 ? "none" : getFillColor().toString()) << "\"";
+    // Only output opacity when different from default to minimize SVG size
+    if (getOpacity() < 1.0) {
         ss << " opacity=\"" << getOpacity() << "\"";
     }
     if (!getTransform().transform_str.empty()) {
@@ -60,6 +62,7 @@ double SvgElement::getStrokeWidth() const {
 
 void SvgElement::setStrokeWidth(double width) {
     qCInfo(svgElementLog) << "Setting element stroke width: " + QString::fromStdString(std::to_string(m_strokeWidth)) + " to " + QString::fromStdString(std::to_string((width < 0) ? 0 : width));
+    // Negative stroke width is invalid in SVG specification
     m_strokeWidth = (width < 0) ? 0 : width;
 }
 
@@ -89,6 +92,7 @@ double SvgElement::getOpacity() const {
 }
 
 void SvgElement::setOpacity(double opacity) {
+    // SVG opacity must be clamped to [0.0, 1.0] range
     double newOpacity = (opacity < 0.0) ? 0.0 : (opacity > 1.0 ? 1.0 : opacity);
     qCInfo(svgElementLog) << "Setting element opacity: " + QString::fromStdString(std::to_string(m_opacity)) + " to " + QString::fromStdString(std::to_string(newOpacity));
     m_opacity = newOpacity;

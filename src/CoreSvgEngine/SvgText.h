@@ -1,9 +1,9 @@
 ﻿#pragma once
 #include "svgelement.h"
 
-// Text anchor enumeration
+// SVG text-anchor attribute values for text alignment
 enum class TextAnchor {
-    Start,  // Default, left-aligned for LTR text
+    Start,  // Left-aligned for LTR text (SVG default)
     Middle, // Center-aligned
     End     // Right-aligned for LTR text
 };

@@ -28,7 +28,7 @@ private:
     double m_width; 
     double m_height; 
     double m_rx; 
-    double m_ry; // 圆角半径
+    double m_ry;
 
 public: 
     SvgRectangle(Point tl = {0,0}, double w = 0, double h = 0, double rx_ = 0.0, double ry_ = 0.0);
@@ -93,7 +93,8 @@ public:
 };
 
 class SvgPolygon : public SvgElement {
-protected: // 改为 protected 以便派生类可以访问
+protected:
+    // Protected access allows derived classes to directly manipulate points for shape generation
     std::vector<Point> m_points;
 
 public:
@@ -125,7 +126,6 @@ public:
     void addPoint(const Point& p);
 };
 
-// 五边形
 class SvgPentagon : public SvgPolygon {
 public: 
     SvgPentagon(Point center = {0,0}, double radius = 0);
@@ -133,21 +133,18 @@ public:
     SvgElementType getType() const override { return SvgElementType::Pentagon; }
 };
 
-// 六边形
 class SvgHexagon : public SvgPolygon {
 public: 
     SvgHexagon(Point center = {0,0}, double radius = 0);
     
-    
     SvgElementType getType() const override { return SvgElementType::Hexagon; }
 };
 
-// 五角星
 class SvgStar : public SvgPolygon {
 public: 
+    // Star generation requires outer/inner radius ratio to create proper star shape
     SvgStar(Point center = {0,0}, double outerRadius = 0, double innerRadius = 0, 
             int numPoints = 5, double startAngleDeg = -90);
-    
     
     SvgElementType getType() const override { 
         return SvgElementType::Star; 
