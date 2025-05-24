@@ -29,16 +29,18 @@ public:
     void resetToDefaults();
 
 signals:
+    // Enables reactive UI updates when settings change
     void settingsChanged();
 
 private:
     explicit ConfigManager(QObject* parent = nullptr);
     ~ConfigManager() = default;
     
+    // Singleton instance prevents multiple config managers with inconsistent state
     static ConfigManager* s_instance;
     QSettings* m_settings;
     
-    // Default values
+    // Compile-time constants ensure consistent defaults across application lifecycle
     static constexpr int DEFAULT_CANVAS_WIDTH = 800;
     static constexpr int DEFAULT_CANVAS_HEIGHT = 600;
     static const QColor DEFAULT_BACKGROUND_COLOR;

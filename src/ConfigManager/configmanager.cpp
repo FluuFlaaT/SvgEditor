@@ -2,11 +2,13 @@
 #include <QtWidgets/QApplication>
 
 ConfigManager* ConfigManager::s_instance = nullptr;
-const QColor ConfigManager::DEFAULT_BACKGROUND_COLOR = QColor(255, 255, 255); // White
+// White background provides optimal contrast for design work
+const QColor ConfigManager::DEFAULT_BACKGROUND_COLOR = QColor(255, 255, 255);
 
 ConfigManager* ConfigManager::instance()
 {
     if (!s_instance) {
+        // Parent to qApp ensures cleanup during application shutdown
         s_instance = new ConfigManager(qApp);
     }
     return s_instance;
@@ -35,6 +37,7 @@ void ConfigManager::setDefaultCanvasSize(const QSize& size)
 {
     m_settings->setValue("canvas/width", size.width());
     m_settings->setValue("canvas/height", size.height());
+    // Force immediate disk write to prevent data loss on unexpected shutdown
     m_settings->sync();
     emit settingsChanged();
 }
@@ -77,6 +80,7 @@ void ConfigManager::initializeDefaults()
 
 void ConfigManager::resetToDefaults()
 {
+    // Direct overwrite for reset functionality - ignores existing values intentionally
     m_settings->setValue("canvas/width", DEFAULT_CANVAS_WIDTH);
     m_settings->setValue("canvas/height", DEFAULT_CANVAS_HEIGHT);
     m_settings->setValue("canvas/backgroundColor", DEFAULT_BACKGROUND_COLOR.name());
