@@ -15,6 +15,11 @@
 
 class ConfigManager;
 
+/**
+ * Modal dialog for configuring application-wide default settings.
+ * Provides a centralized interface to modify user preferences that affect
+ * new canvas creation, avoiding the need to set these values repeatedly.
+ */
 class CONFIGDIALOG_EXPORT ConfigDialog : public QDialog
 {
     Q_OBJECT
@@ -37,15 +42,16 @@ private:
     void loadCurrentSettings();
     void saveSettings();
     
+    // Direct reference to singleton to avoid unnecessary coupling
     ConfigManager* m_configManager;
     
     // Canvas size controls
     QSpinBox* m_widthSpinBox;
     QSpinBox* m_heightSpinBox;
     
-    // Background color controls
+    // Background color controls - using button instead of label for better UX
     QPushButton* m_colorButton;
-    QColor m_currentBackgroundColor;
+    QColor m_currentBackgroundColor;  // Cache to prevent frequent config reads
     
     // Button box
     QDialogButtonBox* m_buttonBox;
