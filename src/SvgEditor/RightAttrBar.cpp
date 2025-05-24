@@ -134,8 +134,11 @@ void RightAttrBar::updateForSelectedItem(QGraphicsItem* item, ShapeType type)
         case ShapeType::Pentagon:
         case ShapeType::Hexagon:
         case ShapeType::Star:
+            // Use circle attributes for polygon shapes (border and fill properties)
+            setCurrentWidget(CircleAttributes);
+            break;
         case ShapeType::Freehand:
-            // For now, use common attributes for these shapes
+            // For now, use common attributes for freehand
             setCurrentWidget(CommonAttributes);
             break;
         default:

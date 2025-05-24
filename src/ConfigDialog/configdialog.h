@@ -11,10 +11,11 @@
 #include <QFrame>
 #include <QGroupBox>
 #include <QDialogButtonBox>
+#include "configdialog_export.h"
 
 class ConfigManager;
 
-class ConfigDialog : public QDialog
+class CONFIGDIALOG_EXPORT ConfigDialog : public QDialog
 {
     Q_OBJECT
 
