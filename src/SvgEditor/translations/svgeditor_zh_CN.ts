@@ -43,19 +43,19 @@
     <name>LeftSideBar</name>
     <message>
         <source>Pan/scroll the canvas view</source>
-        <translation>平移/滚动画布视图</translation>
+        <translation type="vanished">平移/滚动画布视图</translation>
     </message>
     <message>
         <source>Create shapes</source>
-        <translation>创建形状</translation>
+        <translation type="vanished">创建形状</translation>
     </message>
     <message>
         <source>Add text</source>
-        <translation>添加文本</translation>
+        <translation type="vanished">添加文本</translation>
     </message>
     <message>
         <source>Zoom controls</source>
-        <translation>缩放控制</translation>
+        <translation type="vanished">缩放控制</translation>
     </message>
     <message>
         <source>Line</source>
@@ -83,27 +83,27 @@
     </message>
     <message>
         <source>Create straight lines</source>
-        <translation>创建直线</translation>
+        <translation type="vanished">创建直线</translation>
     </message>
     <message>
         <source>Draw freehand paths</source>
-        <translation>绘制自由路径</translation>
+        <translation type="vanished">绘制自由路径</translation>
     </message>
     <message>
         <source>Create circles and ellipses</source>
-        <translation>创建圆形和椭圆</translation>
+        <translation type="vanished">创建圆形和椭圆</translation>
     </message>
     <message>
         <source>Create regular pentagons</source>
-        <translation>创建正五边形</translation>
+        <translation type="vanished">创建正五边形</translation>
     </message>
     <message>
         <source>Create five-pointed stars</source>
-        <translation>创建五角星</translation>
+        <translation type="vanished">创建五角星</translation>
     </message>
     <message>
         <source>Create regular hexagons</source>
-        <translation>创建正六边形</translation>
+        <translation type="vanished">创建正六边形</translation>
     </message>
     <message>
         <source>Zoom In</source>
@@ -334,7 +334,7 @@
     </message>
     <message>
         <source>Fit to Window</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">适应窗口</translation>
     </message>
     <message>
         <source>Ctrl+F</source>
@@ -345,43 +345,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Undo last action</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Redo last action</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Main Toolbar</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Create a new document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Open an existing document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Save the current document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Zoom in</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Zoom out</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reset zoom to 100%</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Fit content to view</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -390,11 +354,11 @@
     </message>
     <message>
         <source>Line</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">直线</translation>
     </message>
     <message>
         <source>Freehand</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">自由绘制</translation>
     </message>
     <message>
         <source>Rectangle</source>
@@ -402,19 +366,19 @@
     </message>
     <message>
         <source>Ellipse</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">椭圆</translation>
     </message>
     <message>
         <source>Pentagon</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">五边形</translation>
     </message>
     <message>
         <source>Star</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">星形</translation>
     </message>
     <message>
         <source>Hexagon</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">六边形</translation>
     </message>
     <message>
         <source>Unknown</source>
@@ -581,31 +545,27 @@ Do you want to save your changes?</source>
     <name>ShapeToolBar</name>
     <message>
         <source>Create straight lines</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">创建直线</translation>
     </message>
     <message>
         <source>Draw freehand paths</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Create rectangles</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">绘制自由路径</translation>
     </message>
     <message>
         <source>Create circles and ellipses</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">创建圆形和椭圆</translation>
     </message>
     <message>
         <source>Create regular pentagons</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">创建正五边形</translation>
     </message>
     <message>
         <source>Create five-pointed stars</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">创建五角星</translation>
     </message>
     <message>
         <source>Create regular hexagons</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">创建正六边形</translation>
     </message>
 </context>
 </TS>

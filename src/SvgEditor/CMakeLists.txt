@@ -14,6 +14,7 @@ set(SOURCES
     CanvasArea.cpp
     ShapeToolBar.cpp
     EditableTextItem.cpp
+    CustomTooltip.cpp
 )
 
 set(HEADERS
@@ -23,6 +24,7 @@ set(HEADERS
     canvasarea.h
     shapetoolbar.h
     editabletextitem.h
+    CustomTooltip.h
 )
 
 # Generate translation files (.ts -> .qm)
@@ -59,6 +61,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     Qt5::Widgets
     Qt5::Svg
     Qt5::Xml
+    Qt5::Network
     CoreSvgEngine
     Commands
     ConfigManager

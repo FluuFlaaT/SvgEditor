@@ -22,22 +22,6 @@
 <context>
     <name>LeftSideBar</name>
     <message>
-        <source>Pan/scroll the canvas view</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Create shapes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Add text</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Zoom controls</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Line</source>
         <translation type="unfinished"></translation>
     </message>
@@ -59,30 +43,6 @@
     </message>
     <message>
         <source>Hexagon</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Create straight lines</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Draw freehand paths</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Create circles and ellipses</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Create regular pentagons</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Create five-pointed stars</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Create regular hexagons</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -305,14 +265,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Undo last action</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Redo last action</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
@@ -329,35 +281,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Create a new document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Open an existing document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Save the current document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Zoom in</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Zoom out</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reset zoom to 100%</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Fit to View</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Fit content to view</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -554,37 +478,6 @@ Do you want to save your changes?</source>
     </message>
     <message>
         <source>Select Text Color</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>ShapeToolBar</name>
-    <message>
-        <source>Create straight lines</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Draw freehand paths</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Create rectangles</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Create circles and ellipses</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Create regular pentagons</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Create five-pointed stars</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Create regular hexagons</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -9,9 +9,13 @@
 #include <QAction>
 #include <QButtonGroup>
 #include <QLoggingCategory>
+#include <QMap>
 #include "shapetoolbar.h"
 
 Q_DECLARE_LOGGING_CATEGORY(leftSideBarLog)
+
+class CustomTooltip;
+class ButtonTipManager;
 
 class LeftSideBar : public QWidget
 {
@@ -83,7 +87,24 @@ signals:
     void textToolRequested();
     void zoomToolRequested();
 
+protected:
+    bool eventFilter(QObject* obj, QEvent* event) override;
+
+private slots:
+    void onButtonTipsLoaded();
+
 private:
+    void setupButtonTooltips();
+    void setupButtonEventFilters();
+    QString getButtonId(QPushButton* button) const;
+    void showButtonTooltip(QPushButton* button, const QPoint& position);
+    void hideButtonTooltip();
+    
     QButtonGroup *m_toolButtonGroup; // For mutually exclusive selection
     ShapeType m_selectedShapeType;
+    
+    // Tooltip management
+    CustomTooltip* m_tooltip;
+    ButtonTipManager* m_tipManager;
+    QMap<QPushButton*, QString> m_buttonIdMap; // Maps buttons to their API IDs
 };

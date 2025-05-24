@@ -20,13 +20,13 @@ ShapeToolBar::ShapeToolBar(QWidget *parent)
     hexagonBtn = new QPushButton("Hexagon", this);
 
     // Set tooltips for buttons
-    lineBtn->setToolTip(tr("Create straight lines"));
-    freehandBtn->setToolTip(tr("Draw freehand paths"));
-    rectangleBtn->setToolTip(tr("Create rectangles"));
-    ellipseBtn->setToolTip(tr("Create circles and ellipses"));
-    pentagonBtn->setToolTip(tr("Create regular pentagons"));
-    starBtn->setToolTip(tr("Create five-pointed stars"));
-    hexagonBtn->setToolTip(tr("Create regular hexagons"));
+    // lineBtn->setToolTip(tr("Create straight lines"));
+    // freehandBtn->setToolTip(tr("Draw freehand paths"));
+    // rectangleBtn->setToolTip(tr("Create rectangles"));
+    // ellipseBtn->setToolTip(tr("Create circles and ellipses"));
+    // pentagonBtn->setToolTip(tr("Create regular pentagons"));
+    // starBtn->setToolTip(tr("Create five-pointed stars"));
+    // hexagonBtn->setToolTip(tr("Create regular hexagons"));
 
     // Add title label
     QLabel* shapesLabel = new QLabel("Shape Tools", this);

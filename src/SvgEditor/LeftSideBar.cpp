@@ -1,4 +1,6 @@
 #include "leftsidebar.h"
+#include "CustomTooltip.h"
+#include "../ConfigManager/ButtonTipManager.h"
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QLabel>
@@ -6,12 +8,18 @@
 #include <QMenu>
 #include <QAction>
 #include <QButtonGroup>
+#include <QEvent>
+#include <QMouseEvent>
 
 Q_LOGGING_CATEGORY(leftSideBarLog, "LeftSideBar")
 
 LeftSideBar::LeftSideBar(QWidget *parent)
     : QWidget(parent), m_selectedShapeType(ShapeType::None)
 {
+    // Initialize tooltip components
+    m_tooltip = new CustomTooltip(this);
+    m_tipManager = ButtonTipManager::instance();
+    
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     setLayout(mainLayout);
 
@@ -26,10 +34,10 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     textBtn->setCheckable(true);
     zoomBtn->setCheckable(true);
 
-    dragBtn->setToolTip(tr("Pan/scroll the canvas view"));
-    shapeBtn->setToolTip(tr("Create shapes"));
-    textBtn->setToolTip(tr("Add text"));
-    zoomBtn->setToolTip(tr("Zoom controls"));
+    // dragBtn->setToolTip(tr("Pan/scroll the canvas view"));
+    // shapeBtn->setToolTip(tr("Create shapes"));
+    // textBtn->setToolTip(tr("Add text"));
+    // zoomBtn->setToolTip(tr("Zoom controls"));
 
     dragBtn->setCursor(Qt::OpenHandCursor);
 
@@ -72,12 +80,12 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     starBtn = new QPushButton(tr("Star"), shapeToolsWidget);
     hexagonBtn = new QPushButton(tr("Hexagon"), shapeToolsWidget);
 
-    lineBtn->setToolTip(tr("Create straight lines"));
-    freehandBtn->setToolTip(tr("Draw freehand paths"));
-    ellipseBtn->setToolTip(tr("Create circles and ellipses"));
-    pentagonBtn->setToolTip(tr("Create regular pentagons"));
-    starBtn->setToolTip(tr("Create five-pointed stars"));
-    hexagonBtn->setToolTip(tr("Create regular hexagons"));
+    // lineBtn->setToolTip(tr("Create straight lines"));
+    // freehandBtn->setToolTip(tr("Draw freehand paths"));
+    // ellipseBtn->setToolTip(tr("Create circles and ellipses"));
+    // pentagonBtn->setToolTip(tr("Create regular pentagons"));
+    // starBtn->setToolTip(tr("Create five-pointed stars"));
+    // hexagonBtn->setToolTip(tr("Create regular hexagons"));
 
     shapeBtnGroup = {lineBtn, freehandBtn, ellipseBtn, pentagonBtn, starBtn, hexagonBtn};
 
@@ -182,6 +190,13 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     setFixedWidth(200);
     setMinimumHeight(400);
 
+    // Setup button tooltips
+    setupButtonTooltips();
+    setupButtonEventFilters();
+    
+    // Connect to tip manager signals
+    connect(m_tipManager, &ButtonTipManager::tipsLoaded, this, &LeftSideBar::onButtonTipsLoaded);
+
     qCDebug(leftSideBarLog) << "LeftSideBar constructed with new layout: Drag, Shapes, Text, Zoom";
 }
 
@@ -246,4 +261,85 @@ void LeftSideBar::setSelectedShapeType(ShapeType type)
 {
     m_selectedShapeType = type;
     qCDebug(leftSideBarLog) << "Selected shape type:" << static_cast<int>(type);
+}
+
+void LeftSideBar::setupButtonTooltips()
+{
+    // Map buttons to their corresponding API IDs
+    m_buttonIdMap[dragBtn] = "selectionbutton";
+    m_buttonIdMap[lineBtn] = "linedrawbutton";
+    m_buttonIdMap[freehandBtn] = "freehandlinedrawbutton";
+    m_buttonIdMap[ellipseBtn] = "rectdrawbutton";  // Using rect as fallback for ellipse
+    m_buttonIdMap[pentagonBtn] = "pentagondrawbutton";
+    m_buttonIdMap[starBtn] = "stardrawbutton";
+    m_buttonIdMap[zoomInBtn] = "zoominbutton";
+    m_buttonIdMap[zoomOutBtn] = "zoomoutbutton";
+    
+    qCDebug(leftSideBarLog) << "Button tooltip mapping setup completed";
+}
+
+void LeftSideBar::setupButtonEventFilters()
+{
+    // Install event filters for all buttons that have tooltip mappings
+    for (auto it = m_buttonIdMap.begin(); it != m_buttonIdMap.end(); ++it) {
+        it.key()->installEventFilter(this);
+    }
+    
+    qCDebug(leftSideBarLog) << "Event filters installed for" << m_buttonIdMap.size() << "buttons";
+}
+
+QString LeftSideBar::getButtonId(QPushButton* button) const
+{
+    return m_buttonIdMap.value(button, QString());
+}
+
+void LeftSideBar::showButtonTooltip(QPushButton* button, const QPoint& position)
+{
+    QString buttonId = getButtonId(button);
+    if (buttonId.isEmpty()) {
+        return;
+    }
+    
+    ButtonTipInfo tipInfo = m_tipManager->getButtonTip(buttonId);
+    m_tooltip->scheduleShow(tipInfo.title, tipInfo.text, position);
+    
+    qCDebug(leftSideBarLog) << "Showing tooltip for button:" << buttonId;
+}
+
+void LeftSideBar::hideButtonTooltip()
+{
+    m_tooltip->scheduleHide();
+}
+
+bool LeftSideBar::eventFilter(QObject* obj, QEvent* event)
+{
+    QPushButton* button = qobject_cast<QPushButton*>(obj);
+    if (!button || !m_buttonIdMap.contains(button)) {
+        return QWidget::eventFilter(obj, event);
+    }
+    
+    switch (event->type()) {
+    case QEvent::Enter:
+        {
+            // Position tooltip near the right edge of the button
+            QPoint buttonTopRight = button->rect().topRight();
+            QPoint globalPos = button->mapToGlobal(buttonTopRight);
+            showButtonTooltip(button, globalPos);
+        }
+        break;
+    case QEvent::Leave:
+        hideButtonTooltip();
+        break;
+    default:
+        break;
+    }
+    
+    return QWidget::eventFilter(obj, event);
+}
+
+void LeftSideBar::onButtonTipsLoaded()
+{
+    qCDebug(leftSideBarLog) << "Button tips loaded from server";
+    // Tips are now available, no additional action needed
+    // The tooltip will automatically use the loaded tips
 }

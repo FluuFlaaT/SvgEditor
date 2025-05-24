@@ -578,7 +578,7 @@ void MainWindow::setupMenus()
     m_undoAction->setShortcut(QKeySequence::Undo);
     m_undoAction->setIcon(QIcon(":/icon/images/undo.svg"));
     m_undoAction->setEnabled(false);
-    m_undoAction->setToolTip(tr("Undo last action"));
+    // m_undoAction->setToolTip(tr("Undo last action"));
     connect(m_undoAction, &QAction::triggered, this, &MainWindow::undo);
     editMenu->addAction(m_undoAction);
 
@@ -587,7 +587,7 @@ void MainWindow::setupMenus()
     m_redoAction->setShortcut(QKeySequence::Redo);
     m_redoAction->setIcon(QIcon(":/icon/images/redo.svg"));
     m_redoAction->setEnabled(false);
-    m_redoAction->setToolTip(tr("Redo last action"));
+    // m_redoAction->setToolTip(tr("Redo last action"));
     connect(m_redoAction, &QAction::triggered, this, &MainWindow::redo);
     editMenu->addAction(m_redoAction);
 
@@ -621,19 +621,19 @@ void MainWindow::setupToolBar()
     // Add file operations to toolbar
     QAction* newAction = new QAction(tr("New"), this);
     newAction->setIcon(QIcon(":/icon/images/new.svg"));
-    newAction->setToolTip(tr("Create a new document"));
+    // newAction->setToolTip(tr("Create a new document"));
     connect(newAction, &QAction::triggered, this, &MainWindow::newFile);
     m_mainToolBar->addAction(newAction);
 
     QAction* openAction = new QAction(tr("Open"), this);
     openAction->setIcon(QIcon(":/icon/images/open.svg"));
-    openAction->setToolTip(tr("Open an existing document"));
+    // openAction->setToolTip(tr("Open an existing document"));
     connect(openAction, &QAction::triggered, this, &MainWindow::openFile);
     m_mainToolBar->addAction(openAction);
 
     QAction* saveAction = new QAction(tr("Save"), this);
     saveAction->setIcon(QIcon(":/icon/images/save.svg"));
-    saveAction->setToolTip(tr("Save the current document"));
+    // saveAction->setToolTip(tr("Save the current document"));
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
     m_mainToolBar->addAction(saveAction);
 
@@ -648,25 +648,25 @@ void MainWindow::setupToolBar()
     // Add zoom controls
     QAction* zoomInAction = new QAction(tr("Zoom In"), this);
     zoomInAction->setIcon(QIcon(":/icon/images/zoomin.svg"));
-    zoomInAction->setToolTip(tr("Zoom in"));
+    // zoomInAction->setToolTip(tr("Zoom in"));
     connect(zoomInAction, &QAction::triggered, m_canvasArea, &CanvasArea::zoomIn);
     m_mainToolBar->addAction(zoomInAction);
 
     QAction* zoomOutAction = new QAction(tr("Zoom Out"), this);
     zoomOutAction->setIcon(QIcon(":/icon/images/zoomout.svg"));
-    zoomOutAction->setToolTip(tr("Zoom out"));
+    // zoomOutAction->setToolTip(tr("Zoom out"));
     connect(zoomOutAction, &QAction::triggered, m_canvasArea, &CanvasArea::zoomOut);
     m_mainToolBar->addAction(zoomOutAction);
 
     QAction* zoomResetAction = new QAction(tr("Reset Zoom"), this);
     zoomResetAction->setIcon(QIcon(":/icon/images/reset-zoom.svg"));
-    zoomResetAction->setToolTip(tr("Reset zoom to 100%"));
+    // zoomResetAction->setToolTip(tr("Reset zoom to 100%"));
     connect(zoomResetAction, &QAction::triggered, m_canvasArea, &CanvasArea::resetZoom);
     m_mainToolBar->addAction(zoomResetAction);
 
     QAction* zoomFitAction = new QAction(tr("Fit to View"), this);
     zoomFitAction->setIcon(QIcon(":/icon/images/fit-screen.svg"));
-    zoomFitAction->setToolTip(tr("Fit content to view"));
+    // zoomFitAction->setToolTip(tr("Fit content to view"));
     connect(zoomFitAction, &QAction::triggered, m_canvasArea, &CanvasArea::fitToView);
     m_mainToolBar->addAction(zoomFitAction);
 
