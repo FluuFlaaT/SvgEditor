@@ -1,5 +1,4 @@
 <RCC>
-    <qresource prefix="/i18n"/>
     <qresource prefix="/icon">
         <file>images/icon.svg</file>
         <file>images/fit-screen.svg</file>

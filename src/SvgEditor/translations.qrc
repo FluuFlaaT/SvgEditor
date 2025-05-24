@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/i18n">
+        <file>translations/svgeditor_zh_CN.qm</file>
+        <file>translations/svgeditor_en.qm</file>
+    </qresource>
+</RCC> 

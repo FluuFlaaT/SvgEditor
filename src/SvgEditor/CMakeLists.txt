@@ -1,7 +1,9 @@
 set(TARGET_NAME SvgEditor)
 
-qt5_add_resources(qrc_FILES
-                edtSource.qrc
+# Translation files
+set(TS_FILES
+    translations/svgeditor_zh_CN.ts
+    translations/svgeditor_en.ts
 )
 
 set(SOURCES
@@ -23,6 +25,14 @@ set(HEADERS
     editabletextitem.h
 )
 
+# Generate translation files (.ts -> .qm)
+qt5_create_translation(QM_FILES ${SOURCES} ${HEADERS} ${TS_FILES})
+
+qt5_add_resources(qrc_FILES
+                edtSource.qrc
+                translations.qrc
+)
+
 file(GLOB UI_FILES *.ui)
 
 add_executable(${TARGET_NAME} WIN32
@@ -30,6 +40,7 @@ add_executable(${TARGET_NAME} WIN32
     ${HEADERS}
     ${UI_FILES}
     ${qrc_FILES}
+    ${QM_FILES}  # Add QM_FILES to ensure they are built
 )
 
 set_target_properties(${TARGET_NAME} PROPERTIES

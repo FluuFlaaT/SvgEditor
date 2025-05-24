@@ -79,12 +79,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_leftSideBar->zoomBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(3); });
 
     resize(1280, 800);
-    setWindowTitle(tr("SVG Editor"));
+    // Window title will be set by updateTitle() after language is configured
     setWindowIcon(QIcon(":/icon/images/icon.svg"));
 
     m_currentFilePath = "";
     m_documentModified = false;
-    updateTitle();
+    // updateTitle() will be called after language setup in setupLanguageMenu()
 
     // Initialize with an empty canvas ready for drawing using default settings
     ConfigManager* configManager = ConfigManager::instance();
@@ -797,21 +797,41 @@ void MainWindow::setupLanguageMenu()
         return;
     }
 
+    // Create action group to ensure mutual exclusion
+    QActionGroup* languageGroup = new QActionGroup(this);
+    languageGroup->setExclusive(true);
+
+    // Create a map for friendly language names
+    QMap<QString, QString> languageNames;
+    languageNames["en"] = "English";
+    languageNames["zh_CN"] = "简体中文 (Simplified Chinese)";
+
+    // Determine default language based on system locale
+    QString systemLocale = QLocale::system().name();
+    QString defaultLanguage = systemLocale.startsWith("zh") ? "zh_CN" : "en";
+    m_currentLanguage = defaultLanguage;
+
     for (const QString& locale : m_languages) {
-        QString language = QLocale(locale).nativeLanguageName();
+        QString language = languageNames.value(locale, locale);
         QAction* action = m_languageMenu->addAction(language);
         action->setCheckable(true);
         action->setData(locale);
+        
+        // Add to action group for mutual exclusion
+        languageGroup->addAction(action);
 
         connect(action, &QAction::triggered, this, [this, locale]() {
             switchLanguage(locale);
         });
 
-        if (locale == QLocale::system().name().left(2)) {
+        // Set default selection
+        if (locale == defaultLanguage) {
             action->setChecked(true);
-            m_currentLanguage = locale;
         }
     }
+
+    // Apply the default language immediately
+    switchLanguage(defaultLanguage);
 
     qCDebug(mainWindowLog) << "Language menu setup complete with" << m_languages.size() << "languages";
 }
@@ -821,22 +841,46 @@ void MainWindow::switchLanguage(const QString& locale)
     qCDebug(mainWindowLog) << "Switching language to:" << locale;
 
     if (m_currentLanguage == locale) {
+        qCDebug(mainWindowLog) << "Language already set to:" << locale;
         return;
     }
 
+    // Remove old translator
+    if (!m_translator.isEmpty()) {
+        qApp->removeTranslator(&m_translator);
+        qCDebug(mainWindowLog) << "Removed previous translator";
+    }
+
     // Load and install the new translator
-    if (m_translator.load("svgeditor_" + locale, m_translationsPath)) {
+    QString translationFile = "svgeditor_" + locale;
+    if (m_translator.load(translationFile, ":/i18n")) {
         qApp->installTranslator(&m_translator);
         m_currentLanguage = locale;
 
-        // Update checked state in menu
+        // Update checked state in menu - the action group will handle exclusivity
         for (QAction* action : m_languageMenu->actions()) {
-            action->setChecked(action->data().toString() == locale);
+            if (action->data().toString() == locale) {
+                action->setChecked(true);
+                break;
+            }
         }
 
-        qCDebug(mainWindowLog) << "Language switched successfully";
+        // Force UI refresh by updating the window title and status
+        updateTitle();
+        showStatusMessage(tr("Language changed to %1").arg(locale == "zh_CN" ? "中文" : "English"), 3000);
+        
+        qCDebug(mainWindowLog) << "Language switched successfully to:" << locale;
     } else {
         qCWarning(mainWindowLog) << "Failed to load translation for:" << locale;
+        showStatusMessage(tr("Failed to load language: %1").arg(locale), 3000);
+        
+        // Revert to previous language if switch failed
+        for (QAction* action : m_languageMenu->actions()) {
+            if (action->data().toString() == m_currentLanguage) {
+                action->setChecked(true);
+                break;
+            }
+        }
     }
 }
 
@@ -844,12 +888,13 @@ QStringList MainWindow::getAvailableLanguages() const
 {
     QStringList result;
 
-    // Add English as default
+    // Add English as default (source language)
     result << "en";
 
-    // TODO: Scan translations directory for available language files
-    // This would typically look for files like svgeditor_fr.qm, svgeditor_de.qm, etc.
+    // Add Chinese since we have the translation file
+    result << "zh_CN";
 
+    qCDebug(mainWindowLog) << "Available languages:" << result;
     return result;
 }
 
