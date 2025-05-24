@@ -15,11 +15,10 @@ ConfigManager* ConfigManager::instance()
 ConfigManager::ConfigManager(QObject* parent)
     : QObject(parent)
 {
-    // Initialize QSettings to use Windows registry
-    // HKEY_CURRENT_USER/Software/svgeditor
+    // Registry storage persists across application sessions and system reboots
     m_settings = new QSettings("svgeditor", "SvgEditor", this);
     
-    // If no existing settings, initialize with defaults
+    // First-run initialization prevents undefined behavior with missing settings
     if (!hasExistingSettings()) {
         initializeDefaults();
     }
@@ -55,7 +54,7 @@ void ConfigManager::setDefaultCanvasBackgroundColor(const QColor& color)
 
 bool ConfigManager::hasExistingSettings() const
 {
-    // Check if any of our keys exist
+    // Existence check prevents overwriting user customizations during startup
     return m_settings->contains("canvas/width") || 
            m_settings->contains("canvas/height") || 
            m_settings->contains("canvas/backgroundColor");
@@ -63,7 +62,7 @@ bool ConfigManager::hasExistingSettings() const
 
 void ConfigManager::initializeDefaults()
 {
-    // Only set if not already exists
+    // Conditional initialization preserves partial user configurations
     if (!m_settings->contains("canvas/width")) {
         m_settings->setValue("canvas/width", DEFAULT_CANVAS_WIDTH);
     }

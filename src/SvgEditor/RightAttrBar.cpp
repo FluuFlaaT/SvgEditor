@@ -10,7 +10,7 @@ RightAttrBar::RightAttrBar(QWidget *parent)
     m_selectedItem(nullptr),
     m_selectedItemType(ShapeType::None)
 {
-    // Widget initialization
+    // Fixed width ensures consistent UI layout regardless of content changes
     setFixedWidth(300);
 
     m_mainLayout = new QVBoxLayout(this);
@@ -19,14 +19,14 @@ RightAttrBar::RightAttrBar(QWidget *parent)
 
     m_stackedWidget = new QStackedWidget(this);
 
-    // Add all widget types to the stacked widget
+    // Order matters here - enum values must match widget indices
     m_stackedWidget->addWidget(createCommonAttributesWidget());
     m_stackedWidget->addWidget(createCircleAttributesWidget());
     m_stackedWidget->addWidget(createRectangleAttributesWidget());
     m_stackedWidget->addWidget(createLineAttributesWidget());
     m_stackedWidget->addWidget(createTextAttributesWidget());
 
-    // Set the common attributes widget as the default
+    // Default to common attributes when no shape is selected
     m_stackedWidget->setCurrentIndex(CommonAttributes);
 
     m_mainLayout->addWidget(m_stackedWidget);
@@ -37,7 +37,7 @@ RightAttrBar::RightAttrBar(QWidget *parent)
 
 RightAttrBar::~RightAttrBar()
 {
-    // Cleanup placeholder
+    // Qt handles widget cleanup automatically through parent-child relationships
 }
 
 void RightAttrBar::setCurrentWidget(int widgetType)
@@ -52,9 +52,9 @@ void RightAttrBar::setCurrentWidget(int widgetType)
 
 void RightAttrBar::updateCanvasSize(int width, int height)
 {
-    // Only update if the values have actually changed
+    // Prevent unnecessary UI updates and infinite signal loops
     if (m_canvasWidthSpinBox->value() != width || m_canvasHeightSpinBox->value() != height) {
-        // Update the spinbox values without triggering signals
+        // Signal blocking prevents recursive updates from user modifications
         m_canvasWidthSpinBox->blockSignals(true);
         m_canvasHeightSpinBox->blockSignals(true);
 
@@ -71,7 +71,7 @@ void RightAttrBar::updateCanvasSize(int width, int height)
 void RightAttrBar::updateCanvasColor(const QColor& color)
 {
     if (color.isValid()) {
-        // Only update if the color has actually changed
+        // Avoid redundant updates that cause unnecessary repaints
         if (m_canvasColor != color) {
             m_canvasColor = color;
             QString qss = QString("background-color: %1").arg(color.name());
@@ -117,7 +117,7 @@ void RightAttrBar::updateForSelectedItem(QGraphicsItem* item, ShapeType type)
         return;
     }
 
-    // Switch to the appropriate widget based on the item type
+    // Shape type determines which attribute panel is most relevant to the user
     switch (type) {
         case ShapeType::Rectangle:
             setCurrentWidget(RectangleAttributes);
@@ -134,11 +134,11 @@ void RightAttrBar::updateForSelectedItem(QGraphicsItem* item, ShapeType type)
         case ShapeType::Pentagon:
         case ShapeType::Hexagon:
         case ShapeType::Star:
-            // Use circle attributes for polygon shapes (border and fill properties)
+            // Polygon shapes share the same visual properties as circles
             setCurrentWidget(CircleAttributes);
             break;
         case ShapeType::Freehand:
-            // For now, use common attributes for freehand
+            // Freehand drawing has limited customizable properties
             setCurrentWidget(CommonAttributes);
             break;
         default:
@@ -146,7 +146,6 @@ void RightAttrBar::updateForSelectedItem(QGraphicsItem* item, ShapeType type)
             break;
     }
 
-    // Update the UI with the item's properties
     updateShapeProperties(item, type);
 
     qCDebug(rightAttrBarLog) << "Updated UI for selected item, type:" << static_cast<int>(type);
@@ -158,7 +157,7 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
         return;
     }
 
-    // Extract properties from the item based on its type
+    // Extract visual properties based on Qt's graphics item hierarchy
     QPen pen;
     QBrush brush;
 
@@ -177,11 +176,11 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
         pen = pathItem->pen();
         brush = pathItem->brush();
     } else if (auto textItem = dynamic_cast<EditableTextItem*>(item)) {
-        // Handle editable text item properties
+        // Text items require special handling due to font and alignment properties
         if (type == ShapeType::Text && m_textContentEdit && m_fontFamilyComboBox &&
             m_fontSizeSpinBox && m_boldCheckBox && m_italicCheckBox && m_textAlignComboBox) {
 
-            // Block signals to prevent triggering updates while setting values
+            // Prevent cascading events during bulk property updates
             m_textContentEdit->blockSignals(true);
             m_fontFamilyComboBox->blockSignals(true);
             m_fontSizeSpinBox->blockSignals(true);
@@ -189,26 +188,20 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
             m_italicCheckBox->blockSignals(true);
             m_textAlignComboBox->blockSignals(true);
 
-            // Set text content
             m_textContentEdit->setText(textItem->toPlainString());
 
-            // Set font properties
             QFont font = textItem->font();
 
-            // Set font family
             int fontIndex = m_fontFamilyComboBox->findText(font.family());
             if (fontIndex >= 0) {
                 m_fontFamilyComboBox->setCurrentIndex(fontIndex);
             }
 
-            // Set font size
             m_fontSizeSpinBox->setValue(font.pointSize());
 
-            // Set bold and italic
             m_boldCheckBox->setChecked(textItem->isBold());
             m_italicCheckBox->setChecked(textItem->isItalic());
 
-            // Set text alignment
             int alignmentIndex = 0; // Default to left alignment
             Qt::Alignment alignment = textItem->textAlignment();
             if (alignment & Qt::AlignCenter) {
@@ -218,12 +211,10 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
             }
             m_textAlignComboBox->setCurrentIndex(alignmentIndex);
 
-            // Set text color
             m_textColor = textItem->defaultTextColor();
             QString qss = QString("background-color: %1").arg(m_textColor.name());
             m_textColorButton->setStyleSheet(qss);
 
-            // Unblock signals
             m_textContentEdit->blockSignals(false);
             m_fontFamilyComboBox->blockSignals(false);
             m_fontSizeSpinBox->blockSignals(false);
@@ -238,15 +229,15 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
                                    << ", italic=" << textItem->isItalic()
                                    << ", color=" << m_textColor.name();
 
-            // For text items, we don't need to update the other properties
+            // Text items have unique properties that don't apply to other shapes
             return;
         }
     } else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(item)) {
-        // Handle simple text item properties (for backward compatibility)
+        // Legacy support for applications that might use QGraphicsSimpleTextItem
         if (type == ShapeType::Text && m_textContentEdit && m_fontFamilyComboBox &&
             m_fontSizeSpinBox && m_boldCheckBox && m_italicCheckBox && m_textAlignComboBox) {
 
-            // Block signals to prevent triggering updates while setting values
+            // Prevent cascading events during bulk property updates
             m_textContentEdit->blockSignals(true);
             m_fontFamilyComboBox->blockSignals(true);
             m_fontSizeSpinBox->blockSignals(true);
@@ -254,31 +245,24 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
             m_italicCheckBox->blockSignals(true);
             m_textAlignComboBox->blockSignals(true);
 
-            // Set text content
             m_textContentEdit->setText(textItem->text());
 
-            // Set font properties
             QFont font = textItem->font();
 
-            // Set font family
             int fontIndex = m_fontFamilyComboBox->findText(font.family());
             if (fontIndex >= 0) {
                 m_fontFamilyComboBox->setCurrentIndex(fontIndex);
             }
 
-            // Set font size
             m_fontSizeSpinBox->setValue(font.pointSize());
 
-            // Set bold and italic
             m_boldCheckBox->setChecked(font.bold());
             m_italicCheckBox->setChecked(font.italic());
 
-            // Set text color
             m_textColor = textItem->brush().color();
             QString qss = QString("background-color: %1").arg(m_textColor.name());
             m_textColorButton->setStyleSheet(qss);
 
-            // Unblock signals
             m_textContentEdit->blockSignals(false);
             m_fontFamilyComboBox->blockSignals(false);
             m_fontSizeSpinBox->blockSignals(false);
@@ -293,22 +277,20 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
                                    << ", italic=" << font.italic()
                                    << ", color=" << m_textColor.name();
 
-            // For text items, we don't need to update the other properties
+            // Text items have unique properties that don't apply to other shapes
             return;
         }
     } else {
         return;
     }
 
-    // Update the UI controls with the extracted properties
-    // Border width
+    // Apply properties common to all drawable shapes (pen and brush)
     if (m_borderWidthSpinBox) {
         m_borderWidthSpinBox->blockSignals(true);
         m_borderWidthSpinBox->setValue(pen.width());
         m_borderWidthSpinBox->blockSignals(false);
     }
 
-    // Border style
     if (m_borderStyleComboBox) {
         m_borderStyleComboBox->blockSignals(true);
         int styleIndex = 0;
@@ -324,14 +306,12 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
         m_borderStyleComboBox->blockSignals(false);
     }
 
-    // Border color
     m_borderColor = pen.color();
     if (m_borderColorButton) {
         QString qss = QString("background-color: %1").arg(m_borderColor.name());
         m_borderColorButton->setStyleSheet(qss);
     }
 
-    // Fill color
     m_fillColor = brush.color();
     if (m_fillColorButton) {
         QString qss = QString("background-color: %1").arg(m_fillColor.name());
@@ -358,27 +338,25 @@ QWidget* RightAttrBar::createCommonAttributesWidget() {
     layout->setContentsMargins(5, 10, 5, 10);
     layout->setSpacing(10);
 
-    // 1. Canvas width
     QHBoxLayout* widthLayout = new QHBoxLayout();
     QLabel* widthLabel = new QLabel(tr("Canvas Width:"));
     m_canvasWidthSpinBox = new QSpinBox();
     m_canvasWidthSpinBox->setRange(1, 9999);
-    m_canvasWidthSpinBox->setValue(800); // Default value
+    m_canvasWidthSpinBox->setValue(800); // 800x600 is a common default resolution
     m_canvasWidthSpinBox->setSuffix(" px");
     widthLayout->addWidget(widthLabel);
     widthLayout->addWidget(m_canvasWidthSpinBox);
 
-    // 2. Canvas height
     QHBoxLayout* heightLayout = new QHBoxLayout();
     QLabel* heightLabel = new QLabel(tr("Canvas Height:"));
     m_canvasHeightSpinBox = new QSpinBox();
     m_canvasHeightSpinBox->setRange(1, 9999);
-    m_canvasHeightSpinBox->setValue(600); // Default value
+    m_canvasHeightSpinBox->setValue(600); // 800x600 is a common default resolution
     m_canvasHeightSpinBox->setSuffix(" px");
     heightLayout->addWidget(heightLabel);
     heightLayout->addWidget(m_canvasHeightSpinBox);
 
-    // 3. Zoom level (read-only)
+    // Read-only display prevents user confusion about edit capabilities
     QHBoxLayout* zoomLayout = new QHBoxLayout();
     QLabel* zoomLabel = new QLabel(tr("Zoom:"));
     m_zoomEdit = new QLineEdit("100%");
@@ -386,7 +364,6 @@ QWidget* RightAttrBar::createCommonAttributesWidget() {
     zoomLayout->addWidget(zoomLabel);
     zoomLayout->addWidget(m_zoomEdit);
 
-    // 4. Canvas color
     QHBoxLayout* colorLayout = new QHBoxLayout();
     QLabel* colorLabel = new QLabel(tr("Canvas Color:"));
     m_canvasColorButton = new QPushButton();
@@ -394,7 +371,7 @@ QWidget* RightAttrBar::createCommonAttributesWidget() {
     QString qss = QString("background-color: %1").arg(m_canvasColor.name());
     m_canvasColorButton->setStyleSheet(qss);
 
-    // Connect color button click to color dialog
+    // Lambda captures this to ensure proper signal emission in Qt's event system
     connect(m_canvasColorButton, &QPushButton::clicked, this, [this]() {
         QColor color = QColorDialog::getColor(m_canvasColor, this, tr("Select Canvas Color"));
         if (color.isValid()) {
@@ -402,7 +379,6 @@ QWidget* RightAttrBar::createCommonAttributesWidget() {
             QString qss = QString("background-color: %1").arg(color.name());
             m_canvasColorButton->setStyleSheet(qss);
 
-            // Emit signal to notify about color change
             emit canvasColorChanged(color);
         }
     });
@@ -709,7 +685,6 @@ QWidget* RightAttrBar::createTextAttributesWidget()
     layout->setContentsMargins(5, 10, 5, 10);
     layout->setSpacing(10);
 
-    // 1. Text content
     QHBoxLayout* textContentLayout = new QHBoxLayout();
     QLabel* textContentLabel = new QLabel(tr("Text:"));
     m_textContentEdit = new QLineEdit();
@@ -718,17 +693,16 @@ QWidget* RightAttrBar::createTextAttributesWidget()
     textContentLayout->addWidget(textContentLabel);
     textContentLayout->addWidget(m_textContentEdit);
 
-    // 2. Font family
     QHBoxLayout* fontFamilyLayout = new QHBoxLayout();
     QLabel* fontFamilyLabel = new QLabel(tr("Font:"));
     m_fontFamilyComboBox = new QComboBox();
 
-    // Load system fonts
+    // System fonts provide platform-appropriate text rendering
     QFontDatabase fontDatabase;
     QStringList fontFamilies = fontDatabase.families();
     m_fontFamilyComboBox->addItems(fontFamilies);
 
-    // Set default font
+    // Arial provides consistent cross-platform appearance
     int defaultIndex = fontFamilies.indexOf("Arial");
     if (defaultIndex >= 0) {
         m_fontFamilyComboBox->setCurrentIndex(defaultIndex);
@@ -737,18 +711,16 @@ QWidget* RightAttrBar::createTextAttributesWidget()
     fontFamilyLayout->addWidget(fontFamilyLabel);
     fontFamilyLayout->addWidget(m_fontFamilyComboBox);
 
-    // 3. Font size
     QHBoxLayout* fontSizeLayout = new QHBoxLayout();
     QLabel* fontSizeLabel = new QLabel(tr("Size:"));
     m_fontSizeSpinBox = new QSpinBox();
     m_fontSizeSpinBox->setRange(6, 72);
-    m_fontSizeSpinBox->setValue(12); // Default value
+    m_fontSizeSpinBox->setValue(12); // 12pt is standard for readability
     m_fontSizeSpinBox->setSuffix(" pt");
 
     fontSizeLayout->addWidget(fontSizeLabel);
     fontSizeLayout->addWidget(m_fontSizeSpinBox);
 
-    // 4. Font style (Bold, Italic)
     QHBoxLayout* fontStyleLayout = new QHBoxLayout();
     m_boldCheckBox = new QCheckBox(tr("Bold"));
     m_italicCheckBox = new QCheckBox(tr("Italic"));
@@ -756,7 +728,6 @@ QWidget* RightAttrBar::createTextAttributesWidget()
     fontStyleLayout->addWidget(m_boldCheckBox);
     fontStyleLayout->addWidget(m_italicCheckBox);
 
-    // 5. Text alignment
     QHBoxLayout* textAlignLayout = new QHBoxLayout();
     QLabel* textAlignLabel = new QLabel(tr("Alignment:"));
     m_textAlignComboBox = new QComboBox();
@@ -767,19 +738,17 @@ QWidget* RightAttrBar::createTextAttributesWidget()
     textAlignLayout->addWidget(textAlignLabel);
     textAlignLayout->addWidget(m_textAlignComboBox);
 
-    // 6. Text color
     QHBoxLayout* textColorLayout = new QHBoxLayout();
     QLabel* textColorLabel = new QLabel(tr("Color:"));
     m_textColorButton = new QPushButton();
     m_textColorButton->setFixedWidth(50);
-    m_textColor = Qt::black; // Default text color
+    m_textColor = Qt::black; // Black provides maximum contrast and readability
     QString qss = QString("background-color: %1").arg(m_textColor.name());
     m_textColorButton->setStyleSheet(qss);
 
     textColorLayout->addWidget(textColorLabel);
     textColorLayout->addWidget(m_textColorButton);
 
-    // Connect signals
     connect(m_textContentEdit, &QLineEdit::textChanged, this, [this](const QString& text) {
         emit textContentChanged(text);
         qCDebug(rightAttrBarLog) << "Text content changed to:" << text;

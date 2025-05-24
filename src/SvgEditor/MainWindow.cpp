@@ -42,18 +42,17 @@ MainWindow::MainWindow(QWidget *parent)
 {
     qCDebug(mainWindowLog) << "MainWindow constructed.";
 
-    // Create a horizontal splitter for the main layout
+    // Three-panel layout provides optimal workflow segregation
     QSplitter* splitter = new QSplitter(Qt::Horizontal, this);
 
-    // Create a vertical splitter for the left sidebar and shape toolbar
+    // Vertical arrangement saves horizontal space for the main canvas
     QSplitter* leftSplitter = new QSplitter(Qt::Vertical, this);
     leftSplitter->addWidget(m_leftSideBar);
     leftSplitter->addWidget(m_shapeToolBar);
 
-    // Initially hide the shape toolbar
+    // Hidden by default to reduce interface complexity for new users
     m_shapeToolBar->hide();
 
-    // Add the left splitter, canvas area, and right sidebar to the main splitter
     splitter->addWidget(leftSplitter);
     splitter->addWidget(m_canvasArea);
     splitter->addWidget(m_rightAttrBar);
@@ -72,26 +71,23 @@ MainWindow::MainWindow(QWidget *parent)
     setupStatusBar();
     setupLanguageMenu();
 
-    // Connect LeftSideBar buttons to handleToolSelected (updated for new layout)
+    // Lambda approach avoids additional member functions for simple tool selection
     connect(m_leftSideBar->dragBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(0); });
     connect(m_leftSideBar->shapeBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(1); });
     connect(m_leftSideBar->textBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(2); });
     connect(m_leftSideBar->zoomBtn, &QPushButton::clicked, this, [this]() { handleToolSelected(3); });
 
     resize(1280, 800);
-    // Window title will be set by updateTitle() after language is configured
     setWindowIcon(QIcon(":/icon/images/icon.svg"));
 
     m_currentFilePath = "";
     m_documentModified = false;
-    // updateTitle() will be called after language setup in setupLanguageMenu()
 
-    // Initialize with an empty canvas ready for drawing using default settings
+    // Default document ensures users can start drawing immediately
     ConfigManager* configManager = ConfigManager::instance();
     QSize defaultCanvasSize = configManager->getDefaultCanvasSize();
     m_svgEngine->createNewDocument(defaultCanvasSize.width(), defaultCanvasSize.height());
     
-    // Set default background color
     QColor defaultBgColor = configManager->getDefaultCanvasBackgroundColor();
     Color bgColor;
     bgColor.r = defaultBgColor.red();
@@ -102,26 +98,23 @@ MainWindow::MainWindow(QWidget *parent)
     
     m_canvasArea->openFileWithEngine(m_svgEngine);
 
-    // Connect RightAttrBar signals to update canvas settings
+    // Real-time canvas updates provide immediate visual feedback
     connect(m_rightAttrBar, &RightAttrBar::canvasSizeChanged, this, [this](int width, int height) {
         try {
-            // Update canvas size in the engine
             SvgDocument* doc = m_svgEngine->getCurrentDocument();
             if (doc) {
                 doc->setWidth(width);
                 doc->setHeight(height);
 
-                // Create new background and outline items instead of reloading everything
+                // Direct item modification avoids expensive scene reconstruction
                 QGraphicsScene* scene = m_canvasArea->scene();
                 if (scene) {
-                    // Update background item
                     QRectF newRect(0, 0, width, height);
                     
-                    // Find and update the background item
+                    // Z-value identifies the background layer reliably
                     QList<QGraphicsItem*> items = scene->items();
                     for (QGraphicsItem* item : items) {
                         if (QGraphicsRectItem* rectItem = dynamic_cast<QGraphicsRectItem*>(item)) {
-                            // Check if this is the background item (z-value -1)
                             if (rectItem->zValue() == -1) {
                                 rectItem->setRect(newRect);
                                 break;
@@ -129,10 +122,9 @@ MainWindow::MainWindow(QWidget *parent)
                         }
                     }
                     
-                    // Find and update the outline item
+                    // Outline helps users understand canvas boundaries
                     for (QGraphicsItem* item : items) {
                         if (QGraphicsRectItem* rectItem = dynamic_cast<QGraphicsRectItem*>(item)) {
-                            // Check if this is the outline item (z-value MAX_N)
                             if (rectItem->zValue() == 25565) { // MAX_N value
                                 rectItem->setRect(newRect);
                                 break;
@@ -140,7 +132,7 @@ MainWindow::MainWindow(QWidget *parent)
                         }
                     }
                     
-                    // Update scene rect with padding
+                    // Padding prevents edge clipping during zoom operations
                     scene->setSceneRect(newRect.adjusted(-10, -10, 10, 10));
                 }
 
@@ -155,7 +147,6 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     connect(m_rightAttrBar, &RightAttrBar::canvasColorChanged, this, [this](const QColor& color) {
-        // Update canvas background color in the engine
         Color bgColor;
         bgColor.r = color.red();
         bgColor.g = color.green();
@@ -163,13 +154,12 @@ MainWindow::MainWindow(QWidget *parent)
         bgColor.alpha = color.alpha();
         m_svgEngine->getCurrentDocument()->setBackgroundColor(bgColor);
 
-        // Update the background item directly instead of reloading everything
+        // Direct brush update avoids full scene reload
         QGraphicsScene* scene = m_canvasArea->scene();
         if (scene) {
             QList<QGraphicsItem*> items = scene->items();
             for (QGraphicsItem* item : items) {
                 if (QGraphicsRectItem* rectItem = dynamic_cast<QGraphicsRectItem*>(item)) {
-                    // Check if this is the background item (z-value -1)
                     if (rectItem->zValue() == -1) {
                         rectItem->setBrush(QBrush(color));
                         break;
@@ -183,45 +173,39 @@ MainWindow::MainWindow(QWidget *parent)
         showStatusMessage(tr("Canvas color changed"), 2000);
     });
 
-    // Initialize the RightAttrBar with current document properties
     updateRightAttrBarFromDocument();
 
-    // Connect zoom signals
     connect(m_canvasArea, &CanvasArea::zoomChanged, this, &MainWindow::updateZoomStatus);
     connect(m_canvasArea, &CanvasArea::zoomChanged, m_rightAttrBar, &RightAttrBar::updateZoomLevel);
 
-    // Connect left sidebar zoom button (only zoomIn remains)
+    // Multiple zoom controls accommodate different user preferences
     connect(m_leftSideBar, &LeftSideBar::zoomInRequested, m_canvasArea, &CanvasArea::zoomIn);
     connect(m_leftSideBar, &LeftSideBar::zoomOutRequested, m_canvasArea, &CanvasArea::zoomOut);
     connect(m_leftSideBar, &LeftSideBar::resetZoomRequested, m_canvasArea, &CanvasArea::resetZoom);
     connect(m_leftSideBar, &LeftSideBar::fitToWindowRequested, m_canvasArea, &CanvasArea::fitToView);
 
-    // Connect tool signals
     connect(m_leftSideBar, &LeftSideBar::dragToolRequested, this, [this]() { handleToolSelected(0); });
-    connect(m_leftSideBar, &LeftSideBar::shapeGroupRequested, this, [this]() { handleToolSelected(1); });
-    connect(m_leftSideBar, &LeftSideBar::textToolRequested, this, [this]() { handleToolSelected(2); });
-    connect(m_leftSideBar, &LeftSideBar::zoomToolRequested, this, [this]() { handleToolSelected(3); });
 
-    // Connect shape signals from LeftSideBar (replaces ShapeToolBar connections)
+    // Shape creation workflow replaces the separate shape toolbar approach
     connect(m_leftSideBar, &LeftSideBar::shapeToolSelected, this, &MainWindow::handleShapeToolSelected);
 
-    // Connect shape created signal to mark document as modified
+    // Document state tracking enables proper save prompts and undo/redo functionality
     connect(m_canvasArea, &CanvasArea::shapeCreated, this, [this](QGraphicsItem*) {
         m_documentModified = true;
         updateTitle();
         qCDebug(mainWindowLog) << "Document marked as modified due to shape creation";
     });
 
-    // Connect item selection signal to update the right attribute bar
+    // Real-time property synchronization provides immediate visual feedback
     connect(m_canvasArea, &CanvasArea::itemSelected, m_rightAttrBar, &RightAttrBar::updateForSelectedItem);
 
-    // Connect property change signals to update the selected item
+    // Bidirectional property binding keeps UI and graphics items synchronized
     connect(m_rightAttrBar, &RightAttrBar::borderColorChanged, this, &MainWindow::updateSelectedItemBorderColor);
     connect(m_rightAttrBar, &RightAttrBar::fillColorChanged, this, &MainWindow::updateSelectedItemFillColor);
     connect(m_rightAttrBar, &RightAttrBar::borderWidthChanged, this, &MainWindow::updateSelectedItemBorderWidth);
     connect(m_rightAttrBar, &RightAttrBar::borderStyleChanged, this, &MainWindow::updateSelectedItemBorderStyle);
 
-    // Connect text property change signals
+    // Text editing requires specialized property handling due to font complexity
     connect(m_rightAttrBar, &RightAttrBar::textContentChanged, this, &MainWindow::updateSelectedItemTextContent);
     connect(m_rightAttrBar, &RightAttrBar::fontFamilyChanged, this, &MainWindow::updateSelectedItemFontFamily);
     connect(m_rightAttrBar, &RightAttrBar::fontSizeChanged, this, &MainWindow::updateSelectedItemFontSize);
@@ -230,13 +214,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_rightAttrBar, &RightAttrBar::textAlignmentChanged, this, &MainWindow::updateSelectedItemTextAlignment);
     connect(m_rightAttrBar, &RightAttrBar::textColorChanged, this, &MainWindow::updateSelectedItemTextColor);
 
-    // Set the current engine for the canvas area
     m_canvasArea->setCurrentEngine(m_svgEngine);
 
-    // Initialize undo/redo actions state
     updateUndoRedoActions();
 
-    // Connect to CommandManager's undoRedoChanged signal
+    // Command pattern integration enables comprehensive undo/redo support
     connect(CommandManager::instance(), &CommandManager::undoRedoChanged,
             this, &MainWindow::updateUndoRedoActions);
 
@@ -247,7 +229,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    // Clean up resources
     delete m_svgEngine;
     qCDebug(mainWindowLog) << "MainWindow destroyed.";
 }
@@ -274,12 +255,11 @@ void MainWindow::newFile()
         if (!fileDialog.selectedFiles().isEmpty()) {
             QString fileName = fileDialog.selectedFiles().constFirst();
 
-            // Use default settings from ConfigManager
+            // Configuration-driven defaults ensure consistent user experience
             ConfigManager* configManager = ConfigManager::instance();
             QSize defaultCanvasSize = configManager->getDefaultCanvasSize();
             m_svgEngine->createNewDocument(defaultCanvasSize.width(), defaultCanvasSize.height());
             
-            // Set default background color
             QColor defaultBgColor = configManager->getDefaultCanvasBackgroundColor();
             Color bgColor;
             bgColor.r = defaultBgColor.red();
@@ -292,7 +272,7 @@ void MainWindow::newFile()
                 m_currentFilePath = fileName;
                 m_documentModified = false;
 
-                // Clear the command history for the new file
+                // Fresh command history prevents confusion with previous document operations
                 CommandManager::instance()->clear();
                 updateUndoRedoActions();
 
@@ -312,9 +292,9 @@ void MainWindow::newFile()
 
 void MainWindow::openFile()
 {
-    // Check if we need to save current document
+    // Unsaved changes protection prevents accidental data loss
     if (m_documentModified && !maybeSave()) {
-        return; // User canceled the operation
+        return;
     }
 
     QFileDialog fileDialog(this);
@@ -337,7 +317,7 @@ void MainWindow::openFile()
             qCDebug(mainWindowLog) << "Opening file:" << fileName;
 
             if (m_svgEngine->loadSvgFile(fileName.toStdString())) {
-                // Clear the command history for the opened file
+                // Fresh command history prevents confusion with previous document operations
                 CommandManager::instance()->clear();
                 updateUndoRedoActions();
 

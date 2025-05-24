@@ -174,20 +174,19 @@ void CanvasArea::createShape(const QPointF& startPoint, const QPointF& endPoint)
         }
         case ShapeType::Text: {
             qCDebug(canvasAreaLog) << "Creating Text";
-            // Create a preview rectangle with dashed border during dragging
+            // Preview rectangle helps users visualize text box boundaries before typing
             QRectF textRect(qMin(startPoint.x(), endPoint.x()),
                            qMin(startPoint.y(), endPoint.y()),
                            qAbs(endPoint.x() - startPoint.x()),
                            qAbs(endPoint.y() - startPoint.y()));
             
-            // Ensure minimum size for the text box
+            // Minimum size ensures text remains readable and clickable
             if (textRect.width() < 50) textRect.setWidth(50);
             if (textRect.height() < 20) textRect.setHeight(20);
             
-            // Store the text rect for later use when finalizing
             m_textPreviewRect = textRect;
             
-            // Create a dashed rectangle for preview
+            // Dashed outline distinguishes preview from final text elements
             QGraphicsRectItem* previewRect = new QGraphicsRectItem(textRect);
             QPen dashedPen(Qt::gray, 2, Qt::DashLine);
             previewRect->setPen(dashedPen);
@@ -224,7 +223,6 @@ void CanvasArea::updateShape(const QPointF& endPoint)
 
 void CanvasArea::finalizeShape()
 {
-    // Finalize the current shape
     if (!m_currentItem) {
         qCWarning(canvasAreaLog) << "Cannot finalize shape: current item is null";
         return;
@@ -232,13 +230,12 @@ void CanvasArea::finalizeShape()
 
     qCDebug(canvasAreaLog) << "Finalizing shape of type" << static_cast<int>(m_currentShapeType);
 
-    // For text items, we need special handling: replace preview with actual text item
+    // Text elements require preview-to-editable conversion for proper interaction
     if (m_currentShapeType == ShapeType::Text) {
-        // Remove the preview rectangle from scene
         m_scene->removeItem(m_currentItem);
         delete m_currentItem;
         
-        // Create the actual text item using the stored preview rect
+        // Actual text item enables in-place editing and proper text rendering
         EditableTextItem* textItem = createTextBox(m_textPreviewRect);
         m_currentItem = textItem;
         m_scene->addItem(m_currentItem);
@@ -246,23 +243,19 @@ void CanvasArea::finalizeShape()
         qCDebug(canvasAreaLog) << "Replaced preview rectangle with text item";
     }
 
-    // Store a reference to the current item
     QGraphicsItem* finalizedItem = m_currentItem;
 
-    // Create and execute an AddShapeCommand
+    // Command pattern enables undo/redo functionality for all shape operations
     auto command = std::make_unique<AddShapeCommand>(this, m_currentItem, m_currentShapeType);
     CommandManager::instance()->executeCommand(std::move(command));
 
-    // For text items, ensure they're selected and start editing
+    // Immediate editing improves user workflow for text creation
     if (m_currentShapeType == ShapeType::Text) {
-        // Clear any existing selection
         m_scene->clearSelection();
-        // Select the newly created text item
         finalizedItem->setSelected(true);
-        // Emit the selection signal
         emit itemSelected(finalizedItem, ShapeType::Text);
         
-        // Start editing immediately after creation
+        // Slight delay ensures scene is fully updated before editing starts
         if (auto textItem = dynamic_cast<EditableTextItem*>(finalizedItem)) {
             QTimer::singleShot(50, [textItem]() {
                 textItem->startEditing();
@@ -272,7 +265,7 @@ void CanvasArea::finalizeShape()
         qCDebug(canvasAreaLog) << "Text item selected and editing started after creation";
     }
 
-    // Reset the current item pointer (ownership transferred to the command)
+    // Command now owns the item, preventing double-deletion
     m_currentItem = nullptr;
 
     qCDebug(canvasAreaLog) << "Shape finalized and added to document via command";

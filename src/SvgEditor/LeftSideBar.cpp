@@ -15,7 +15,7 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     setLayout(mainLayout);
 
-    // Create main tool buttons in the new order: Drag, Shapes, Text, Zoom
+    // Logical workflow order: select, draw, annotate, view
     dragBtn = new QPushButton("Drag", this);
     shapeBtn = new QPushButton("Shapes", this);
     textBtn = new QPushButton("Text", this);
@@ -33,6 +33,7 @@ LeftSideBar::LeftSideBar(QWidget *parent)
 
     dragBtn->setCursor(Qt::OpenHandCursor);
 
+    // Exclusive selection prevents conflicting tool states
     m_toolButtonGroup = new QButtonGroup(this);
     m_toolButtonGroup->addButton(dragBtn, 0);
     m_toolButtonGroup->addButton(shapeBtn, 1);
@@ -50,11 +51,10 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     toolsLabel->setStyleSheet("font-weight: bold;");
     mainLayout->addWidget(toolsLabel);
 
-    // Add main tool buttons
     mainLayout->addWidget(dragBtn);
     mainLayout->addWidget(shapeBtn);
 
-    // Create shape tools widget
+    // Collapsible panels save screen real estate for primary tools
     shapeToolsWidget = new QWidget(this);
     QVBoxLayout* shapeLayout = new QVBoxLayout(shapeToolsWidget);
     shapeLayout->setContentsMargins(5, 5, 5, 5);
@@ -72,7 +72,6 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     starBtn = new QPushButton(tr("Star"), shapeToolsWidget);
     hexagonBtn = new QPushButton(tr("Hexagon"), shapeToolsWidget);
 
-    // Set tooltips for shape buttons
     lineBtn->setToolTip(tr("Create straight lines"));
     freehandBtn->setToolTip(tr("Draw freehand paths"));
     ellipseBtn->setToolTip(tr("Create circles and ellipses"));
@@ -92,7 +91,7 @@ LeftSideBar::LeftSideBar(QWidget *parent)
     mainLayout->addWidget(shapeToolsWidget);
     shapeToolsWidget->hide();
 
-    // Connect shape button signals
+    // Lambdas combine state management with signal emission efficiently
     connect(lineBtn, &QPushButton::clicked, this, [this]() {
         setSelectedShapeType(ShapeType::Line);
         highlightShapeButton(0);
@@ -129,13 +128,10 @@ LeftSideBar::LeftSideBar(QWidget *parent)
         emit shapeToolSelected(ShapeType::Hexagon);
     });
 
-    // Add text button
     mainLayout->addWidget(textBtn);
-
-    // Add zoom button
     mainLayout->addWidget(zoomBtn);
 
-    // Create zoom tools widget
+    // Separate zoom widget reduces cognitive load for shape-focused users
     zoomToolsWidget = new QWidget(this);
     QVBoxLayout* zoomLayout = new QVBoxLayout(zoomToolsWidget);
     zoomLayout->setContentsMargins(5, 5, 5, 5);
@@ -191,7 +187,7 @@ LeftSideBar::LeftSideBar(QWidget *parent)
 
 LeftSideBar::~LeftSideBar()
 {
-    // Cleanup resources if needed
+    // Qt automatically cleans up child widgets and layout objects
 }
 
 void LeftSideBar::highlightButton(int toolId)
