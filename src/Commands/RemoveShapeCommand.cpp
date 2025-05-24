@@ -21,7 +21,7 @@ RemoveShapeCommand::RemoveShapeCommand(CanvasArea* canvasArea, QGraphicsItem* it
 
 RemoveShapeCommand::~RemoveShapeCommand()
 {
-    // If we own the item and it's not in a scene, delete it
+    // Clean up orphaned items to prevent memory leaks during command stack operations
     if (m_itemOwned && m_item && !m_item->scene()) {
         qCDebug(removeShapeCommandLog) << "Deleting owned item in RemoveShapeCommand destructor";
         delete m_item;
@@ -38,7 +38,6 @@ bool RemoveShapeCommand::execute()
 
     qCDebug(removeShapeCommandLog) << "Executing RemoveShapeCommand";
 
-    // Get the engine and document
     CoreSvgEngine* engine = m_canvasArea->getCurrentEngine();
     SvgDocument* doc = engine ? engine->getCurrentDocument() : nullptr;
     if (!engine || !doc) {
@@ -46,10 +45,10 @@ bool RemoveShapeCommand::execute()
         return false;
     }
 
-    // Store the scene index for proper restoration
+    // Preserve original position for accurate restoration during undo
     m_sceneIndex = m_canvasArea->scene()->items().indexOf(m_item);
 
-    // Remove the item from the document's graphics items list
+    // Maintain synchronization between document model and graphics scene
     auto it = std::find(doc->m_graphicsItems.begin(), doc->m_graphicsItems.end(), m_item);
     if (it != doc->m_graphicsItems.end()) {
         doc->m_graphicsItems.erase(it);
@@ -58,10 +57,9 @@ bool RemoveShapeCommand::execute()
         qCWarning(removeShapeCommandLog) << "Item not found in document's graphics items list";
     }
 
-    // Remove the item from the scene
     m_canvasArea->scene()->removeItem(m_item);
 
-    // We now own the item
+    // Take ownership to prevent premature deletion
     m_itemOwned = true;
 
     return true;
@@ -76,7 +74,6 @@ bool RemoveShapeCommand::undo()
 
     qCDebug(removeShapeCommandLog) << "Undoing RemoveShapeCommand";
 
-    // Get the engine and document
     CoreSvgEngine* engine = m_canvasArea->getCurrentEngine();
     SvgDocument* doc = engine ? engine->getCurrentDocument() : nullptr;
     if (!engine || !doc) {
@@ -84,10 +81,9 @@ bool RemoveShapeCommand::undo()
         return false;
     }
 
-    // Add the item back to the scene
     m_canvasArea->scene()->addItem(m_item);
 
-    // Add the item back to the document's graphics items list
+    // Restore document model consistency - avoid duplicates
     if (std::find(doc->m_graphicsItems.begin(), doc->m_graphicsItems.end(), m_item) == doc->m_graphicsItems.end()) {
         doc->m_graphicsItems.push_back(m_item);
         qCDebug(removeShapeCommandLog) << "Added item back to document's graphics items list";
@@ -95,7 +91,7 @@ bool RemoveShapeCommand::undo()
         qCWarning(removeShapeCommandLog) << "Item already in document's graphics items list";
     }
 
-    // We no longer own the item
+    // Transfer ownership back to the scene
     m_itemOwned = false;
 
     return true;

@@ -34,20 +34,19 @@ signals:
     void undoRedoChanged();
 
 private:
-    // Private constructor for singleton
+    // Singleton pattern for global command history management
     CommandManager();
     ~CommandManager();
 
-    // Disable copy and move
+    // Prevent copying/moving to maintain singleton integrity
     CommandManager(const CommandManager&) = delete;
     CommandManager& operator=(const CommandManager&) = delete;
     CommandManager(CommandManager&&) = delete;
     CommandManager& operator=(CommandManager&&) = delete;
 
-    // Stacks for undo and redo commands
+    // Use QList instead of QStack for random access to command descriptions
     QList<Command*> m_undoStack;
     QList<Command*> m_redoStack;
 
-    // Singleton instance
     static CommandManager* m_instance;
 };

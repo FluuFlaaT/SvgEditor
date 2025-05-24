@@ -18,7 +18,7 @@ AddShapeCommand::AddShapeCommand(CanvasArea* canvasArea, QGraphicsItem* item, Sh
 
 AddShapeCommand::~AddShapeCommand()
 {
-    // If we own the item and it's not in a scene, delete it
+    // Clean up orphaned items to prevent memory leaks in case of command stack rollback
     if (m_itemOwned && m_item && !m_item->scene()) {
         qCDebug(addShapeCommandLog) << "Deleting owned item in AddShapeCommand destructor";
         delete m_item;
@@ -35,10 +35,9 @@ bool AddShapeCommand::execute()
 
     qCDebug(addShapeCommandLog) << "Executing AddShapeCommand";
 
-    // Check if the item is already in the scene
+    // Check if the item is already in the scene to handle redo operations correctly
     bool alreadyInScene = (m_item->scene() != nullptr);
 
-    // If the item is not in the scene, add it
     if (!alreadyInScene) {
         m_canvasArea->scene()->addItem(m_item);
         qCDebug(addShapeCommandLog) << "Added item to scene";
@@ -46,14 +45,13 @@ bool AddShapeCommand::execute()
         qCDebug(addShapeCommandLog) << "Item is already in scene, skipping scene addition";
     }
 
-    // Add the shape to the document if it's not already there
-    // The addShapeToDocument method should handle this check internally
+    // Synchronize with SVG document model - essential for proper serialization
     m_canvasArea->addShapeToDocument(m_item);
 
-    // Store the element ID for undo
+    // Store element ID for reliable undo operation - we need this because 
+    // the document structure might change between execute and undo
     CoreSvgEngine* engine = m_canvasArea->getCurrentEngine();
     if (engine && engine->getCurrentDocument()) {
-        // The element ID would be the last added element
         auto& elements = engine->getCurrentDocument()->getElements();
         if (!elements.empty()) {
             m_elementId = elements.back()->getID();
@@ -61,10 +59,9 @@ bool AddShapeCommand::execute()
         }
     }
 
-    // We no longer own the item, it's now owned by the scene
+    // Transfer ownership to the scene to ensure proper Qt object lifecycle
     m_itemOwned = false;
 
-    // Emit the shapeCreated signal
     emit m_canvasArea->shapeCreated(m_item);
 
     return true;
@@ -79,25 +76,21 @@ bool AddShapeCommand::undo()
 
     qCDebug(addShapeCommandLog) << "Undoing AddShapeCommand";
 
-    // Get the engine and document
     CoreSvgEngine* engine = m_canvasArea->getCurrentEngine();
     if (!engine || !engine->getCurrentDocument()) {
         qCWarning(addShapeCommandLog) << "Cannot undo AddShapeCommand: engine or document is null";
         return false;
     }
 
-    // Remove the element from the document by ID
+    // Remove from document first to maintain model-view consistency
     if (!m_elementId.empty()) {
         qCDebug(addShapeCommandLog) << "Removing element with ID:" << QString::fromStdString(m_elementId);
         engine->getCurrentDocument()->removeElementById(m_elementId);
     }
 
-    // Find the item in the scene
     if (m_item && m_item->scene()) {
-        // Remove the item from the scene
         m_canvasArea->scene()->removeItem(m_item);
-
-        // We now own the item again
+        // Reclaim ownership to prevent deletion until command is destroyed
         m_itemOwned = true;
     } else {
         qCWarning(addShapeCommandLog) << "Item not found in scene during undo";

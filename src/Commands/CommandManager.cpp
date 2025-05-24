@@ -33,16 +33,13 @@ bool CommandManager::executeCommand(std::unique_ptr<Command> command)
 
     qCDebug(commandManagerLog) << "Executing command:" << command->getDescription();
 
-    // Execute the command
     if (command->execute()) {
-        // Clear the redo stack when a new command is executed
+        // Executing a new command invalidates any previous redo history
         qDeleteAll(m_redoStack);
         m_redoStack.clear();
 
-        // Add the command to the undo stack (transfer ownership)
         m_undoStack.append(command.release());
 
-        // Notify listeners that the undo/redo state has changed
         emit undoRedoChanged();
 
         return true;
@@ -59,17 +56,13 @@ bool CommandManager::undo()
         return false;
     }
 
-    // Get the command from the undo stack
     Command* command = m_undoStack.takeLast();
 
     qCDebug(commandManagerLog) << "Undoing command:" << command->getDescription();
 
-    // Undo the command
     if (command->undo()) {
-        // Add the command to the redo stack
         m_redoStack.append(command);
 
-        // Notify listeners that the undo/redo state has changed
         emit undoRedoChanged();
 
         return true;
@@ -87,17 +80,13 @@ bool CommandManager::redo()
         return false;
     }
 
-    // Get the command from the redo stack
     Command* command = m_redoStack.takeLast();
 
     qCDebug(commandManagerLog) << "Redoing command:" << command->getDescription();
 
-    // Execute the command again
     if (command->execute()) {
-        // Add the command back to the undo stack
         m_undoStack.append(command);
 
-        // Notify listeners that the undo/redo state has changed
         emit undoRedoChanged();
 
         return true;

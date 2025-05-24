@@ -19,9 +19,9 @@ private:
     CanvasArea* m_canvasArea;
     QGraphicsItem* m_item;
     ShapeType m_shapeType;
-    bool m_itemOwned; // Whether this command owns the item
+    bool m_itemOwned; // Track ownership to prevent double-deletion during command lifecycle
 
-    // Store the SVG element data for undo
+    // Preserve SVG element state for complete restoration
     std::unique_ptr<SvgElement> m_svgElement;
-    int m_sceneIndex; // Index in the scene for proper restoration
+    int m_sceneIndex; // Preserve original Z-order for accurate undo positioning
 };

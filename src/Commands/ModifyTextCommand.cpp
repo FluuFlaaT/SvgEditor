@@ -131,7 +131,7 @@ void ModifyTextCommand::applyModification(bool isUndo)
             break;
     }
     
-    // Emit signal to update the document
+    // Trigger document synchronization only on forward operations to avoid duplicate signals
     if (!isUndo) {
         emit m_textItem->textChanged(m_textItem->toPlainString());
     }

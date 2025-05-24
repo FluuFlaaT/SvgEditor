@@ -19,6 +19,6 @@ private:
     CanvasArea* m_canvasArea;
     QGraphicsItem* m_item;
     ShapeType m_shapeType;
-    bool m_itemOwned; // Whether this command owns the item
-    std::string m_elementId; // ID of the SVG element for removal
+    bool m_itemOwned; // Track ownership to prevent double-deletion during command lifecycle
+    std::string m_elementId; // Store ID for safe removal from document model during undo
 };
