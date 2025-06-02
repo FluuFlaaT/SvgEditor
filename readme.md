@@ -1,5 +1,13 @@
 # SvgEditor
 
+## What is SvgEditor
+
+- A simple SVG painter application build with Qt5
+- Easy to build and maintain with CMake
+- Fast and tiny
+- Modules can be separately used by third-party softwares
+- A project made for C++ Summer Intern
+
 ## Compile
 
 ### Before you compile
