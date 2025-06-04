@@ -1,5 +1,7 @@
 # SvgEditor
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/FluuFlaaT/SvgEditor)
+
 ## What is SvgEditor
 
 - A simple SVG painter application build with Qt5
