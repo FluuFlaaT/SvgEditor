@@ -7,16 +7,19 @@ Q_LOGGING_CATEGORY(svgShapesLog, "SvgShapes")
 
 // SvgLine
 SvgLine::SvgLine(Point start, Point end) : m_p1(start), m_p2(end) {
-    qCInfo(svgShapesLog) << "Creating Line element: (" + QString::fromStdString(std::to_string(start.x)) + "," + QString::fromStdString(std::to_string(start.y)) + ") to (" + QString::fromStdString(std::to_string(end.x)) + "," + QString::fromStdString(std::to_string(end.y)) + ")";
+    qCInfo(svgShapesLog) << "Creating Line element: (" << start.x << "," << start.y
+                          << ") to (" << end.x << "," << end.y << ")";
 }
 
 void SvgLine::setP1(const Point& p) {
-    qCInfo(svgShapesLog) << "Setting Line start point: (" + QString::fromStdString(std::to_string(m_p1.x)) + "," + QString::fromStdString(std::to_string(m_p1.y)) + ") to (" + QString::fromStdString(std::to_string(p.x)) + "," + QString::fromStdString(std::to_string(p.y)) + ")";
+    qCInfo(svgShapesLog) << "Setting Line start point: (" << m_p1.x << "," << m_p1.y
+                          << ") to (" << p.x << "," << p.y << ")";
     m_p1 = p;
 }
 
 void SvgLine::setP2(const Point& p) {
-    qCInfo(svgShapesLog) << "Setting Line end point: (" + QString::fromStdString(std::to_string(m_p2.x)) + "," + QString::fromStdString(std::to_string(m_p2.y)) + ") to (" + QString::fromStdString(std::to_string(p.x)) + "," + QString::fromStdString(std::to_string(p.y)) + ")";
+    qCInfo(svgShapesLog) << "Setting Line end point: (" << m_p2.x << "," << m_p2.y
+                          << ") to (" << p.x << "," << p.y << ")";
     m_p2 = p;
 }
 
@@ -32,35 +35,38 @@ std::string SvgLine::toSvgString() const {
 SvgRectangle::SvgRectangle(Point tl, double w, double h, double rx_, double ry_)
     : m_topLeft(tl), m_width(w > 0 ? w : 0), m_height(h > 0 ? h : 0), 
       m_rx(rx_ > 0 ? rx_ : 0), m_ry(ry_ > 0 ? ry_ : 0) {
-    qCInfo(svgShapesLog) << "Creating Rectangle element: (" + QString::fromStdString(std::to_string(tl.x)) + "," + QString::fromStdString(std::to_string(tl.y)) + ") width=" + QString::fromStdString(std::to_string(m_width)) + ", height=" + QString::fromStdString(std::to_string(m_height)) + ", rx=" + QString::fromStdString(std::to_string(m_rx)) + ", ry=" + QString::fromStdString(std::to_string(m_ry));
+    qCInfo(svgShapesLog) << "Creating Rectangle element: (" << tl.x << "," << tl.y
+                          << ") width=" << m_width << ", height=" << m_height
+                          << ", rx=" << m_rx << ", ry=" << m_ry;
 }
 
 void SvgRectangle::setTopLeft(const Point& p) {
-    qCInfo(svgShapesLog) << "Setting Rectangle top-left: (" + QString::fromStdString(std::to_string(m_topLeft.x)) + "," + QString::fromStdString(std::to_string(m_topLeft.y)) + ") to (" + QString::fromStdString(std::to_string(p.x)) + "," + QString::fromStdString(std::to_string(p.y)) + ")";
+    qCInfo(svgShapesLog) << "Setting Rectangle top-left: (" << m_topLeft.x << "," << m_topLeft.y
+                          << ") to (" << p.x << "," << p.y << ")";
     m_topLeft = p;
 }
 
 void SvgRectangle::setWidth(double w) {
     double newWidth = (w > 0 ? w : 0);
-    qCInfo(svgShapesLog) << "Setting Rectangle width: " + QString::fromStdString(std::to_string(m_width)) + " to " + QString::fromStdString(std::to_string(newWidth));
+    qCInfo(svgShapesLog) << "Setting Rectangle width:" << m_width << "to" << newWidth;
     m_width = newWidth;
 }
 
 void SvgRectangle::setHeight(double h) {
     double newHeight = (h > 0 ? h : 0);
-    qCInfo(svgShapesLog) << "Setting Rectangle height: " + QString::fromStdString(std::to_string(m_height)) + " to " + QString::fromStdString(std::to_string(newHeight));
+    qCInfo(svgShapesLog) << "Setting Rectangle height:" << m_height << "to" << newHeight;
     m_height = newHeight;
 }
 
 void SvgRectangle::setRx(double rx_val) {
     double newRx = (rx_val > 0 ? rx_val : 0);
-    qCInfo(svgShapesLog) << "Setting Rectangle rx (corner radius x): " + QString::fromStdString(std::to_string(m_rx)) + " to " + QString::fromStdString(std::to_string(newRx));
+    qCInfo(svgShapesLog) << "Setting Rectangle rx (corner radius x):" << m_rx << "to" << newRx;
     m_rx = newRx;
 }
 
 void SvgRectangle::setRy(double ry_val) {
     double newRy = (ry_val > 0 ? ry_val : 0);
-    qCInfo(svgShapesLog) << "Setting Rectangle ry (corner radius y): " + QString::fromStdString(std::to_string(m_ry)) + " to " + QString::fromStdString(std::to_string(newRy));
+    qCInfo(svgShapesLog) << "Setting Rectangle ry (corner radius y):" << m_ry << "to" << newRy;
     m_ry = newRy;
 }
 
@@ -76,17 +82,19 @@ std::string SvgRectangle::toSvgString() const {
 
 // SvgCircle    
 SvgCircle::SvgCircle(Point c, double r) : m_center(c), m_radius(r > 0 ? r : 0) {
-    qCInfo(svgShapesLog) << "Creating Circle element: center=(" + QString::fromStdString(std::to_string(c.x)) + "," + QString::fromStdString(std::to_string(c.y)) + "), radius=" + QString::fromStdString(std::to_string(m_radius));
+    qCInfo(svgShapesLog) << "Creating Circle element: center=(" << c.x << "," << c.y
+                          << "), radius=" << m_radius;
 }
 
 void SvgCircle::setCenter(const Point& c) {
-    qCInfo(svgShapesLog) << "Setting Circle center: (" + QString::fromStdString(std::to_string(m_center.x)) + "," + QString::fromStdString(std::to_string(m_center.y)) + ") to (" + QString::fromStdString(std::to_string(c.x)) + "," + QString::fromStdString(std::to_string(c.y)) + ")";
+    qCInfo(svgShapesLog) << "Setting Circle center: (" << m_center.x << "," << m_center.y
+                          << ") to (" << c.x << "," << c.y << ")";
     m_center = c;
 }
 
 void SvgCircle::setRadius(double r) {
     double newRadius = (r > 0 ? r : 0);
-    qCInfo(svgShapesLog) << "Setting Circle radius: " + QString::fromStdString(std::to_string(m_radius)) + " to " + QString::fromStdString(std::to_string(newRadius));
+    qCInfo(svgShapesLog) << "Setting Circle radius:" << m_radius << "to" << newRadius;
     m_radius = newRadius;
 }
 
@@ -101,23 +109,25 @@ std::string SvgCircle::toSvgString() const {
 // SvgEllipse    
 SvgEllipse::SvgEllipse(Point c, double r_x, double r_y) 
     : m_center(c), m_rx(r_x > 0 ? r_x : 0), m_ry(r_y > 0 ? r_y : 0) {
-    qCInfo(svgShapesLog) << "Creating Ellipse element: center=(" + QString::fromStdString(std::to_string(c.x)) + "," + QString::fromStdString(std::to_string(c.y)) + "), rx=" + QString::fromStdString(std::to_string(m_rx)) + ", ry=" + QString::fromStdString(std::to_string(m_ry));
+    qCInfo(svgShapesLog) << "Creating Ellipse element: center=(" << c.x << "," << c.y
+                          << "), rx=" << m_rx << ", ry=" << m_ry;
 }
 
 void SvgEllipse::setCenter(const Point& c) {
-    qCInfo(svgShapesLog) << "Setting Ellipse center: (" + QString::fromStdString(std::to_string(m_center.x)) + "," + QString::fromStdString(std::to_string(m_center.y)) + ") to (" + QString::fromStdString(std::to_string(c.x)) + "," + QString::fromStdString(std::to_string(c.y)) + ")";
+    qCInfo(svgShapesLog) << "Setting Ellipse center: (" << m_center.x << "," << m_center.y
+                          << ") to (" << c.x << "," << c.y << ")";
     m_center = c;
 }
 
 void SvgEllipse::setRx(double r_x) {
     double newRx = (r_x > 0 ? r_x : 0);
-    qCInfo(svgShapesLog) << "Setting Ellipse x-radius: " + QString::fromStdString(std::to_string(m_rx)) + " to " + QString::fromStdString(std::to_string(newRx));
+    qCInfo(svgShapesLog) << "Setting Ellipse x-radius:" << m_rx << "to" << newRx;
     m_rx = newRx;
 }
 
 void SvgEllipse::setRy(double r_y) {
     double newRy = (r_y > 0 ? r_y : 0);
-    qCInfo(svgShapesLog) << "Setting Ellipse y-radius: " + QString::fromStdString(std::to_string(m_ry)) + " to " + QString::fromStdString(std::to_string(newRy));
+    qCInfo(svgShapesLog) << "Setting Ellipse y-radius:" << m_ry << "to" << newRy;
     m_ry = newRy;
 }
 
@@ -131,16 +141,17 @@ std::string SvgEllipse::toSvgString() const {
 
 // SvgPolygon    
 SvgPolygon::SvgPolygon(const std::vector<Point>& pts) : m_points(pts) {
-    qCInfo(svgShapesLog) << "Creating Polygon element with " + QString::fromStdString(std::to_string(pts.size())) + " points";
+    qCInfo(svgShapesLog) << "Creating Polygon element with" << pts.size() << "points";
 }
 
 void SvgPolygon::setPoints(const std::vector<Point>& pts) {
-    qCInfo(svgShapesLog) << "Updating Polygon points: from " + QString::fromStdString(std::to_string(m_points.size())) + " points to " + QString::fromStdString(std::to_string(pts.size())) + " points";
+    qCInfo(svgShapesLog) << "Updating Polygon points: from" << m_points.size()
+                          << "points to" << pts.size() << "points";
     m_points = pts;
 }
 
 void SvgPolygon::addPoint(const Point& p) {
-    qCInfo(svgShapesLog) << "Adding point (" + QString::fromStdString(std::to_string(p.x)) + "," + QString::fromStdString(std::to_string(p.y)) + ") to Polygon";
+    qCInfo(svgShapesLog) << "Adding point (" << p.x << "," << p.y << ") to Polygon";
     m_points.push_back(p);
 }
 
@@ -156,16 +167,17 @@ std::string SvgPolygon::toSvgString() const {
 
 // SvgPolyline    
 SvgPolyline::SvgPolyline(const std::vector<Point>& pts) : m_points(pts) {
-    qCInfo(svgShapesLog) << "Creating Polyline element with " + QString::fromStdString(std::to_string(pts.size())) + " points";
+    qCInfo(svgShapesLog) << "Creating Polyline element with" << pts.size() << "points";
 }
 
 void SvgPolyline::setPoints(const std::vector<Point>& pts) {
-    qCInfo(svgShapesLog) << "Updating Polyline points: from " + QString::fromStdString(std::to_string(m_points.size())) + " points to " + QString::fromStdString(std::to_string(pts.size())) + " points";
+    qCInfo(svgShapesLog) << "Updating Polyline points: from" << m_points.size()
+                          << "points to" << pts.size() << "points";
     m_points = pts;
 }
 
 void SvgPolyline::addPoint(const Point& p) {
-    qCInfo(svgShapesLog) << "Adding point (" + QString::fromStdString(std::to_string(p.x)) + "," + QString::fromStdString(std::to_string(p.y)) + ") to Polyline";
+    qCInfo(svgShapesLog) << "Adding point (" << p.x << "," << p.y << ") to Polyline";
     m_points.push_back(p);
 }
 
@@ -195,7 +207,8 @@ std::string SvgPolyline::toSvgString() const {
 
 // SvgPentagon    
 SvgPentagon::SvgPentagon(Point center, double radius) {
-    qCInfo(svgShapesLog) << "Creating Pentagon element: center=(" + QString::fromStdString(std::to_string(center.x)) + "," + QString::fromStdString(std::to_string(center.y)) + "), radius=" + QString::fromStdString(std::to_string(radius));
+    qCInfo(svgShapesLog) << "Creating Pentagon element: center=(" << center.x << "," << center.y
+                          << "), radius=" << radius;
     
     m_points.resize(5);
     for (int i = 0; i < 5; ++i) {
@@ -209,7 +222,8 @@ SvgPentagon::SvgPentagon(Point center, double radius) {
 
 // SvgHexagon    
 SvgHexagon::SvgHexagon(Point center, double radius) {
-    qCInfo(svgShapesLog) << "Creating Hexagon element: center=(" + QString::fromStdString(std::to_string(center.x)) + "," + QString::fromStdString(std::to_string(center.y)) + "), radius=" + QString::fromStdString(std::to_string(radius));
+    qCInfo(svgShapesLog) << "Creating Hexagon element: center=(" << center.x << "," << center.y
+                          << "), radius=" << radius;
         
     m_points.resize(6);
     for (int i = 0; i < 6; ++i) {
@@ -222,10 +236,10 @@ SvgHexagon::SvgHexagon(Point center, double radius) {
 
 // SvgStar    
 SvgStar::SvgStar(Point center, double outerRadius, double innerRadius, int numPoints, double startAngleDeg) {
-    qCInfo(svgShapesLog) << "Creating Star element: center=(" + QString::fromStdString(std::to_string(center.x)) + "," + QString::fromStdString(std::to_string(center.y)) + 
-        "), outerRadius=" + QString::fromStdString(std::to_string(outerRadius)) + 
-        ", innerRadius=" + QString::fromStdString(std::to_string(innerRadius)) + 
-        ", points=" + QString::fromStdString(std::to_string(numPoints));
+    qCInfo(svgShapesLog) << "Creating Star element: center=(" << center.x << "," << center.y
+                          << "), outerRadius=" << outerRadius
+                          << ", innerRadius=" << innerRadius
+                          << ", points=" << numPoints;
         
     // Minimum 2 points required for star geometry
     if (numPoints < 2) return;
