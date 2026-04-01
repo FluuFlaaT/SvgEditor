@@ -6,21 +6,9 @@
 #include <QVector>
 #include <QLabel>
 #include <QLoggingCategory>
+#include "Core/ShapeType.h"
 
 Q_DECLARE_LOGGING_CATEGORY(shapeToolBarLog)
-
-// Enum for shape types
-enum class ShapeType {
-    None,
-    Line,
-    Freehand,
-    Rectangle,
-    Ellipse,
-    Pentagon,
-    Star,
-    Hexagon,
-    Text
-};
 
 class ShapeToolBar : public QWidget
 {
@@ -61,6 +49,8 @@ private:
     ShapeType m_selectedShapeType;
     QVBoxLayout *m_mainLayout;
 };
+
+
 
 
 

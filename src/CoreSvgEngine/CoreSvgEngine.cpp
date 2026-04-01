@@ -1,9 +1,9 @@
 ﻿#include "coresvgengine.h"
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <QLoggingCategory>
 #include <QString>
+
 Q_DECLARE_LOGGING_CATEGORY(coreSvgEngineLog)
 Q_LOGGING_CATEGORY(coreSvgEngineLog, "CoreSvgEngine")
 
@@ -34,9 +34,8 @@ bool CoreSvgEngine::loadSvgFile(const std::string& filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
         qCWarning(coreSvgEngineLog) << "Failed to open file:" << QString::fromStdString(filePath);
-        std::cerr << "Error: Could not open file " << filePath << std::endl;
         return false;
-    }    
+    }
     std::stringstream buffer;
     buffer << file.rdbuf();
     file.close();
@@ -58,7 +57,6 @@ bool CoreSvgEngine::saveSvgFile(const std::string& filePath) const {
     std::ofstream file(filePath);
     if (!file.is_open()) {
         qCWarning(coreSvgEngineLog) << "Failed to open file for writing:" << QString::fromStdString(filePath);
-        std::cerr << "Error: Could not open file for writing " << filePath << std::endl;
         return false;
     }
     file << m_document->generateSvgContent();

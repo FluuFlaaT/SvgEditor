@@ -10,7 +10,7 @@
 #include <QButtonGroup>
 #include <QLoggingCategory>
 #include <QMap>
-#include "shapetoolbar.h"
+#include "Core/ShapeType.h"
 
 Q_DECLARE_LOGGING_CATEGORY(leftSideBarLog)
 
@@ -108,5 +108,7 @@ private:
     ButtonTipManager* m_tipManager;
     QMap<QPushButton*, QString> m_buttonIdMap; // Maps buttons to their API IDs
 };
+
+
 
 

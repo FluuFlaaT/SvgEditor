@@ -27,12 +27,10 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <cmath>
-#include "shapetoolbar.h"
+#include "Core/ShapeType.h"
 #include "editabletextitem.h"
 #include "../Commands/CommandManager.h"
-
-// 前向声明CoreSvgEngine类
-class CoreSvgEngine;
+#include "../CoreSvgEngine/coresvgengine.h"
 
 Q_DECLARE_LOGGING_CATEGORY(canvasAreaLog)
 
@@ -143,5 +141,7 @@ private:
     EditableTextItem* createText(const QPointF& position, const QString& text = "");
     EditableTextItem* createTextBox(const QRectF& textRect);
 };
+
+
 
 

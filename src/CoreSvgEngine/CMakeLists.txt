@@ -12,6 +12,7 @@ find_package(tinyxml2 CONFIG REQUIRED)
 
 target_include_directories(${TARGET_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/src
 )
 
 target_compile_definitions(${TARGET_NAME} PRIVATE
@@ -32,6 +33,8 @@ set_target_properties(${TARGET_NAME} PROPERTIES
     CXX_STANDARD_REQUIRED ON
     WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
+
+
 
 
 

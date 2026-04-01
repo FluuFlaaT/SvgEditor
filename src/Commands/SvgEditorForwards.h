@@ -1,11 +1,11 @@
 ﻿#pragma once
 #include <QObject>
+#include "Core/ShapeType.h"
 
 // Forward declarations for SvgEditor classes
 class CanvasArea;
 
-// Include ShapeType enum from ShapeToolBar
-#include "SvgEditor/shapetoolbar.h"
+
 
 
 

@@ -18,7 +18,7 @@
 #include <QCheckBox>
 #include <QGraphicsSimpleTextItem>
 #include "editabletextitem.h"
-#include "shapetoolbar.h" // Contains ShapeType definitions
+#include "Core/ShapeType.h"
 
 Q_DECLARE_LOGGING_CATEGORY(rightAttrBarLog)
 class RightAttrBar : public QWidget
@@ -118,5 +118,7 @@ private:
     QWidget* createLineAttributesWidget();
     QWidget* createTextAttributesWidget();
 };
+
+
 
 
