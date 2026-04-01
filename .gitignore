@@ -1,3 +1,2 @@
 docs/
-convert_to_utf8_bom.ps1
-convert_to_utf8.ps1
+build/
