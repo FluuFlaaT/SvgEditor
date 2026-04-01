@@ -40,6 +40,35 @@ RightAttrBar::~RightAttrBar()
     // Qt handles widget cleanup automatically through parent-child relationships
 }
 
+void RightAttrBar::setButtonColor(QPushButton* button, const QColor& color)
+{
+    if (button) {
+        button->setStyleSheet(QString("background-color: %1").arg(color.name()));
+    }
+}
+
+void RightAttrBar::blockTextWidgetSignals(bool block)
+{
+    m_textContentEdit->blockSignals(block);
+    m_fontFamilyComboBox->blockSignals(block);
+    m_fontSizeSpinBox->blockSignals(block);
+    m_boldCheckBox->blockSignals(block);
+    m_italicCheckBox->blockSignals(block);
+    m_textAlignComboBox->blockSignals(block);
+}
+
+Qt::PenStyle RightAttrBar::indexToPenStyle(int index)
+{
+    switch (index) {
+        case 0: return Qt::SolidLine;
+        case 1: return Qt::DashLine;
+        case 2: return Qt::DotLine;
+        case 3: return Qt::DashDotLine;
+        case 4: return Qt::DashDotDotLine;
+        default: return Qt::SolidLine;
+    }
+}
+
 void RightAttrBar::setCurrentWidget(int widgetType)
 {
     if (widgetType >= 0 && widgetType < m_stackedWidget->count()) {
@@ -74,8 +103,7 @@ void RightAttrBar::updateCanvasColor(const QColor& color)
         // Avoid redundant updates that cause unnecessary repaints
         if (m_canvasColor != color) {
             m_canvasColor = color;
-            QString qss = QString("background-color: %1").arg(color.name());
-            m_canvasColorButton->setStyleSheet(qss);
+            setButtonColor(m_canvasColorButton, color);
             qCDebug(rightAttrBarLog) << "Canvas color updated to:" << color.name()
                                     << "RGBA:" << color.red() << color.green() << color.blue() << color.alpha();
         }
@@ -96,15 +124,7 @@ Qt::PenStyle RightAttrBar::getBorderStyle() const
         return Qt::SolidLine;
     }
 
-    int index = m_borderStyleComboBox->currentIndex();
-    switch (index) {
-        case 0: return Qt::SolidLine;
-        case 1: return Qt::DashLine;
-        case 2: return Qt::DotLine;
-        case 3: return Qt::DashDotLine;
-        case 4: return Qt::DashDotDotLine;
-        default: return Qt::SolidLine;
-    }
+    return indexToPenStyle(m_borderStyleComboBox->currentIndex());
 }
 
 void RightAttrBar::updateForSelectedItem(QGraphicsItem* item, ShapeType type)
@@ -181,12 +201,7 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
             m_fontSizeSpinBox && m_boldCheckBox && m_italicCheckBox && m_textAlignComboBox) {
 
             // Prevent cascading events during bulk property updates
-            m_textContentEdit->blockSignals(true);
-            m_fontFamilyComboBox->blockSignals(true);
-            m_fontSizeSpinBox->blockSignals(true);
-            m_boldCheckBox->blockSignals(true);
-            m_italicCheckBox->blockSignals(true);
-            m_textAlignComboBox->blockSignals(true);
+            blockTextWidgetSignals(true);
 
             m_textContentEdit->setText(textItem->toPlainString());
 
@@ -212,15 +227,9 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
             m_textAlignComboBox->setCurrentIndex(alignmentIndex);
 
             m_textColor = textItem->defaultTextColor();
-            QString qss = QString("background-color: %1").arg(m_textColor.name());
-            m_textColorButton->setStyleSheet(qss);
+            setButtonColor(m_textColorButton, m_textColor);
 
-            m_textContentEdit->blockSignals(false);
-            m_fontFamilyComboBox->blockSignals(false);
-            m_fontSizeSpinBox->blockSignals(false);
-            m_boldCheckBox->blockSignals(false);
-            m_italicCheckBox->blockSignals(false);
-            m_textAlignComboBox->blockSignals(false);
+            blockTextWidgetSignals(false);
 
             qCDebug(rightAttrBarLog) << "Updated editable text properties: content=" << textItem->toPlainString()
                                    << ", font=" << font.family()
@@ -238,12 +247,7 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
             m_fontSizeSpinBox && m_boldCheckBox && m_italicCheckBox && m_textAlignComboBox) {
 
             // Prevent cascading events during bulk property updates
-            m_textContentEdit->blockSignals(true);
-            m_fontFamilyComboBox->blockSignals(true);
-            m_fontSizeSpinBox->blockSignals(true);
-            m_boldCheckBox->blockSignals(true);
-            m_italicCheckBox->blockSignals(true);
-            m_textAlignComboBox->blockSignals(true);
+            blockTextWidgetSignals(true);
 
             m_textContentEdit->setText(textItem->text());
 
@@ -260,15 +264,9 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
             m_italicCheckBox->setChecked(font.italic());
 
             m_textColor = textItem->brush().color();
-            QString qss = QString("background-color: %1").arg(m_textColor.name());
-            m_textColorButton->setStyleSheet(qss);
+            setButtonColor(m_textColorButton, m_textColor);
 
-            m_textContentEdit->blockSignals(false);
-            m_fontFamilyComboBox->blockSignals(false);
-            m_fontSizeSpinBox->blockSignals(false);
-            m_boldCheckBox->blockSignals(false);
-            m_italicCheckBox->blockSignals(false);
-            m_textAlignComboBox->blockSignals(false);
+            blockTextWidgetSignals(false);
 
             qCDebug(rightAttrBarLog) << "Updated simple text properties: content=" << textItem->text()
                                    << ", font=" << font.family()
@@ -308,14 +306,12 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
 
     m_borderColor = pen.color();
     if (m_borderColorButton) {
-        QString qss = QString("background-color: %1").arg(m_borderColor.name());
-        m_borderColorButton->setStyleSheet(qss);
+        setButtonColor(m_borderColorButton, m_borderColor);
     }
 
     m_fillColor = brush.color();
     if (m_fillColorButton) {
-        QString qss = QString("background-color: %1").arg(m_fillColor.name());
-        m_fillColorButton->setStyleSheet(qss);
+        setButtonColor(m_fillColorButton, m_fillColor);
     }
 
     qCDebug(rightAttrBarLog) << "Updated shape properties: border width=" << pen.width()
@@ -368,16 +364,14 @@ QWidget* RightAttrBar::createCommonAttributesWidget() {
     QLabel* colorLabel = new QLabel(tr("Canvas Color:"));
     m_canvasColorButton = new QPushButton();
     m_canvasColorButton->setFixedSize(30, 30);
-    QString qss = QString("background-color: %1").arg(m_canvasColor.name());
-    m_canvasColorButton->setStyleSheet(qss);
+    setButtonColor(m_canvasColorButton, m_canvasColor);
 
     // Lambda captures this to ensure proper signal emission in Qt's event system
     connect(m_canvasColorButton, &QPushButton::clicked, this, [this]() {
         QColor color = QColorDialog::getColor(m_canvasColor, this, tr("Select Canvas Color"));
         if (color.isValid()) {
             m_canvasColor = color;
-            QString qss = QString("background-color: %1").arg(color.name());
-            m_canvasColorButton->setStyleSheet(qss);
+            setButtonColor(m_canvasColorButton, color);
 
             emit canvasColorChanged(color);
         }
@@ -404,105 +398,7 @@ QWidget* RightAttrBar::createCommonAttributesWidget() {
     return widget;
 }
 
-QWidget* RightAttrBar::createCircleAttributesWidget() {
-    QWidget* widget = new QWidget();
-    QVBoxLayout* layout = new QVBoxLayout(widget);
-    layout->setContentsMargins(5, 10, 5, 10);
-    layout->setSpacing(10);
-
-    QHBoxLayout* borderWidthLayout = new QHBoxLayout();
-    QLabel* borderWidthLabel = new QLabel(tr("Border Width:"));
-    m_borderWidthSpinBox = new QSpinBox();
-    m_borderWidthSpinBox->setRange(0, 9);
-    m_borderWidthSpinBox->setValue(1);
-    m_borderWidthSpinBox->setSuffix(" px");
-
-    connect(m_borderWidthSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int width) {
-        emit borderWidthChanged(width);
-        qCDebug(rightAttrBarLog) << "Border width changed to:" << width;
-    });
-
-    borderWidthLayout->addWidget(borderWidthLabel);
-    borderWidthLayout->addWidget(m_borderWidthSpinBox);
-
-    QHBoxLayout* borderStyleLayout = new QHBoxLayout();
-    QLabel* borderStyleLabel = new QLabel(tr("Border Style:"));
-    m_borderStyleComboBox = new QComboBox();
-    m_borderStyleComboBox->addItem(tr("Solid Line"), static_cast<int>(Qt::SolidLine));
-    m_borderStyleComboBox->addItem(tr("Dash Line"), static_cast<int>(Qt::DashLine));
-    m_borderStyleComboBox->addItem(tr("Dot Line"), static_cast<int>(Qt::DotLine));
-    m_borderStyleComboBox->addItem(tr("Dash Dot Line"), static_cast<int>(Qt::DashDotLine));
-    m_borderStyleComboBox->addItem(tr("Dash Dot Dot Line"), static_cast<int>(Qt::DashDotDotLine));
-
-    connect(m_borderStyleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
-        Qt::PenStyle style = Qt::SolidLine;
-        switch (index) {
-            case 0: style = Qt::SolidLine; break;
-            case 1: style = Qt::DashLine; break;
-            case 2: style = Qt::DotLine; break;
-            case 3: style = Qt::DashDotLine; break;
-            case 4: style = Qt::DashDotDotLine; break;
-            default: style = Qt::SolidLine; break;
-        }
-        emit borderStyleChanged(style);
-        qCDebug(rightAttrBarLog) << "Border style changed to index:" << index;
-    });
-
-    borderStyleLayout->addWidget(borderStyleLabel);
-    borderStyleLayout->addWidget(m_borderStyleComboBox);
-
-    QHBoxLayout* borderColorLayout = new QHBoxLayout();
-    QLabel* borderColorLabel = new QLabel(tr("Border Color:"));
-    m_borderColorButton = new QPushButton();
-    m_borderColorButton->setFixedSize(30, 30);
-    QString borderQss = QString("background-color: %1").arg(m_borderColor.name());
-    m_borderColorButton->setStyleSheet(borderQss);
-
-    connect(m_borderColorButton, &QPushButton::clicked, this, [this]() {
-        QColor color = QColorDialog::getColor(m_borderColor, this, tr("Select Border Color"));
-        if (color.isValid()) {
-            m_borderColor = color;
-            QString qss = QString("background-color: %1").arg(color.name());
-            m_borderColorButton->setStyleSheet(qss);
-            emit borderColorChanged(color);
-            qCDebug(rightAttrBarLog) << "Border color changed to:" << color.name();
-        }
-    });
-
-    borderColorLayout->addWidget(borderColorLabel);
-    borderColorLayout->addWidget(m_borderColorButton);
-
-    QHBoxLayout* fillColorLayout = new QHBoxLayout();
-    QLabel* fillColorLabel = new QLabel(tr("Fill Color:"));
-    m_fillColorButton = new QPushButton();
-    m_fillColorButton->setFixedSize(30, 30);
-    QString fillQss = QString("background-color: %1").arg(m_fillColor.name());
-    m_fillColorButton->setStyleSheet(fillQss);
-
-    connect(m_fillColorButton, &QPushButton::clicked, this, [this]() {
-        QColor color = QColorDialog::getColor(m_fillColor, this, tr("Select Fill Color"));
-        if (color.isValid()) {
-            m_fillColor = color;
-            QString qss = QString("background-color: %1").arg(color.name());
-            m_fillColorButton->setStyleSheet(qss);
-            emit fillColorChanged(color);
-            qCDebug(rightAttrBarLog) << "Fill color changed to:" << color.name();
-        }
-    });
-
-    fillColorLayout->addWidget(fillColorLabel);
-    fillColorLayout->addWidget(m_fillColorButton);
-
-    layout->addLayout(borderWidthLayout);
-    layout->addLayout(borderStyleLayout);
-    layout->addLayout(borderColorLayout);
-    layout->addLayout(fillColorLayout);
-    layout->addStretch();
-
-    return widget;
-}
-
-QWidget* RightAttrBar::createRectangleAttributesWidget()
+QWidget* RightAttrBar::createFilledShapeAttributesWidget()
 {
     QWidget* widget = new QWidget();
     QVBoxLayout* layout = new QVBoxLayout(widget);
@@ -534,16 +430,7 @@ QWidget* RightAttrBar::createRectangleAttributesWidget()
     m_borderStyleComboBox->addItem(tr("Dash Dot Dot Line"), static_cast<int>(Qt::DashDotDotLine));
 
     connect(m_borderStyleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
-        Qt::PenStyle style = Qt::SolidLine;
-        switch (index) {
-            case 0: style = Qt::SolidLine; break;
-            case 1: style = Qt::DashLine; break;
-            case 2: style = Qt::DotLine; break;
-            case 3: style = Qt::DashDotLine; break;
-            case 4: style = Qt::DashDotDotLine; break;
-            default: style = Qt::SolidLine; break;
-        }
-        emit borderStyleChanged(style);
+        emit borderStyleChanged(indexToPenStyle(index));
         qCDebug(rightAttrBarLog) << "Border style changed to index:" << index;
     });
 
@@ -554,15 +441,13 @@ QWidget* RightAttrBar::createRectangleAttributesWidget()
     QLabel* borderColorLabel = new QLabel(tr("Border Color:"));
     m_borderColorButton = new QPushButton();
     m_borderColorButton->setFixedSize(30, 30);
-    QString borderQss = QString("background-color: %1").arg(m_borderColor.name());
-    m_borderColorButton->setStyleSheet(borderQss);
+    setButtonColor(m_borderColorButton, m_borderColor);
 
     connect(m_borderColorButton, &QPushButton::clicked, this, [this]() {
         QColor color = QColorDialog::getColor(m_borderColor, this, tr("Select Border Color"));
         if (color.isValid()) {
             m_borderColor = color;
-            QString qss = QString("background-color: %1").arg(color.name());
-            m_borderColorButton->setStyleSheet(qss);
+            setButtonColor(m_borderColorButton, color);
             emit borderColorChanged(color);
             qCDebug(rightAttrBarLog) << "Border color changed to:" << color.name();
         }
@@ -575,15 +460,13 @@ QWidget* RightAttrBar::createRectangleAttributesWidget()
     QLabel* fillColorLabel = new QLabel(tr("Fill Color:"));
     m_fillColorButton = new QPushButton();
     m_fillColorButton->setFixedSize(30, 30);
-    QString fillQss = QString("background-color: %1").arg(m_fillColor.name());
-    m_fillColorButton->setStyleSheet(fillQss);
+    setButtonColor(m_fillColorButton, m_fillColor);
 
     connect(m_fillColorButton, &QPushButton::clicked, this, [this]() {
         QColor color = QColorDialog::getColor(m_fillColor, this, tr("Select Fill Color"));
         if (color.isValid()) {
             m_fillColor = color;
-            QString qss = QString("background-color: %1").arg(color.name());
-            m_fillColorButton->setStyleSheet(qss);
+            setButtonColor(m_fillColorButton, color);
             emit fillColorChanged(color);
             qCDebug(rightAttrBarLog) << "Fill color changed to:" << color.name();
         }
@@ -599,6 +482,15 @@ QWidget* RightAttrBar::createRectangleAttributesWidget()
     layout->addStretch();
 
     return widget;
+}
+
+QWidget* RightAttrBar::createCircleAttributesWidget() {
+    return createFilledShapeAttributesWidget();
+}
+
+QWidget* RightAttrBar::createRectangleAttributesWidget()
+{
+    return createFilledShapeAttributesWidget();
 }
 
 QWidget* RightAttrBar::createLineAttributesWidget()
@@ -633,16 +525,7 @@ QWidget* RightAttrBar::createLineAttributesWidget()
     m_borderStyleComboBox->addItem(tr("Dash Dot Dot Line"), static_cast<int>(Qt::DashDotDotLine));
 
     connect(m_borderStyleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
-        Qt::PenStyle style = Qt::SolidLine;
-        switch (index) {
-            case 0: style = Qt::SolidLine; break;
-            case 1: style = Qt::DashLine; break;
-            case 2: style = Qt::DotLine; break;
-            case 3: style = Qt::DashDotLine; break;
-            case 4: style = Qt::DashDotDotLine; break;
-            default: style = Qt::SolidLine; break;
-        }
-        emit borderStyleChanged(style);
+        emit borderStyleChanged(indexToPenStyle(index));
         qCDebug(rightAttrBarLog) << "Line style changed to index:" << index;
     });
 
@@ -653,15 +536,13 @@ QWidget* RightAttrBar::createLineAttributesWidget()
     QLabel* borderColorLabel = new QLabel(tr("Line Color:"));
     m_borderColorButton = new QPushButton();
     m_borderColorButton->setFixedSize(30, 30);
-    QString borderQss = QString("background-color: %1").arg(m_borderColor.name());
-    m_borderColorButton->setStyleSheet(borderQss);
+    setButtonColor(m_borderColorButton, m_borderColor);
 
     connect(m_borderColorButton, &QPushButton::clicked, this, [this]() {
         QColor color = QColorDialog::getColor(m_borderColor, this, tr("Select Line Color"));
         if (color.isValid()) {
             m_borderColor = color;
-            QString qss = QString("background-color: %1").arg(color.name());
-            m_borderColorButton->setStyleSheet(qss);
+            setButtonColor(m_borderColorButton, color);
             emit borderColorChanged(color);
             qCDebug(rightAttrBarLog) << "Line color changed to:" << color.name();
         }
@@ -743,8 +624,7 @@ QWidget* RightAttrBar::createTextAttributesWidget()
     m_textColorButton = new QPushButton();
     m_textColorButton->setFixedWidth(50);
     m_textColor = Qt::black; // Black provides maximum contrast and readability
-    QString qss = QString("background-color: %1").arg(m_textColor.name());
-    m_textColorButton->setStyleSheet(qss);
+    setButtonColor(m_textColorButton, m_textColor);
 
     textColorLayout->addWidget(textColorLabel);
     textColorLayout->addWidget(m_textColorButton);
@@ -784,8 +664,7 @@ QWidget* RightAttrBar::createTextAttributesWidget()
         QColor color = QColorDialog::getColor(m_textColor, this, tr("Select Text Color"));
         if (color.isValid()) {
             m_textColor = color;
-            QString qss = QString("background-color: %1").arg(color.name());
-            m_textColorButton->setStyleSheet(qss);
+            setButtonColor(m_textColorButton, color);
             emit textColorChanged(color);
             qCDebug(rightAttrBarLog) << "Text color changed to:" << color.name();
         }
