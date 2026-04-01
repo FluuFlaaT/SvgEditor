@@ -1,4 +1,4 @@
-﻿set(TARGET_NAME SvgEditor)
+set(TARGET_NAME SvgEditor)
 
 # Translation files
 set(TS_FILES
@@ -15,6 +15,7 @@ set(SOURCES
     ShapeToolBar.cpp
     EditableTextItem.cpp
     CustomTooltip.cpp
+    QGraphicsItemAdapter.cpp
 )
 
 set(HEADERS
@@ -25,6 +26,7 @@ set(HEADERS
     shapetoolbar.h
     editabletextitem.h
     CustomTooltip.h
+    QGraphicsItemAdapter.h
 )
 
 # Generate translation files (.ts -> .qm)
@@ -63,6 +65,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     Qt5::Xml
     Qt5::Network
     CoreSvgEngine
+    SvgText
     Commands
     ConfigManager
     ConfigDialog

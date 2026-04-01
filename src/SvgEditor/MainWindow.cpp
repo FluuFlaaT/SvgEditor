@@ -1,4 +1,5 @@
-﻿#include "mainwindow.h"
+#include "mainwindow.h"
+#include "QGraphicsItemAdapter.h"
 #include <QApplication>
 #include <QMessageBox>
 #include <QSplitter>
@@ -920,429 +921,226 @@ bool MainWindow::maybeSave()
 void MainWindow::updateSelectedItemBorderColor(const QColor& color)
 {
     QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
-    if (!selectedItem) {
-        qCWarning(mainWindowLog) << "No item selected for border color update";
-        return;
-    }
+    if (!selectedItem) { qCWarning(mainWindowLog) << "No item selected for border color update"; return; }
 
-    QPen pen;
+    QGraphicsItemAdapter a(selectedItem);
+    if (a.hasStroke()) a.setStrokeColor(color);
 
-    // Get the current pen from the item
-    if (auto lineItem = dynamic_cast<QGraphicsLineItem*>(selectedItem)) {
-        pen = lineItem->pen();
-        pen.setColor(color);
-        lineItem->setPen(pen);
-    } else if (auto rectItem = dynamic_cast<QGraphicsRectItem*>(selectedItem)) {
-        pen = rectItem->pen();
-        pen.setColor(color);
-        rectItem->setPen(pen);
-    } else if (auto ellipseItem = dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
-        pen = ellipseItem->pen();
-        pen.setColor(color);
-        ellipseItem->setPen(pen);
-    } else if (auto polygonItem = dynamic_cast<QGraphicsPolygonItem*>(selectedItem)) {
-        pen = polygonItem->pen();
-        pen.setColor(color);
-        polygonItem->setPen(pen);
-    } else if (auto pathItem = dynamic_cast<QGraphicsPathItem*>(selectedItem)) {
-        pen = pathItem->pen();
-        pen.setColor(color);
-        pathItem->setPen(pen);
-    }
-
-    // Synchronize changes to SVG document
     syncItemToSvgDocument(selectedItem);
-
-    // Mark document as modified
     m_documentModified = true;
     updateTitle();
-
     qCDebug(mainWindowLog) << "Updated selected item border color to:" << color.name();
 }
 
 void MainWindow::updateSelectedItemFillColor(const QColor& color)
 {
     QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
-    if (!selectedItem) {
-        qCWarning(mainWindowLog) << "No item selected for fill color update";
-        return;
-    }
+    if (!selectedItem) { qCWarning(mainWindowLog) << "No item selected for fill color update"; return; }
 
-    QBrush brush(color);
+    QGraphicsItemAdapter a(selectedItem);
+    if (a.hasFill()) a.setFillColor(color);
 
-    // Apply the brush to the item
-    if (auto rectItem = dynamic_cast<QGraphicsRectItem*>(selectedItem)) {
-        rectItem->setBrush(brush);
-    } else if (auto ellipseItem = dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
-        ellipseItem->setBrush(brush);
-    } else if (auto polygonItem = dynamic_cast<QGraphicsPolygonItem*>(selectedItem)) {
-        polygonItem->setBrush(brush);
-    } else if (auto pathItem = dynamic_cast<QGraphicsPathItem*>(selectedItem)) {
-        pathItem->setBrush(brush);
-    }
-
-    // Synchronize changes to SVG document
     syncItemToSvgDocument(selectedItem);
-
-    // Mark document as modified
     m_documentModified = true;
     updateTitle();
-
     qCDebug(mainWindowLog) << "Updated selected item fill color to:" << color.name();
 }
 
 void MainWindow::updateSelectedItemBorderWidth(int width)
 {
     QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
-    if (!selectedItem) {
-        qCWarning(mainWindowLog) << "No item selected for border width update";
-        return;
-    }
+    if (!selectedItem) { qCWarning(mainWindowLog) << "No item selected for border width update"; return; }
 
-    QPen pen;
+    QGraphicsItemAdapter a(selectedItem);
+    if (a.hasStroke()) a.setStrokeWidth(width);
 
-    // Get the current pen from the item and update its width
-    if (auto lineItem = dynamic_cast<QGraphicsLineItem*>(selectedItem)) {
-        pen = lineItem->pen();
-        pen.setWidth(width);
-        lineItem->setPen(pen);
-    } else if (auto rectItem = dynamic_cast<QGraphicsRectItem*>(selectedItem)) {
-        pen = rectItem->pen();
-        pen.setWidth(width);
-        rectItem->setPen(pen);
-    } else if (auto ellipseItem = dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
-        pen = ellipseItem->pen();
-        pen.setWidth(width);
-        ellipseItem->setPen(pen);
-    } else if (auto polygonItem = dynamic_cast<QGraphicsPolygonItem*>(selectedItem)) {
-        pen = polygonItem->pen();
-        pen.setWidth(width);
-        polygonItem->setPen(pen);
-    } else if (auto pathItem = dynamic_cast<QGraphicsPathItem*>(selectedItem)) {
-        pen = pathItem->pen();
-        pen.setWidth(width);
-        pathItem->setPen(pen);
-    }
-
-    // Synchronize changes to SVG document
     syncItemToSvgDocument(selectedItem);
-
-    // Mark document as modified
     m_documentModified = true;
     updateTitle();
-
     qCDebug(mainWindowLog) << "Updated selected item border width to:" << width;
 }
 
 void MainWindow::updateSelectedItemBorderStyle(Qt::PenStyle style)
 {
     QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
-    if (!selectedItem) {
-        qCWarning(mainWindowLog) << "No item selected for border style update";
-        return;
-    }
+    if (!selectedItem) { qCWarning(mainWindowLog) << "No item selected for border style update"; return; }
 
-    QPen pen;
+    QGraphicsItemAdapter a(selectedItem);
+    if (a.hasStroke()) a.setStrokeStyle(style);
 
-    // Get the current pen from the item and update its style
-    if (auto lineItem = dynamic_cast<QGraphicsLineItem*>(selectedItem)) {
-        pen = lineItem->pen();
-        pen.setStyle(style);
-        lineItem->setPen(pen);
-    } else if (auto rectItem = dynamic_cast<QGraphicsRectItem*>(selectedItem)) {
-        pen = rectItem->pen();
-        pen.setStyle(style);
-        rectItem->setPen(pen);
-    } else if (auto ellipseItem = dynamic_cast<QGraphicsEllipseItem*>(selectedItem)) {
-        pen = ellipseItem->pen();
-        pen.setStyle(style);
-        ellipseItem->setPen(pen);
-    } else if (auto polygonItem = dynamic_cast<QGraphicsPolygonItem*>(selectedItem)) {
-        pen = polygonItem->pen();
-        pen.setStyle(style);
-        polygonItem->setPen(pen);
-    } else if (auto pathItem = dynamic_cast<QGraphicsPathItem*>(selectedItem)) {
-        pen = pathItem->pen();
-        pen.setStyle(style);
-        pathItem->setPen(pen);
-    }
-
-    // Synchronize changes to SVG document
     syncItemToSvgDocument(selectedItem);
-
-    // Mark document as modified
     m_documentModified = true;
     updateTitle();
-
     qCDebug(mainWindowLog) << "Updated selected item border style to:" << static_cast<int>(style);
 }
 
 void MainWindow::updateSelectedItemTextContent(const QString& text)
 {
     QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
-    if (!selectedItem) {
-        qCWarning(mainWindowLog) << "No item selected for text content update";
-        return;
-    }
+    if (!selectedItem) { qCWarning(mainWindowLog) << "No item selected for text content update"; return; }
 
-    if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
-        // For our new EditableTextItem
-        QString oldText = textItem->toPlainString();
-        if (oldText != text) {
-            // Create and execute the command
-            auto command = std::make_unique<ModifyTextCommand>(textItem, oldText, text);
-            CommandManager::instance()->executeCommand(std::move(command));
-            
-            // Synchronize changes to SVG document
-            syncItemToSvgDocument(selectedItem);
-            m_documentModified = true;
-            updateTitle();
-            qCDebug(mainWindowLog) << "Updated editable text content to:" << text;
-        }
+    QGraphicsItemAdapter a(selectedItem);
+    if (!a.hasText()) return;
+
+    QString oldText = a.textContent();
+    if (oldText == text) return;
+
+    if (auto et = qgraphicsitem_cast<EditableTextItem*>(selectedItem)) {
+        auto command = std::make_unique<ModifyTextCommand>(et, oldText, text);
+        CommandManager::instance()->executeCommand(std::move(command));
+    } else {
+        a.setTextContent(text);
     }
-    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
-        // For backward compatibility
-        QString oldText = textItem->text();
-        if (oldText != text) {
-            textItem->setText(text);
-            // Synchronize changes to SVG document
-            syncItemToSvgDocument(selectedItem);
-            m_documentModified = true;
-            updateTitle();
-            qCDebug(mainWindowLog) << "Updated simple text content to:" << text;
-        }
-    }
+    syncItemToSvgDocument(selectedItem);
+    m_documentModified = true;
+    updateTitle();
+    qCDebug(mainWindowLog) << "Updated text content to:" << text;
 }
 
 void MainWindow::updateSelectedItemFontFamily(const QString& family)
 {
     QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
-    if (!selectedItem) {
-        qCWarning(mainWindowLog) << "No item selected for font family update";
-        return;
-    }
+    if (!selectedItem) { qCWarning(mainWindowLog) << "No item selected for font family update"; return; }
 
-    if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
-        // For our new EditableTextItem
-        QString oldFamily = textItem->font().family();
-        if (oldFamily != family) {
-            // Create and execute the command
-            auto command = std::make_unique<ModifyTextCommand>(textItem, oldFamily, family, TextModificationType::FontFamily);
-            CommandManager::instance()->executeCommand(std::move(command));
-            
-            // Synchronize changes to SVG document
-            syncItemToSvgDocument(selectedItem);
-            m_documentModified = true;
-            updateTitle();
-            qCDebug(mainWindowLog) << "Updated editable text font family to:" << family;
-        }
+    QGraphicsItemAdapter a(selectedItem);
+    if (!a.hasText()) return;
+
+    QString oldFamily = a.textFont().family();
+    if (oldFamily == family) return;
+
+    if (auto et = qgraphicsitem_cast<EditableTextItem*>(selectedItem)) {
+        auto command = std::make_unique<ModifyTextCommand>(et, oldFamily, family, TextModificationType::FontFamily);
+        CommandManager::instance()->executeCommand(std::move(command));
+    } else {
+        QFont font = a.textFont();
+        font.setFamily(family);
+        a.setTextFont(font);
     }
-    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
-        // For backward compatibility
-        QFont font = textItem->font();
-        QString oldFamily = font.family();
-        if (oldFamily != family) {
-            font.setFamily(family);
-            textItem->setFont(font);
-            // Synchronize changes to SVG document
-            syncItemToSvgDocument(selectedItem);
-            m_documentModified = true;
-            updateTitle();
-            qCDebug(mainWindowLog) << "Updated simple text font family to:" << family;
-        }
-    }
+    syncItemToSvgDocument(selectedItem);
+    m_documentModified = true;
+    updateTitle();
+    qCDebug(mainWindowLog) << "Updated font family to:" << family;
 }
 
 void MainWindow::updateSelectedItemFontSize(int size)
 {
     QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
-    if (!selectedItem) {
-        qCWarning(mainWindowLog) << "No item selected for font size update";
-        return;
-    }
+    if (!selectedItem) { qCWarning(mainWindowLog) << "No item selected for font size update"; return; }
 
-    if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
-        // For our new EditableTextItem
-        int oldSize = textItem->font().pointSize();
-        if (oldSize != size) {
-            // Create and execute the command
-            auto command = std::make_unique<ModifyTextCommand>(textItem, oldSize, size);
-            CommandManager::instance()->executeCommand(std::move(command));
-            
-            // Synchronize changes to SVG document
-            syncItemToSvgDocument(selectedItem);
-            m_documentModified = true;
-            updateTitle();
-            qCDebug(mainWindowLog) << "Updated editable text font size to:" << size;
-        }
+    QGraphicsItemAdapter a(selectedItem);
+    if (!a.hasText()) return;
+
+    int oldSize = a.textFont().pointSize();
+    if (oldSize == size) return;
+
+    if (auto et = qgraphicsitem_cast<EditableTextItem*>(selectedItem)) {
+        auto command = std::make_unique<ModifyTextCommand>(et, oldSize, size);
+        CommandManager::instance()->executeCommand(std::move(command));
+    } else {
+        QFont font = a.textFont();
+        font.setPointSize(size);
+        a.setTextFont(font);
     }
-    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
-        // For backward compatibility
-        QFont font = textItem->font();
-        int oldSize = font.pointSize();
-        if (oldSize != size) {
-            font.setPointSize(size);
-            textItem->setFont(font);
-            // Synchronize changes to SVG document
-            syncItemToSvgDocument(selectedItem);
-            m_documentModified = true;
-            updateTitle();
-            qCDebug(mainWindowLog) << "Updated simple text font size to:" << size;
-        }
-    }
+    syncItemToSvgDocument(selectedItem);
+    m_documentModified = true;
+    updateTitle();
+    qCDebug(mainWindowLog) << "Updated font size to:" << size;
 }
 
 void MainWindow::updateSelectedItemFontBold(bool bold)
 {
     QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
-    if (!selectedItem) {
-        qCWarning(mainWindowLog) << "No item selected for font bold update";
-        return;
-    }
+    if (!selectedItem) { qCWarning(mainWindowLog) << "No item selected for font bold update"; return; }
 
-    if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
-        // For our new EditableTextItem
-        bool oldBold = textItem->isBold();
-        if (oldBold != bold) {
-            // Create and execute the command
-            auto command = std::make_unique<ModifyTextCommand>(textItem, oldBold, bold, TextModificationType::FontBold);
-            CommandManager::instance()->executeCommand(std::move(command));
-            
-            // Synchronize changes to SVG document
-            syncItemToSvgDocument(selectedItem);
-            m_documentModified = true;
-            updateTitle();
-            qCDebug(mainWindowLog) << "Updated editable text font bold to:" << (bold ? "true" : "false");
-        }
+    QGraphicsItemAdapter a(selectedItem);
+    if (!a.hasText()) return;
+
+    if (a.isBold() == bold) return;
+
+    if (auto et = qgraphicsitem_cast<EditableTextItem*>(selectedItem)) {
+        auto command = std::make_unique<ModifyTextCommand>(et, !bold, bold, TextModificationType::FontBold);
+        CommandManager::instance()->executeCommand(std::move(command));
+    } else {
+        a.setBold(bold);
     }
-    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
-        // For backward compatibility
-        QFont font = textItem->font();
-        bool oldBold = font.bold();
-        if (oldBold != bold) {
-            font.setBold(bold);
-            textItem->setFont(font);
-            // Synchronize changes to SVG document
-            syncItemToSvgDocument(selectedItem);
-            m_documentModified = true;
-            updateTitle();
-            qCDebug(mainWindowLog) << "Updated simple text font bold to:" << (bold ? "true" : "false");
-        }
-    }
+    syncItemToSvgDocument(selectedItem);
+    m_documentModified = true;
+    updateTitle();
+    qCDebug(mainWindowLog) << "Updated font bold to:" << (bold ? "true" : "false");
 }
 
 void MainWindow::updateSelectedItemFontItalic(bool italic)
 {
     QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
-    if (!selectedItem) {
-        qCWarning(mainWindowLog) << "No item selected for font italic update";
-        return;
-    }
+    if (!selectedItem) { qCWarning(mainWindowLog) << "No item selected for font italic update"; return; }
 
-    if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
-        // For our new EditableTextItem
-        bool oldItalic = textItem->isItalic();
-        if (oldItalic != italic) {
-            // Create and execute the command
-            auto command = std::make_unique<ModifyTextCommand>(textItem, oldItalic, italic, TextModificationType::FontItalic);
-            CommandManager::instance()->executeCommand(std::move(command));
-            
-            // Synchronize changes to SVG document
-            syncItemToSvgDocument(selectedItem);
-            m_documentModified = true;
-            updateTitle();
-            qCDebug(mainWindowLog) << "Updated editable text font italic to:" << (italic ? "true" : "false");
-        }
+    QGraphicsItemAdapter a(selectedItem);
+    if (!a.hasText()) return;
+
+    if (a.isItalic() == italic) return;
+
+    if (auto et = qgraphicsitem_cast<EditableTextItem*>(selectedItem)) {
+        auto command = std::make_unique<ModifyTextCommand>(et, !italic, italic, TextModificationType::FontItalic);
+        CommandManager::instance()->executeCommand(std::move(command));
+    } else {
+        a.setItalic(italic);
     }
-    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
-        // For backward compatibility
-        QFont font = textItem->font();
-        bool oldItalic = font.italic();
-        if (oldItalic != italic) {
-            font.setItalic(italic);
-            textItem->setFont(font);
-            // Synchronize changes to SVG document
-            syncItemToSvgDocument(selectedItem);
-            m_documentModified = true;
-            updateTitle();
-            qCDebug(mainWindowLog) << "Updated simple text font italic to:" << (italic ? "true" : "false");
-        }
-    }
+    syncItemToSvgDocument(selectedItem);
+    m_documentModified = true;
+    updateTitle();
+    qCDebug(mainWindowLog) << "Updated font italic to:" << (italic ? "true" : "false");
 }
 
 void MainWindow::updateSelectedItemTextAlignment(int alignment)
 {
     QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
-    if (!selectedItem) {
-        qCWarning(mainWindowLog) << "No item selected for text alignment update";
-        return;
+    if (!selectedItem) { qCWarning(mainWindowLog) << "No item selected for text alignment update"; return; }
+
+    QGraphicsItemAdapter a(selectedItem);
+    if (!a.hasText()) return;
+
+    Qt::Alignment newAlign = Qt::AlignLeft;
+    switch (alignment) {
+        case 0: newAlign = Qt::AlignLeft; break;
+        case 1: newAlign = Qt::AlignCenter; break;
+        case 2: newAlign = Qt::AlignRight; break;
+        default: newAlign = Qt::AlignLeft; break;
     }
 
-    if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
-        // For our new EditableTextItem
-        Qt::Alignment oldAlignment = textItem->textAlignment();
-        Qt::Alignment textAlignment = Qt::AlignLeft;
-        switch (alignment) {
-            case 0: textAlignment = Qt::AlignLeft; break;
-            case 1: textAlignment = Qt::AlignCenter; break;
-            case 2: textAlignment = Qt::AlignRight; break;
-            default: textAlignment = Qt::AlignLeft; break;
-        }
-        
-        if (oldAlignment != textAlignment) {
-            // Create and execute the command
-            auto command = std::make_unique<ModifyTextCommand>(textItem, oldAlignment, textAlignment);
+    if (auto et = qgraphicsitem_cast<EditableTextItem*>(selectedItem)) {
+        Qt::Alignment oldAlign = a.textAlignment();
+        if (oldAlign != newAlign) {
+            auto command = std::make_unique<ModifyTextCommand>(et, oldAlign, newAlign);
             CommandManager::instance()->executeCommand(std::move(command));
-            
-            // Synchronize changes to SVG document
             syncItemToSvgDocument(selectedItem);
             m_documentModified = true;
             updateTitle();
-            qCDebug(mainWindowLog) << "Updated editable text alignment to:" << alignment;
+            qCDebug(mainWindowLog) << "Updated text alignment to:" << alignment;
         }
-    }
-    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
-        // QGraphicsSimpleTextItem doesn't support alignment directly
-        // In a real implementation, we would need to handle this by adjusting the text position
-        qCDebug(mainWindowLog) << "Simple text item doesn't support alignment directly. Alignment index:" << alignment;
     }
 }
 
 void MainWindow::updateSelectedItemTextColor(const QColor& color)
 {
     QGraphicsItem* selectedItem = m_canvasArea->getSelectedItem();
-    if (!selectedItem) {
-        qCWarning(mainWindowLog) << "No item selected for text color update";
-        return;
-    }
+    if (!selectedItem) { qCWarning(mainWindowLog) << "No item selected for text color update"; return; }
 
-    if (auto textItem = dynamic_cast<EditableTextItem*>(selectedItem)) {
-        // For our new EditableTextItem
-        QColor oldColor = textItem->defaultTextColor();
-        if (oldColor != color) {
-            // Create and execute the command
-            auto command = std::make_unique<ModifyTextCommand>(textItem, oldColor, color);
-            CommandManager::instance()->executeCommand(std::move(command));
-            
-            // Synchronize changes to SVG document
-            syncItemToSvgDocument(selectedItem);
-            m_documentModified = true;
-            updateTitle();
-            qCDebug(mainWindowLog) << "Updated editable text color to:" << color.name();
-        }
+    QGraphicsItemAdapter a(selectedItem);
+    if (!a.hasText()) return;
+
+    QColor oldColor = a.textColor();
+    if (oldColor == color) return;
+
+    if (auto et = qgraphicsitem_cast<EditableTextItem*>(selectedItem)) {
+        auto command = std::make_unique<ModifyTextCommand>(et, oldColor, color);
+        CommandManager::instance()->executeCommand(std::move(command));
+    } else {
+        a.setTextColor(color);
     }
-    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(selectedItem)) {
-        // For backward compatibility
-        QColor oldColor = textItem->brush().color();
-        if (oldColor != color) {
-            textItem->setBrush(QBrush(color));
-            // Synchronize changes to SVG document
-            syncItemToSvgDocument(selectedItem);
-            m_documentModified = true;
-            updateTitle();
-            qCDebug(mainWindowLog) << "Updated simple text color to:" << color.name();
-        }
-    }
+    syncItemToSvgDocument(selectedItem);
+    m_documentModified = true;
+    updateTitle();
+    qCDebug(mainWindowLog) << "Updated text color to:" << color.name();
 }
 
 void MainWindow::updateRightAttrBarFromDocument()
@@ -1370,20 +1168,14 @@ void MainWindow::updateRightAttrBarFromDocument()
 
 void MainWindow::syncItemToSvgDocument(QGraphicsItem* item)
 {
-    if (!item || !m_svgEngine || !m_svgEngine->getCurrentDocument()) {
-        return;
-    }
+    if (!item || !m_svgEngine || !m_svgEngine->getCurrentDocument()) return;
 
     SvgDocument* doc = m_svgEngine->getCurrentDocument();
     const auto& elements = doc->getElements();
-    
-    // Find the corresponding graphics item index in the document
+
     int itemIndex = -1;
     for (int i = 0; i < doc->m_graphicsItems.size(); ++i) {
-        if (doc->m_graphicsItems[i] == item) {
-            itemIndex = i;
-            break;
-        }
+        if (doc->m_graphicsItems[i] == item) { itemIndex = i; break; }
     }
 
     if (itemIndex == -1 || itemIndex >= elements.size()) {
@@ -1391,90 +1183,29 @@ void MainWindow::syncItemToSvgDocument(QGraphicsItem* item)
         return;
     }
 
-    // Get the corresponding SVG element
     SvgElement* svgElement = elements[itemIndex].get();
-    if (!svgElement) {
-        return;
-    }
+    if (!svgElement) return;
 
-    // Update the SVG element properties based on the graphics item
-    if (auto lineItem = dynamic_cast<QGraphicsLineItem*>(item)) {
-        QPen pen = lineItem->pen();
-        Color strokeColor(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha());
-        svgElement->setStrokeColor(strokeColor);
-        svgElement->setStrokeWidth(pen.width());
-        svgElement->setOpacity(item->opacity());
+    auto toColor = [](const QColor& c) { return Color{c.red(), c.green(), c.blue(), c.alpha()}; };
+    QGraphicsItemAdapter a(item);
+
+    if (a.hasStroke()) {
+        svgElement->setStrokeColor(toColor(a.strokeColor()));
+        svgElement->setStrokeWidth(a.strokeWidth());
     }
-    else if (auto rectItem = dynamic_cast<QGraphicsRectItem*>(item)) {
-        QPen pen = rectItem->pen();
-        QBrush brush = rectItem->brush();
-        Color strokeColor(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha());
-        Color fillColor(brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha());
-        svgElement->setStrokeColor(strokeColor);
-        svgElement->setFillColor(fillColor);
-        svgElement->setStrokeWidth(pen.width());
-        svgElement->setOpacity(item->opacity());
+    if (a.hasFill()) {
+        svgElement->setFillColor(toColor(a.fillColor()));
     }
-    else if (auto ellipseItem = dynamic_cast<QGraphicsEllipseItem*>(item)) {
-        QPen pen = ellipseItem->pen();
-        QBrush brush = ellipseItem->brush();
-        Color strokeColor(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha());
-        Color fillColor(brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha());
-        svgElement->setStrokeColor(strokeColor);
-        svgElement->setFillColor(fillColor);
-        svgElement->setStrokeWidth(pen.width());
-        svgElement->setOpacity(item->opacity());
-    }
-    else if (auto polygonItem = dynamic_cast<QGraphicsPolygonItem*>(item)) {
-        QPen pen = polygonItem->pen();
-        QBrush brush = polygonItem->brush();
-        Color strokeColor(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha());
-        Color fillColor(brush.color().red(), brush.color().green(), brush.color().blue(), brush.color().alpha());
-        svgElement->setStrokeColor(strokeColor);
-        svgElement->setFillColor(fillColor);
-        svgElement->setStrokeWidth(pen.width());
-        svgElement->setOpacity(item->opacity());
-    }
-    else if (auto pathItem = dynamic_cast<QGraphicsPathItem*>(item)) {
-        QPen pen = pathItem->pen();
-        QBrush brush = pathItem->brush();
-        Color strokeColor(pen.color().red(), pen.color().green(), pen.color().blue(), pen.color().alpha());
-        svgElement->setStrokeColor(strokeColor);
-        svgElement->setStrokeWidth(pen.width());
-        svgElement->setOpacity(item->opacity());
-    }
-    else if (auto textItem = dynamic_cast<EditableTextItem*>(item)) {
-        // Handle editable text item properties
-        QColor color = textItem->defaultTextColor();
-        Color fillColor(color.red(), color.green(), color.blue(), color.alpha());
-        svgElement->setFillColor(fillColor);
-        svgElement->setOpacity(item->opacity());
-        
-        // Update text-specific properties if this is a text element
-        if (auto svgTextElement = dynamic_cast<SvgText*>(svgElement)) {
-            svgTextElement->setTextContent(textItem->toPlainString().toStdString());
-            QFont font = textItem->font();
-            svgTextElement->setFontFamily(font.family().toStdString());
-            svgTextElement->setFontSize(font.pointSizeF());
-            svgTextElement->setBold(textItem->isBold());
-            svgTextElement->setItalic(textItem->isItalic());
-        }
-    }
-    else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(item)) {
-        // Handle simple text item properties
-        QColor color = textItem->brush().color();
-        Color fillColor(color.red(), color.green(), color.blue(), color.alpha());
-        svgElement->setFillColor(fillColor);
-        svgElement->setOpacity(item->opacity());
-        
-        // Update text-specific properties if this is a text element
-        if (auto svgTextElement = dynamic_cast<SvgText*>(svgElement)) {
-            svgTextElement->setTextContent(textItem->text().toStdString());
-            QFont font = textItem->font();
-            svgTextElement->setFontFamily(font.family().toStdString());
-            svgTextElement->setFontSize(font.pointSizeF());
-            svgTextElement->setBold(font.bold());
-            svgTextElement->setItalic(font.italic());
+    svgElement->setOpacity(a.opacity());
+
+    if (a.hasText()) {
+        if (auto svgText = dynamic_cast<SvgText*>(svgElement)) {
+            svgText->setTextContent(a.textContent().toStdString());
+            svgText->setFontFamily(a.textFont().family().toStdString());
+            svgText->setFontSize(a.textFont().pointSizeF());
+            svgText->setBold(a.isBold());
+            svgText->setItalic(a.isItalic());
+            svgText->setFillColor(toColor(a.textColor()));
         }
     }
 

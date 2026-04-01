@@ -1,5 +1,10 @@
-﻿#pragma once
-#include "svgelement.h"
+#pragma once
+#include "CoreSvgEngine/svgelement.h"
+#include <memory>
+
+namespace tinyxml2 {
+    class XMLElement;
+}
 
 // SVG text-anchor attribute values for text alignment
 enum class TextAnchor {
@@ -23,6 +28,9 @@ public:
 
     SvgElementType getType() const override { return SvgElementType::Text; }
     std::string toSvgString() const override;
+
+    // Factory: parse SvgText from SVG <text> XML element
+    static std::unique_ptr<SvgText> parseFromXmlElement(tinyxml2::XMLElement* element);
 
     // ---------- Getter & Setter ----------
 
@@ -50,6 +58,3 @@ public:
     // Helper method to convert TextAnchor enum to string
     static std::string textAnchorToString(TextAnchor anchor);
 };
-
-
-

@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.30)
 project(SvgEditor LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -19,8 +19,9 @@ add_subdirectory(src/Core)
 add_subdirectory(src/Commands)
 add_subdirectory(src/ConfigManager)
 add_subdirectory(src/ConfigDialog)
-add_subdirectory(src/SvgEditor)
 add_subdirectory(src/CoreSvgEngine)
+add_subdirectory(src/SvgText)
+add_subdirectory(src/SvgEditor)
 
 
 

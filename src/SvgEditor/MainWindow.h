@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <QMainWindow>
 #include <QString>
 #include <QTranslator>
@@ -23,7 +23,7 @@
 #include "canvasarea.h"
 #include "shapetoolbar.h"
 #include "../CoreSvgEngine/coresvgengine.h"
-#include "../CoreSvgEngine/svgtext.h"
+#include "../SvgText/SvgText.h"
 #include "../Commands/CommandManager.h"
 
 Q_DECLARE_LOGGING_CATEGORY(mainWindowLog)

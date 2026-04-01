@@ -1,7 +1,7 @@
-﻿#include "svgdocument.h"
+#include "svgdocument.h"
 #include "svgelement.h"
 #include "svgshapes.h"
-#include "svgtext.h"
+#include "SvgText/SvgText.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -461,38 +461,19 @@ void SvgDocument::parseSvgPolyline(tinyxml2::XMLElement* element) {
 }
 
 void SvgDocument::parseSvgText(tinyxml2::XMLElement* element) {
-    double x = 0, y = 0;
-    element->QueryDoubleAttribute("x", &x);
-    element->QueryDoubleAttribute("y", &y);
-
-    const char* textContent = element->GetText();
-    std::string text = textContent ? textContent : "";
-
-    auto textElement = std::make_unique<SvgText>(Point{x, y}, text);
-
-    const char* fontFamily = element->Attribute("font-family");
-    if (fontFamily) {
-        textElement->setFontFamily(fontFamily);
-    }
-
-    double fontSize = 12.0;
-    if (element->QueryDoubleAttribute("font-size", &fontSize) == tinyxml2::XML_SUCCESS) {
-        textElement->setFontSize(fontSize);
-    }
+    auto textElement = SvgText::parseFromXmlElement(element);
 
     parseCommonAttributes(element, textElement.get());
 
-    auto graphicsItem = new QGraphicsSimpleTextItem(QString::fromStdString(text));
-    graphicsItem->setPos(x, y);
+    auto graphicsItem = new QGraphicsSimpleTextItem(QString::fromStdString(textElement->getTextContent()));
+    graphicsItem->setPos(textElement->getPosition().x, textElement->getPosition().y);
 
     QFont font;
-    if (fontFamily) {
-        font.setFamily(QString::fromStdString(textElement->getFontFamily()));
-    }
+    font.setFamily(QString::fromStdString(textElement->getFontFamily()));
     font.setPointSizeF(textElement->getFontSize());
     graphicsItem->setFont(font);
 
-    // �����ı���ɫ (ʹ�����ɫ��Ϊ�ı���ɫ)
+    // Set text color (fill color as text color)
     Color textColor = textElement->getFillColor();
     if (textColor.alpha > 0) {
         graphicsItem->setBrush(QBrush(QColor(textColor.r, textColor.g, textColor.b, textColor.alpha)));
@@ -508,7 +489,7 @@ void SvgDocument::parseSvgText(tinyxml2::XMLElement* element) {
         pen.setColor(QColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.alpha));
         graphicsItem->setPen(pen);
     } else {
-        graphicsItem->setPen(Qt::NoPen); // Ĭ��������
+        graphicsItem->setPen(Qt::NoPen);
     }
 
     graphicsItem->setOpacity(textElement->getOpacity());

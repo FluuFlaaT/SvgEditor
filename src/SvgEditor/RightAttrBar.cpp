@@ -1,4 +1,5 @@
-﻿#include "rightattrbar.h"
+#include "rightattrbar.h"
+#include "QGraphicsItemAdapter.h"
 
 Q_LOGGING_CATEGORY(rightAttrBarLog, "RightAttrBar")
 
@@ -153,148 +154,56 @@ void RightAttrBar::updateForSelectedItem(QGraphicsItem* item, ShapeType type)
 
 void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
 {
-    if (!item) {
+    if (!item) return;
+
+    QGraphicsItemAdapter a(item);
+
+    if (a.hasText()) {
+        // Text items: update text-related UI controls
+        m_textContentEdit->blockSignals(true);
+        m_fontFamilyComboBox->blockSignals(true);
+        m_fontSizeSpinBox->blockSignals(true);
+        m_boldCheckBox->blockSignals(true);
+        m_italicCheckBox->blockSignals(true);
+        m_textAlignComboBox->blockSignals(true);
+
+        m_textContentEdit->setText(a.textContent());
+        QFont font = a.textFont();
+        int fontIndex = m_fontFamilyComboBox->findText(font.family());
+        if (fontIndex >= 0) m_fontFamilyComboBox->setCurrentIndex(fontIndex);
+        m_fontSizeSpinBox->setValue(font.pointSize());
+        m_boldCheckBox->setChecked(a.isBold());
+        m_italicCheckBox->setChecked(a.isItalic());
+
+        int alignmentIndex = 0;
+        Qt::Alignment alignment = a.textAlignment();
+        if (alignment & Qt::AlignCenter) alignmentIndex = 1;
+        else if (alignment & Qt::AlignRight) alignmentIndex = 2;
+        m_textAlignComboBox->setCurrentIndex(alignmentIndex);
+
+        m_textColor = a.textColor();
+        m_textColorButton->setStyleSheet(QString("background-color: %1").arg(m_textColor.name()));
+
+        m_textContentEdit->blockSignals(false);
+        m_fontFamilyComboBox->blockSignals(false);
+        m_fontSizeSpinBox->blockSignals(false);
+        m_boldCheckBox->blockSignals(false);
+        m_italicCheckBox->blockSignals(false);
+        m_textAlignComboBox->blockSignals(false);
+
+        qCDebug(rightAttrBarLog) << "Updated text properties via adapter";
         return;
     }
 
-    // Extract visual properties based on Qt's graphics item hierarchy
-    QPen pen;
-    QBrush brush;
-
-    if (auto lineItem = dynamic_cast<QGraphicsLineItem*>(item)) {
-        pen = lineItem->pen();
-    } else if (auto rectItem = dynamic_cast<QGraphicsRectItem*>(item)) {
-        pen = rectItem->pen();
-        brush = rectItem->brush();
-    } else if (auto ellipseItem = dynamic_cast<QGraphicsEllipseItem*>(item)) {
-        pen = ellipseItem->pen();
-        brush = ellipseItem->brush();
-    } else if (auto polygonItem = dynamic_cast<QGraphicsPolygonItem*>(item)) {
-        pen = polygonItem->pen();
-        brush = polygonItem->brush();
-    } else if (auto pathItem = dynamic_cast<QGraphicsPathItem*>(item)) {
-        pen = pathItem->pen();
-        brush = pathItem->brush();
-    } else if (auto textItem = dynamic_cast<EditableTextItem*>(item)) {
-        // Text items require special handling due to font and alignment properties
-        if (type == ShapeType::Text && m_textContentEdit && m_fontFamilyComboBox &&
-            m_fontSizeSpinBox && m_boldCheckBox && m_italicCheckBox && m_textAlignComboBox) {
-
-            // Prevent cascading events during bulk property updates
-            m_textContentEdit->blockSignals(true);
-            m_fontFamilyComboBox->blockSignals(true);
-            m_fontSizeSpinBox->blockSignals(true);
-            m_boldCheckBox->blockSignals(true);
-            m_italicCheckBox->blockSignals(true);
-            m_textAlignComboBox->blockSignals(true);
-
-            m_textContentEdit->setText(textItem->toPlainString());
-
-            QFont font = textItem->font();
-
-            int fontIndex = m_fontFamilyComboBox->findText(font.family());
-            if (fontIndex >= 0) {
-                m_fontFamilyComboBox->setCurrentIndex(fontIndex);
-            }
-
-            m_fontSizeSpinBox->setValue(font.pointSize());
-
-            m_boldCheckBox->setChecked(textItem->isBold());
-            m_italicCheckBox->setChecked(textItem->isItalic());
-
-            int alignmentIndex = 0; // Default to left alignment
-            Qt::Alignment alignment = textItem->textAlignment();
-            if (alignment & Qt::AlignCenter) {
-                alignmentIndex = 1;
-            } else if (alignment & Qt::AlignRight) {
-                alignmentIndex = 2;
-            }
-            m_textAlignComboBox->setCurrentIndex(alignmentIndex);
-
-            m_textColor = textItem->defaultTextColor();
-            QString qss = QString("background-color: %1").arg(m_textColor.name());
-            m_textColorButton->setStyleSheet(qss);
-
-            m_textContentEdit->blockSignals(false);
-            m_fontFamilyComboBox->blockSignals(false);
-            m_fontSizeSpinBox->blockSignals(false);
-            m_boldCheckBox->blockSignals(false);
-            m_italicCheckBox->blockSignals(false);
-            m_textAlignComboBox->blockSignals(false);
-
-            qCDebug(rightAttrBarLog) << "Updated editable text properties: content=" << textItem->toPlainString()
-                                   << ", font=" << font.family()
-                                   << ", size=" << font.pointSize()
-                                   << ", bold=" << textItem->isBold()
-                                   << ", italic=" << textItem->isItalic()
-                                   << ", color=" << m_textColor.name();
-
-            // Text items have unique properties that don't apply to other shapes
-            return;
-        }
-    } else if (auto textItem = dynamic_cast<QGraphicsSimpleTextItem*>(item)) {
-        // Legacy support for applications that might use QGraphicsSimpleTextItem
-        if (type == ShapeType::Text && m_textContentEdit && m_fontFamilyComboBox &&
-            m_fontSizeSpinBox && m_boldCheckBox && m_italicCheckBox && m_textAlignComboBox) {
-
-            // Prevent cascading events during bulk property updates
-            m_textContentEdit->blockSignals(true);
-            m_fontFamilyComboBox->blockSignals(true);
-            m_fontSizeSpinBox->blockSignals(true);
-            m_boldCheckBox->blockSignals(true);
-            m_italicCheckBox->blockSignals(true);
-            m_textAlignComboBox->blockSignals(true);
-
-            m_textContentEdit->setText(textItem->text());
-
-            QFont font = textItem->font();
-
-            int fontIndex = m_fontFamilyComboBox->findText(font.family());
-            if (fontIndex >= 0) {
-                m_fontFamilyComboBox->setCurrentIndex(fontIndex);
-            }
-
-            m_fontSizeSpinBox->setValue(font.pointSize());
-
-            m_boldCheckBox->setChecked(font.bold());
-            m_italicCheckBox->setChecked(font.italic());
-
-            m_textColor = textItem->brush().color();
-            QString qss = QString("background-color: %1").arg(m_textColor.name());
-            m_textColorButton->setStyleSheet(qss);
-
-            m_textContentEdit->blockSignals(false);
-            m_fontFamilyComboBox->blockSignals(false);
-            m_fontSizeSpinBox->blockSignals(false);
-            m_boldCheckBox->blockSignals(false);
-            m_italicCheckBox->blockSignals(false);
-            m_textAlignComboBox->blockSignals(false);
-
-            qCDebug(rightAttrBarLog) << "Updated simple text properties: content=" << textItem->text()
-                                   << ", font=" << font.family()
-                                   << ", size=" << font.pointSize()
-                                   << ", bold=" << font.bold()
-                                   << ", italic=" << font.italic()
-                                   << ", color=" << m_textColor.name();
-
-            // Text items have unique properties that don't apply to other shapes
-            return;
-        }
-    } else {
-        return;
-    }
-
-    // Apply properties common to all drawable shapes (pen and brush)
-    if (m_borderWidthSpinBox) {
+    // Shape items: update stroke/fill UI controls
+    if (a.hasStroke()) {
         m_borderWidthSpinBox->blockSignals(true);
-        m_borderWidthSpinBox->setValue(pen.width());
+        m_borderWidthSpinBox->setValue(a.strokeWidth());
         m_borderWidthSpinBox->blockSignals(false);
-    }
 
-    if (m_borderStyleComboBox) {
         m_borderStyleComboBox->blockSignals(true);
         int styleIndex = 0;
-        switch (pen.style()) {
+        switch (a.strokeStyle()) {
             case Qt::SolidLine: styleIndex = 0; break;
             case Qt::DashLine: styleIndex = 1; break;
             case Qt::DotLine: styleIndex = 2; break;
@@ -304,24 +213,17 @@ void RightAttrBar::updateShapeProperties(QGraphicsItem* item, ShapeType type)
         }
         m_borderStyleComboBox->setCurrentIndex(styleIndex);
         m_borderStyleComboBox->blockSignals(false);
+
+        m_borderColor = a.strokeColor();
+        m_borderColorButton->setStyleSheet(QString("background-color: %1").arg(m_borderColor.name()));
     }
 
-    m_borderColor = pen.color();
-    if (m_borderColorButton) {
-        QString qss = QString("background-color: %1").arg(m_borderColor.name());
-        m_borderColorButton->setStyleSheet(qss);
+    if (a.hasFill()) {
+        m_fillColor = a.fillColor();
+        m_fillColorButton->setStyleSheet(QString("background-color: %1").arg(m_fillColor.name()));
     }
 
-    m_fillColor = brush.color();
-    if (m_fillColorButton) {
-        QString qss = QString("background-color: %1").arg(m_fillColor.name());
-        m_fillColorButton->setStyleSheet(qss);
-    }
-
-    qCDebug(rightAttrBarLog) << "Updated shape properties: border width=" << pen.width()
-                           << ", border style=" << pen.style()
-                           << ", border color=" << pen.color().name()
-                           << ", fill color=" << brush.color().name();
+    qCDebug(rightAttrBarLog) << "Updated shape properties via adapter";
 }
 
 void RightAttrBar::clearSelection()

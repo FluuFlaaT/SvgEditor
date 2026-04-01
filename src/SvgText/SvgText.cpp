@@ -1,5 +1,6 @@
-﻿#include "svgtext.h"
+#include "SvgText.h"
 #include <sstream>
+#include <tinyxml2.h>
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(svgTextLog)
 Q_LOGGING_CATEGORY(svgTextLog, "SvgText")
@@ -122,5 +123,25 @@ void SvgText::setTextAnchor(TextAnchor anchor) {
     m_textAnchor = anchor;
 }
 
+std::unique_ptr<SvgText> SvgText::parseFromXmlElement(tinyxml2::XMLElement* element) {
+    double x = 0, y = 0;
+    element->QueryDoubleAttribute("x", &x);
+    element->QueryDoubleAttribute("y", &y);
 
+    const char* textContent = element->GetText();
+    std::string text = textContent ? textContent : "";
 
+    auto textElement = std::make_unique<SvgText>(Point{x, y}, text);
+
+    const char* fontFamily = element->Attribute("font-family");
+    if (fontFamily) {
+        textElement->setFontFamily(fontFamily);
+    }
+
+    double fontSize = 12.0;
+    if (element->QueryDoubleAttribute("font-size", &fontSize) == tinyxml2::XML_SUCCESS) {
+        textElement->setFontSize(fontSize);
+    }
+
+    return textElement;
+}
