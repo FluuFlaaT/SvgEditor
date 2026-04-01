@@ -56,3 +56,6 @@ public:
     double getOpacity() const;
     void setOpacity(double opacity);
 };
+
+
+

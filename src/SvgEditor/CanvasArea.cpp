@@ -1135,3 +1135,6 @@ bool CanvasArea::openFileWithEngine(CoreSvgEngine* engine) {
     qCDebug(canvasAreaLog) << "Scene setup complete with" << doc->m_graphicsItems.size() << "items";
     return true;
 }
+
+
+

@@ -66,3 +66,5 @@ bool CoreSvgEngine::saveSvgFile(const std::string& filePath) const {
     qCDebug(coreSvgEngineLog) << "Successfully saved SVG file:" << QString::fromStdString(filePath);
     return true;
 }
+
+

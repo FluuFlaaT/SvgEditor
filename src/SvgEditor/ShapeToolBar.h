@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QWidget>
 #include <QVBoxLayout>
@@ -61,3 +61,6 @@ private:
     ShapeType m_selectedShapeType;
     QVBoxLayout *m_mainLayout;
 };
+
+
+

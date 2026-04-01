@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Command.h"
 #include <QGraphicsItem>
 #include <memory>
@@ -22,3 +22,6 @@ private:
     bool m_itemOwned; // Track ownership to prevent double-deletion during command lifecycle
     std::string m_elementId; // Store ID for safe removal from document model during undo
 };
+
+
+

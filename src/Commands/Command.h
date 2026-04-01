@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <QString>
 #include <QDebug>
 #include <QLoggingCategory>
@@ -20,3 +20,6 @@ public:
 protected:
     QString m_description; // Human-readable description of the command
 };
+
+
+

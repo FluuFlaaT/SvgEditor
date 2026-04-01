@@ -121,3 +121,6 @@ void SvgText::setTextAnchor(TextAnchor anchor) {
         QString::fromStdString(textAnchorToString(anchor));
     m_textAnchor = anchor;
 }
+
+
+

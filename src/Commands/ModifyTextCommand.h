@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Command.h"
 #include <QGraphicsItem>
 #include <QString>
@@ -51,3 +51,5 @@ private:
     
     void applyModification(bool isUndo);
 }; 
+
+

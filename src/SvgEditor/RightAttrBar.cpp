@@ -802,3 +802,5 @@ QWidget* RightAttrBar::createTextAttributesWidget()
 
     return widget;
 }
+
+

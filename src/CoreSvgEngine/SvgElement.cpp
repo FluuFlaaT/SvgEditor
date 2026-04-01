@@ -97,3 +97,5 @@ void SvgElement::setOpacity(double opacity) {
     qCInfo(svgElementLog) << "Setting element opacity: " + QString::fromStdString(std::to_string(m_opacity)) + " to " + QString::fromStdString(std::to_string(newOpacity));
     m_opacity = newOpacity;
 }
+
+

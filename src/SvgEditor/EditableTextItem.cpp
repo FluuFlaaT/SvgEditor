@@ -1,4 +1,4 @@
-#include "editabletextitem.h"
+﻿#include "editabletextitem.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QTextDocument>
 #include <QTextCursor>
@@ -179,3 +179,6 @@ void EditableTextItem::finishEditing()
 
     qCDebug(editableTextItemLog) << "Finished editing text:" << newText;
 }
+
+
+

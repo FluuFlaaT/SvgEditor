@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30)
+﻿cmake_minimum_required(VERSION 3.30)
 project(SvgEditor LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -7,7 +7,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-include(C:/code/kingsoft/thirdparty_install/vcpkg/scripts/buildsystems/vcpkg.cmake)
+include("C:/code/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
 find_package(Qt5 COMPONENTS Core Gui Widgets Svg LinguistTools Xml Network REQUIRED)
 
@@ -20,3 +20,5 @@ add_subdirectory(src/ConfigManager)
 add_subdirectory(src/ConfigDialog)
 add_subdirectory(src/SvgEditor)
 add_subdirectory(src/CoreSvgEngine)
+
+

@@ -1,4 +1,4 @@
-#include "ModifyTextCommand.h"
+﻿#include "ModifyTextCommand.h"
 #include <QLoggingCategory>
 
 Q_LOGGING_CATEGORY(modifyTextCommandLog, "ModifyTextCommand")
@@ -136,3 +136,5 @@ void ModifyTextCommand::applyModification(bool isUndo)
         emit m_textItem->textChanged(m_textItem->toPlainString());
     }
 } 
+
+

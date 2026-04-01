@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QWidget>
 #include <vector>
@@ -108,3 +108,5 @@ private:
     ButtonTipManager* m_tipManager;
     QMap<QPushButton*, QString> m_buttonIdMap; // Maps buttons to their API IDs
 };
+
+

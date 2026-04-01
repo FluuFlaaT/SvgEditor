@@ -1,4 +1,4 @@
-set(TARGET_NAME SvgEditor)
+﻿set(TARGET_NAME SvgEditor)
 
 # Translation files
 set(TS_FILES
@@ -74,4 +74,7 @@ add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
     $<TARGET_FILE:ConfigDialog>
     $<TARGET_FILE_DIR:${TARGET_NAME}>
 )
+
+
+
 

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QObject>
 #include <QSettings>
@@ -45,3 +45,5 @@ private:
     static constexpr int DEFAULT_CANVAS_HEIGHT = 600;
     static const QColor DEFAULT_BACKGROUND_COLOR;
 }; 
+
+

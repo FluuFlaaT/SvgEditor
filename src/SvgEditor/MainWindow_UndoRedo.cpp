@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 
 void MainWindow::undo()
 {
@@ -57,3 +57,6 @@ void MainWindow::updateUndoRedoActions()
         }
     }
 }
+
+
+

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QGraphicsTextItem>
 #include <QTextDocument>
@@ -54,3 +54,6 @@ private:
     Qt::Alignment m_textAlignment;
     QString m_originalText; // Store original text when editing starts
 };
+
+
+

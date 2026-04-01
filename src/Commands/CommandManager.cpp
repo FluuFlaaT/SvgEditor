@@ -1,4 +1,4 @@
-#include "CommandManager.h"
+﻿#include "CommandManager.h"
 
 Q_LOGGING_CATEGORY(commandManagerLog, "CommandManager")
 
@@ -132,3 +132,6 @@ void CommandManager::clear()
     m_redoStack.clear();
     emit undoRedoChanged();
 }
+
+
+

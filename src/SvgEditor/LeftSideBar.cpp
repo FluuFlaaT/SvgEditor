@@ -1,4 +1,4 @@
-#include "leftsidebar.h"
+﻿#include "leftsidebar.h"
 #include "CustomTooltip.h"
 #include "../ConfigManager/ButtonTipManager.h"
 #include <QVBoxLayout>
@@ -343,3 +343,5 @@ void LeftSideBar::onButtonTipsLoaded()
     // Tips are now available, no additional action needed
     // The tooltip will automatically use the loaded tips
 }
+
+

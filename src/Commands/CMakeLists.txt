@@ -1,4 +1,4 @@
-set(TARGET_NAME Commands)
+﻿set(TARGET_NAME Commands)
 
 set(SOURCES
     Command.cpp
@@ -39,3 +39,6 @@ set_target_properties(${TARGET_NAME} PROPERTIES
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED ON
 )
+
+
+

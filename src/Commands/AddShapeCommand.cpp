@@ -1,4 +1,4 @@
-#include "AddShapeCommand.h"
+﻿#include "AddShapeCommand.h"
 #include <QLoggingCategory>
 #include "CoreSvgEngine/svgdocument.h"
 #include "CommandUtils.h"
@@ -98,3 +98,6 @@ bool AddShapeCommand::undo()
 
     return true;
 }
+
+
+

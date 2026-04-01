@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Command.h"
 #include <QGraphicsItem>
 #include <memory>
@@ -25,3 +25,6 @@ private:
     std::unique_ptr<SvgElement> m_svgElement;
     int m_sceneIndex; // Preserve original Z-order for accurate undo positioning
 };
+
+
+

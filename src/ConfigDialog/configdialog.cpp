@@ -1,4 +1,4 @@
-#include "configdialog.h"
+﻿#include "configdialog.h"
 #include "../ConfigManager/configmanager.h"
 #include <QApplication>
 
@@ -125,3 +125,5 @@ void ConfigDialog::reject()
     // Discard changes to maintain expected dialog behavior
     QDialog::reject();
 } 
+
+

@@ -575,3 +575,6 @@ void SvgDocument::parseCommonAttributes(tinyxml2::XMLElement* element, SvgElemen
         attr = attr->Next();
     }
 }
+
+
+

@@ -51,3 +51,5 @@ private:
     // API endpoint for button tips
     static const QString API_ENDPOINT;
 }; 
+
+

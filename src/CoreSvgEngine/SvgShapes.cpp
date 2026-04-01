@@ -241,3 +241,5 @@ SvgStar::SvgStar(Point center, double outerRadius, double innerRadius, int numPo
         currentAngle += angleStep;
     }
 }
+
+

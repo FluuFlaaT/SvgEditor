@@ -1,4 +1,4 @@
-#include <QApplication>
+﻿#include <QApplication>
 #include <QTranslator>
 #include <QLibraryInfo>
 #include <QLocale>
@@ -49,3 +49,5 @@ int main(int argc, char *argv[])
     qCInfo(svgEditorLog) << "Application exiting...";
     return result;
 }
+
+

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <QStack>
 #include <QObject>
 #include <memory>
@@ -50,3 +50,6 @@ private:
 
     static CommandManager* m_instance;
 };
+
+
+

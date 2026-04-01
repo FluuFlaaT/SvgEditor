@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QWidget>
 #include <QVBoxLayout>
@@ -118,3 +118,5 @@ private:
     QWidget* createLineAttributesWidget();
     QWidget* createTextAttributesWidget();
 };
+
+

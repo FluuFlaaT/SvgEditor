@@ -36,3 +36,6 @@ public:
     bool loadSvgFile(const std::string& filePath);
     bool saveSvgFile(const std::string& filePath) const;
 };
+
+
+

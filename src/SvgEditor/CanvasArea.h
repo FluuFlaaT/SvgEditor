@@ -143,3 +143,5 @@ private:
     EditableTextItem* createText(const QPointF& position, const QString& text = "");
     EditableTextItem* createTextBox(const QRectF& textRect);
 };
+
+

@@ -1,4 +1,4 @@
-#include "shapetoolbar.h"
+﻿#include "shapetoolbar.h"
 
 Q_LOGGING_CATEGORY(shapeToolBarLog, "ShapeToolBar")
 
@@ -132,3 +132,6 @@ void ShapeToolBar::highlightButton(ShapeType type)
             break;
     }
 }
+
+
+

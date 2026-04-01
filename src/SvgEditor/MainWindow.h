@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <QMainWindow>
 #include <QString>
 #include <QTranslator>
@@ -114,3 +114,5 @@ private:
     QAction* m_undoAction;
     QAction* m_redoAction;
 };
+
+

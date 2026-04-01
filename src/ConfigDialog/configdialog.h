@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QDialog>
 #include <QVBoxLayout>
@@ -57,3 +57,5 @@ private:
     QDialogButtonBox* m_buttonBox;
     QPushButton* m_resetButton;
 }; 
+
+

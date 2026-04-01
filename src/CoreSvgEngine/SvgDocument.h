@@ -70,3 +70,6 @@ private:
     Color getBackgroundColor() const { return m_backgroundColor; }
     void setBackgroundColor(const Color& color);
 };
+
+
+

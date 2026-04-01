@@ -1495,3 +1495,5 @@ void MainWindow::showPreferences()
         qCDebug(mainWindowLog) << "Preferences cancelled";
     }
 }
+
+

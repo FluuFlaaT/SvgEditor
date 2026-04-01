@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30)
+﻿cmake_minimum_required(VERSION 3.30)
 
 project(ConfigManager LANGUAGES CXX)
 
@@ -28,3 +28,5 @@ target_include_directories(ConfigManager PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 set_target_properties(ConfigManager PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
 ) 
+
+

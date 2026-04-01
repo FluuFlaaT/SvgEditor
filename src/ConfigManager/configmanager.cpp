@@ -1,4 +1,4 @@
-#include "configmanager.h"
+﻿#include "configmanager.h"
 #include <QtWidgets/QApplication>
 
 ConfigManager* ConfigManager::s_instance = nullptr;
@@ -87,3 +87,5 @@ void ConfigManager::resetToDefaults()
     m_settings->sync();
     emit settingsChanged();
 } 
+
+

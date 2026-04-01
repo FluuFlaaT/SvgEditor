@@ -1,4 +1,4 @@
-#include "RemoveShapeCommand.h"
+﻿#include "RemoveShapeCommand.h"
 #include <QLoggingCategory>
 #include <algorithm> // For std::find
 #include "CoreSvgEngine/svgdocument.h"
@@ -96,3 +96,6 @@ bool RemoveShapeCommand::undo()
 
     return true;
 }
+
+
+

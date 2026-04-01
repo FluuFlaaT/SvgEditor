@@ -50,3 +50,6 @@ public:
     // Helper method to convert TextAnchor enum to string
     static std::string textAnchorToString(TextAnchor anchor);
 };
+
+
+

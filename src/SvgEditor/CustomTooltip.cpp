@@ -1,4 +1,4 @@
-#include "CustomTooltip.h"
+﻿#include "CustomTooltip.h"
 #include <QPainter>
 #include <QPainterPath>
 #include <QApplication>
@@ -187,3 +187,5 @@ void CustomTooltip::paintEvent(QPaintEvent* event)
     painter.setPen(QPen(QColor(189, 195, 199), 1));
     painter.drawPath(path);
 }
+
+

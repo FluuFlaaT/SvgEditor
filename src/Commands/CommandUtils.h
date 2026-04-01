@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <QString>
 #include "SvgEditor/shapetoolbar.h"
 
@@ -16,3 +16,6 @@ inline QString getShapeTypeName(ShapeType type)
         default: return QObject::tr("Shape");
     }
 }
+
+
+

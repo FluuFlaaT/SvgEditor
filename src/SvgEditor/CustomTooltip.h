@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QWidget>
 #include <QLabel>
@@ -58,3 +58,5 @@ private:
     static constexpr int TOOLTIP_MAX_WIDTH = 300;
     static constexpr int TOOLTIP_MARGIN = 10;
 }; 
+
+
