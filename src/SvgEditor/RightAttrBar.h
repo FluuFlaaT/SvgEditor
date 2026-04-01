@@ -117,4 +117,10 @@ private:
     QWidget* createRectangleAttributesWidget();
     QWidget* createLineAttributesWidget();
     QWidget* createTextAttributesWidget();
+
+    // Helper methods to eliminate duplicated code
+    void setButtonColor(QPushButton* button, const QColor& color);
+    void blockTextWidgetSignals(bool block);
+    static Qt::PenStyle indexToPenStyle(int index);
+    QWidget* createFilledShapeAttributesWidget();
 };
