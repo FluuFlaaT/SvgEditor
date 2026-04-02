@@ -1,4 +1,4 @@
-set(TARGET_NAME SvgText)
+﻿set(TARGET_NAME SvgText)
 
 set(SOURCES
     SvgText.cpp

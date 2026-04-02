@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "IShapeFactory.h"
 #include <QGraphicsLineItem>
 #include <QGraphicsPathItem>

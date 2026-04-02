@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+﻿#include <gtest/gtest.h>
 #include <CoreSvgEngine/SvgShapes.h>
 
 class SvgElementTest : public ::testing::Test {

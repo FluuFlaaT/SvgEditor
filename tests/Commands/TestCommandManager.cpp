@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+﻿#include <gtest/gtest.h>
 #include <Commands/Command.h>
 #include <Commands/CommandManager.h>
 #include <memory>

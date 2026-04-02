@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "QGraphicsItemAdapter.h"
 #include <QApplication>
 #include <QMessageBox>

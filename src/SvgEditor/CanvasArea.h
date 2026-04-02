@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <QGraphicsView>
 #include <QGraphicsSvgItem>
 #include <QGraphicsRectItem>

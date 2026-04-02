@@ -1,4 +1,4 @@
-#include "QGraphicsItemAdapter.h"
+﻿#include "QGraphicsItemAdapter.h"
 #include "EditableTextItem.h"
 #include <QGraphicsLineItem>
 #include <QGraphicsRectItem>

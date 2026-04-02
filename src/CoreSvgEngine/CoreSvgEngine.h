@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "svgdocument.h"
 #include <memory>
 

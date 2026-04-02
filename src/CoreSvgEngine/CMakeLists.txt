@@ -1,4 +1,4 @@
-set(TARGET_NAME CoreSvgEngine)
+﻿set(TARGET_NAME CoreSvgEngine)
 
 file(GLOB_RECURSE SOURCES *.cpp)
 file(GLOB_RECURSE HEADERS *.h)

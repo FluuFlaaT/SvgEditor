@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "CoreSvgEngine/svgelement.h"
 #include <memory>
 

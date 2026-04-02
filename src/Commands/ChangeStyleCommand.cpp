@@ -1,4 +1,4 @@
-#include "ChangeStyleCommand.h"
+﻿#include "ChangeStyleCommand.h"
 #include <QLoggingCategory>
 #include <QGraphicsItem>
 #include <QGraphicsPathItem>

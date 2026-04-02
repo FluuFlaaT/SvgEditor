@@ -1,4 +1,4 @@
-#include "GroupCommand.h"
+﻿#include "GroupCommand.h"
 #include <QLoggingCategory>
 
 Q_LOGGING_CATEGORY(groupCommandLog, "GroupCommand")

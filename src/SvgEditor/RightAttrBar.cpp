@@ -1,4 +1,4 @@
-#include "rightattrbar.h"
+﻿#include "rightattrbar.h"
 #include "QGraphicsItemAdapter.h"
 
 Q_LOGGING_CATEGORY(rightAttrBarLog, "RightAttrBar")

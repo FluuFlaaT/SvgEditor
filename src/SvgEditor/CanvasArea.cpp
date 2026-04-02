@@ -1,4 +1,4 @@
-#define MAX_N 25565
+﻿#define MAX_N 25565
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <QtMath>

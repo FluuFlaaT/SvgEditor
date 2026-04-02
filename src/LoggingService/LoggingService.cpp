@@ -1,4 +1,4 @@
-#include "LoggingService.h"
+﻿#include "LoggingService.h"
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>

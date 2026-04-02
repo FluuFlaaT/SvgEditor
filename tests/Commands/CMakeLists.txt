@@ -1,1 +1,1 @@
-# Commands tests - handled by parent CMakeLists.txt
+﻿# Commands tests - handled by parent CMakeLists.txt

@@ -1,4 +1,4 @@
-# Test executable that runs all unit tests
+﻿# Test executable that runs all unit tests
 add_executable(SvgEditorTests
     CoreSvgEngine/TestSvgDocument.cpp
     CoreSvgEngine/TestSvgElement.cpp

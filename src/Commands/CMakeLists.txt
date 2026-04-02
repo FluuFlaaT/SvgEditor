@@ -1,4 +1,4 @@
-set(TARGET_NAME Commands)
+﻿set(TARGET_NAME Commands)
 
 set(SOURCES
     Command.cpp

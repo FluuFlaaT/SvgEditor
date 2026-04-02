@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Command.h"
 #include <QGraphicsItem>
 #include <QRectF>

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Core/IShapeItemAdapter.h"
 #include "Core/ShapeType.h"

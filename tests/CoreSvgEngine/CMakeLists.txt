@@ -1,1 +1,1 @@
-# CoreSvgEngine tests - handled by parent CMakeLists.txt
+﻿# CoreSvgEngine tests - handled by parent CMakeLists.txt

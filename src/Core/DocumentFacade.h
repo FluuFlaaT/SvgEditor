@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "IDocumentFacade.h"
 #include "../CoreSvgEngine/svgdocument.h"
 #include "../CoreSvgEngine/svgelement.h"

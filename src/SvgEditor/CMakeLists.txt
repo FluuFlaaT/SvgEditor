@@ -1,4 +1,4 @@
-set(TARGET_NAME SvgEditor)
+﻿set(TARGET_NAME SvgEditor)
 
 # Translation files
 set(TS_FILES

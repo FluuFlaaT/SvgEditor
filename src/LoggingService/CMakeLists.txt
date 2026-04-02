@@ -1,4 +1,4 @@
-set(TARGET_NAME LoggingService)
+﻿set(TARGET_NAME LoggingService)
 
 set(SOURCES
     LoggingService.cpp

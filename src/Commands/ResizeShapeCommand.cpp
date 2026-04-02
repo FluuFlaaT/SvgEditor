@@ -1,4 +1,4 @@
-#include "ResizeShapeCommand.h"
+﻿#include "ResizeShapeCommand.h"
 #include <QLoggingCategory>
 #include <QGraphicsRectItem>
 #include <QGraphicsEllipseItem>

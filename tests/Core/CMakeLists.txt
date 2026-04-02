@@ -1,1 +1,1 @@
-# Core tests - handled by parent CMakeLists.txt
+﻿# Core tests - handled by parent CMakeLists.txt

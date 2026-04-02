@@ -1,4 +1,4 @@
-#include "SvgText.h"
+﻿#include "SvgText.h"
 #include <sstream>
 #include <tinyxml2.h>
 #include <QLoggingCategory>

@@ -1,4 +1,4 @@
-set(TARGET_NAME Core)
+﻿set(TARGET_NAME Core)
 
 set(HEADERS
     ShapeType.h

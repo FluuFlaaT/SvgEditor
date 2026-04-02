@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+﻿#include <gtest/gtest.h>
 #include <memory>
 #include <Commands/MoveShapeCommand.h>
 #include <Commands/ResizeShapeCommand.h>

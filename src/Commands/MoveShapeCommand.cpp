@@ -1,4 +1,4 @@
-#include "MoveShapeCommand.h"
+﻿#include "MoveShapeCommand.h"
 #include <QLoggingCategory>
 #include "SvgEditor/canvasarea.h"
 
