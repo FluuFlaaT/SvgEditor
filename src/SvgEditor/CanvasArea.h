@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <QGraphicsView>
 #include <QGraphicsSvgItem>
 #include <QGraphicsRectItem>
@@ -27,7 +27,9 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <cmath>
+#include <memory>
 #include "Core/ShapeType.h"
+#include "Core/IShapeFactory.h"
 #include "editabletextitem.h"
 #include "../Commands/CommandManager.h"
 #include "../CoreSvgEngine/coresvgengine.h"
@@ -123,6 +125,9 @@ private:
     // Default style properties
     QPen m_defaultPen;
     QBrush m_defaultBrush;
+
+    // Shape factory for creating graphics items
+    std::unique_ptr<IShapeFactory> m_shapeFactory;
 
     // Helper methods
     void setZoom(qreal factor);

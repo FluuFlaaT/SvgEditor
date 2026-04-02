@@ -1,4 +1,4 @@
-﻿set(TARGET_NAME Commands)
+set(TARGET_NAME Commands)
 
 set(SOURCES
     Command.cpp
@@ -6,6 +6,10 @@ set(SOURCES
     AddShapeCommand.cpp
     RemoveShapeCommand.cpp
     ModifyTextCommand.cpp
+    MoveShapeCommand.cpp
+    ResizeShapeCommand.cpp
+    ChangeStyleCommand.cpp
+    GroupCommand.cpp
 )
 
 set(HEADERS
@@ -15,6 +19,10 @@ set(HEADERS
     AddShapeCommand.h
     RemoveShapeCommand.h
     ModifyTextCommand.h
+    MoveShapeCommand.h
+    ResizeShapeCommand.h
+    ChangeStyleCommand.h
+    GroupCommand.h
     SvgEditorForwards.h
 )
 

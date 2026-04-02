@@ -12,6 +12,7 @@
 #include "../Commands/RemoveShapeCommand.h"
 #include "../Commands/ModifyTextCommand.h"
 #include "QGraphicsItemAdapter.h"
+#include "Core/ShapeFactory.h"
 
 Q_LOGGING_CATEGORY(canvasAreaLog, "CanvasArea")
 
@@ -52,6 +53,11 @@ CanvasArea::CanvasArea(QWidget *parent)
     // Initialize default style properties
     m_defaultPen = QPen(Qt::black, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
     m_defaultBrush = QBrush(Qt::white);
+
+    // Initialize shape factory
+    m_shapeFactory = std::make_unique<ShapeFactory>();
+    m_shapeFactory->setDefaultPen(m_defaultPen);
+    m_shapeFactory->setDefaultBrush(m_defaultBrush);
 }
 
 CanvasArea::~CanvasArea()
