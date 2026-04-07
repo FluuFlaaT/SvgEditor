@@ -131,6 +131,7 @@ private:
     void createShape(const QPointF& startPoint, const QPointF& endPoint);
     void updateShape(const QPointF& endPoint);
     void finalizeShape();
+    static void makeItemInteractive(QGraphicsItem* item);
 
     // Shape creation methods
     QGraphicsLineItem* createLine(const QPointF& startPoint, const QPointF& endPoint);
